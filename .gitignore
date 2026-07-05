@@ -1,0 +1,5 @@
+build/
+.vscode/
+.vs/
+out/
+.external_deps/
