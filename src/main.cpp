@@ -2,10 +2,20 @@
 #include <GLFW/glfw3.h>
 #include "shader/shader.h"
 #include <iostream>
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void calculate_fps(GLFWwindow* window);
+
+void helloWorld() {
+	ImGui::Begin("My DearImGui Window");
+	ImGui::Text("hello, world");
+	ImGui::End();
+}
+
 
 // settings
 const uint32_t SCR_WIDTH = 800;
@@ -36,13 +46,26 @@ int main()
         return -1;
     }
 
-    
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    ImGui::StyleColorsDark();
+
+    const char* glsl_version = "#version 460";
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
 
     float triangle_1_vertices[] = {
         // first triangle
-        -0.9f, -0.5f, 0.0f,  // left 
-        -0.0f, -0.5f, 0.0f,  // right
-        -0.45f, 0.5f, 0.0f,  // top 
+        -0.9f,
+        -0.5f,
+        0.0f, // left
+        -0.0f,
+        -0.5f,
+        0.0f, // right
+        -0.45f,
+        0.5f,
+        0.0f, // top
     };
 
     float triangle_2_vertices[] = {
@@ -97,6 +120,19 @@ int main()
         prev_s = glfwGetTime();
         while (!glfwWindowShouldClose(window))
         {
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            // Run our Dear ImGui application
+            helloWorld();
+
+
+
+
+            // Rendering
+            ImGui::Render();
             calculate_fps(window);
             processInput(window);
 
@@ -111,6 +147,7 @@ int main()
             glBindVertexArray(triangle_2_vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             glfwSwapBuffers(window);
             glfwPollEvents();
         }
@@ -120,6 +157,10 @@ int main()
 
     }
 
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwTerminate();
     return 0;
 }
