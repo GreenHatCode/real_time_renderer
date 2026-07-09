@@ -5,10 +5,11 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "frame_buffer.h"
+#include "imgui_window/imgui_window.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
-void calculate_fps(GLFWwindow* window);
 
 void helloWorld() {
 	ImGui::Begin("My DearImGui Window");
@@ -20,8 +21,6 @@ void helloWorld() {
 // settings
 const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
-double prev_s = 0.0;
-double title_countdown_s = 0.1;
 
 int main()
 {
@@ -48,12 +47,12 @@ int main()
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-
     ImGui::StyleColorsDark();
-
-    const char* glsl_version = "#version 460";
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplOpenGL3_Init("#version 460"); // glsl version
+
+
+
 
     float triangle_1_vertices[] = {
         // first triangle
@@ -115,28 +114,22 @@ int main()
     {
         Shader simple_shader("shader/simple/vertex_shader.vert", "shader/simple/fragment_shader.frag");
         Shader coloured_shader("shader/coloured/vertex_shader.vert", "shader/coloured/fragment_shader.frag");
+        ImGuiWindow imgui_window;
         
         // render loop
-        prev_s = glfwGetTime();
         while (!glfwWindowShouldClose(window))
-        {
-            // Start the Dear ImGui frame
+        {   
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
+            
             ImGui::NewFrame();
-
-            // Run our Dear ImGui application
-            helloWorld();
-
-
-
-
-            // Rendering
-            ImGui::Render();
-            calculate_fps(window);
+            imgui_window.render_window();
             processInput(window);
 
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+            
+            glm::vec4 frame_clear_color = imgui_window.get_clear_color();
+            glClearColor(frame_clear_color.r, frame_clear_color.g, frame_clear_color.b, frame_clear_color.a);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             simple_shader.use();
@@ -147,6 +140,8 @@ int main()
             glBindVertexArray(triangle_2_vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
+
+            ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             glfwSwapBuffers(window);
             glfwPollEvents();
@@ -177,18 +172,3 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void calculate_fps(GLFWwindow* window) {
-    double curr_s = glfwGetTime();
-    double elapsed_s = curr_s - prev_s;
-    prev_s = curr_s;
-
-    title_countdown_s -= elapsed_s;
-    if (title_countdown_s <= 0.0 && elapsed_s > 0.0) {
-        double fps = 1.0 / elapsed_s;
-
-        char tmp[256];
-        sprintf(tmp, "FPS: %.2lf", fps);
-        glfwSetWindowTitle(window, tmp);
-        title_countdown_s = 0.1;
-    }
-}
