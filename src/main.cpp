@@ -75,13 +75,13 @@ int main()
     glEnableVertexAttribArray(2);
 
 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    GLuint container_texture, awesome_face_texture;
+    glGenTextures(1, &container_texture);
+    glBindTexture(GL_TEXTURE_2D, container_texture);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nr_channels;
@@ -96,27 +96,49 @@ int main()
     }
     stbi_image_free(data);
 
+
+    glGenTextures(1, &awesome_face_texture);
+    glBindTexture(GL_TEXTURE_2D, awesome_face_texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    data = stbi_load("resources/awesomeface.png", &width, &height, &nr_channels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
     {
         Shader simple_shader("shader/simple/vertex_shader.vert", "shader/simple/fragment_shader.frag");
         
         // render loop
         prev_s = glfwGetTime();
+
+
+        simple_shader.use();
+        simple_shader.setInt("u_texture2", 0);
+        simple_shader.setInt("u_texture2", 1);
+
         while (!glfwWindowShouldClose(window))
         {
-
-
-
-
-
-
             calculate_fps(window);
             processInput(window);
 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glBindTexture(GL_TEXTURE_2D, texture);
-            simple_shader.use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, container_texture);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, awesome_face_texture);
+
             glBindVertexArray(rectangle_vao); 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); 
 
