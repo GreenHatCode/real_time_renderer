@@ -3,27 +3,19 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "camera/constants_and_defaults.h"
 #include <stdexcept>
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum Camera_Movement {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
-};
-
-namespace CameraDefaults
+class FreeCamera
 {
-    inline constexpr float YAW         = -90.0f;
-    inline constexpr float PITCH       = 0.0f;
-    inline constexpr float SPEED       = 2.5f;
-    inline constexpr float SENSITIVITY = 0.1f;
-    inline constexpr float ZOOM        = 45.0f;
-}
+    // camera limits
+    static constexpr float MaxPitch = 89.0f;
+    static constexpr float MinPitch = -89.0f;
+    static constexpr float MinFOV  = 1.0f;
+    static constexpr float MaxFOV  = 45.0f;
 
-class FlyCamera
-{
+    CameraProjection projection_type_;
+
     glm::vec3 position_;
     glm::vec3 front_;
     glm::vec3 camera_up_;
@@ -38,9 +30,10 @@ class FlyCamera
     float field_of_view_;
 
 public:
-    FlyCamera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
+    FreeCamera(CameraProjection projection_type = PERSPECTIVE, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
     glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = CameraDefaults::YAW, float pitch = CameraDefaults::PITCH) 
-    : front_(direction)
+    : projection_type_(projection_type)
+    , front_(direction)
     , position_(position)
     , world_up_(world_up)
     , yaw_(yaw)
@@ -52,7 +45,7 @@ public:
         update_camera_vectors();
     }
 
-    glm::mat4 get_view_matrix() { return glm::lookAt(position_, position_ + front_, camera_up_); }
+    glm::mat4 view_matrix() const { return glm::lookAt(position_, position_ + front_, camera_up_); }
 
     float get_movement_speed() const { return movement_speed_; }
 
@@ -60,7 +53,26 @@ public:
 
     float get_sensitivity() const { return sensitivity_; }
 
+    CameraProjection get_projection_type() const { return projection_type_; }
+
+    glm::mat4 projection_matrix(float scr_width, float scr_height, float near, float far) const 
+    {
+        if (projection_type_ == PERSPECTIVE) {
+            return glm::perspective(glm::radians(field_of_view_), scr_width / scr_height, near, far);
+        }
+        else
+        {
+            return glm::ortho(0.0f, scr_width, 0.0f, scr_height, near, far);
+        }
+    }
+
 public: // setters and modifiers
+
+    void set_projection_type(CameraProjection projection_type) 
+    {
+        projection_type_ = projection_type;
+    }
+    
     void set_movement_speed(float movement_speed) 
     {
         if (movement_speed <= 0.0f)
@@ -77,7 +89,7 @@ public: // setters and modifiers
         sensitivity_ = sensitivity;
     }
 
-    void move(Camera_Movement direction, float deltaTime)
+    void move(CameraMovement direction, float deltaTime)
     {
         float velocity = movement_speed_ * deltaTime;
         if (direction == FORWARD)
@@ -100,9 +112,9 @@ public: // setters and modifiers
 
         if (constrain_pitch)
         {
-            if (pitch_ > 89.0f)
+            if (pitch_ > MaxPitch)
                 pitch_ = 89.0f;
-            if (pitch_ < -89.0f)
+            if (pitch_ < MinPitch)
                 pitch_ = -89.0f;
         }
 
@@ -112,9 +124,9 @@ public: // setters and modifiers
     void change_fov(float yoffset)
     {
         field_of_view_ -= (float)yoffset;
-        if (field_of_view_ < 1.0f)
+        if (field_of_view_ < MinFOV)
             field_of_view_ = 1.0f;
-        if (field_of_view_ > 45.0f)
+        if (field_of_view_ > MaxFOV)
             field_of_view_ = 45.0f;
     }
 

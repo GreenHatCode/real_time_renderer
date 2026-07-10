@@ -6,7 +6,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include <vector>
-#include "camera/fly_camera.h"
+#include "camera/free_camera.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -17,7 +17,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
 
-FlyCamera fly_camera(glm::vec3(0.0f, 0.0f, 3.0f));
+FreeCamera fly_camera(CameraProjection::ORTHO, glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -196,8 +196,9 @@ int main()
 
             glBindVertexArray(rectangle_vao);
 
-            glm::mat4 view = fly_camera.get_view_matrix();
-            glm::mat4 projection = glm::perspective(glm::radians(fly_camera.get_fov()), static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), 0.1f, 100.0f);
+            glm::mat4 view = fly_camera.view_matrix();
+            // glm::mat4 projection = fly_camera.projection_matrix(static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT), 0.1f, 100.0f);
+            glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
             simple_shader.setMat4("u_view_matrix", view);
             simple_shader.setMat4("u_projection_matrix", projection);
 
