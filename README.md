@@ -18,10 +18,12 @@ Features:
 			- color
 		- user can add light object to the scene (behaves like any object, but produces light of selected type)
 	- camera
-		- orbit camera
-		- free camera
-		- orthographic camera
-		- perspective
+        - behavior (movement type)
+            - orbit camera
+            - free camera
+        - projection
+            - orthographic camera
+            - perspective
 	- render statistics
 		- FPS
 		- frame time
