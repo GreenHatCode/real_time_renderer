@@ -106,3 +106,17 @@ if(UNIX AND NOT APPLE)
             pthread
     )
 endif()
+
+# Copy shader sources
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/shaders_sources
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders_sources
+)
+
+# Copy resources
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/resources
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/resources
+)

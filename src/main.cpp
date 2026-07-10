@@ -156,7 +156,7 @@ int main()
 
     {
         glEnable(GL_DEPTH_TEST);
-        Shader simple_shader("shader/simple/vertex_shader.vert", "shader/simple/fragment_shader.frag");
+        Shader simple_shader("shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
 
         simple_shader.use();
         simple_shader.setInt("u_texture2", 0);
