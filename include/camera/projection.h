@@ -27,6 +27,12 @@ public:
         PERSPECTIVE
     };
 
+    struct ProjectionInfo_t {
+        ProjectionType projection_type;
+        float field_of_view;
+        float orthographic_size;
+    };
+
 private:
     ProjectionType projection_type_;
     float field_of_view_;
@@ -54,7 +60,6 @@ private:
     }
 
 public:
-
     static Projection Perspective(float field_of_view, float near, float far) {
         if (near <= ProjectionLimits::MIN_NEAR || far <= near) {
             throw std::invalid_argument("Incorrect values for near and far");
@@ -98,24 +103,24 @@ public:
         projection_type_ = type;
     }
 
-    float get_field_of_view() const { return field_of_view_; }
-
-    void set_field_of_view(float value) {
-        if (!validate_fov(value)) {
-            throw std::invalid_argument("Invalid new value for field of view");
-        }
-
-        field_of_view_ = value;
+    ProjectionInfo_t get_zoom() const {
+        return ProjectionInfo_t{
+            .projection_type = projection_type_,
+            .field_of_view = field_of_view_,
+            .orthographic_size = orthographic_size_
+        };
     }
 
-    float get_orthographic_size() const { return orthographic_size_; }
-
-    void set_orthographic_size(float value) {
-        if (!validate_ortho_size(value)) {
-            throw std::invalid_argument("Invalid new value for orthographic size");
+    void zoom(float delta) {
+        if (projection_type_ == ProjectionType::PERSPECTIVE) {
+            float new_value = field_of_view_ + delta;
+            new_value = glm::clamp(new_value, ProjectionLimits::MIN_FOV, ProjectionLimits::MAX_FOV); 
+            field_of_view_ = new_value;
+        } else {
+            float new_value = orthographic_size_ + delta;
+            new_value = glm::clamp(new_value, ProjectionLimits::MIN_ORTHOGRAPHIC_SIZE, ProjectionLimits::MAX_ORTHOGRAPHIC_SIZE);
+            orthographic_size_ = new_value;   
         }
-    
-        orthographic_size_ = value;
     }
 
 };
