@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "camera/i_camera.h"
 #include "camera/constants_and_defaults.h"
 #include "camera/projection.h"
 #include <stdexcept>
@@ -13,7 +14,7 @@ namespace FreeCameraLimits
     inline constexpr float MinPitch = -89.0f;
 }
 
-class FreeCamera
+class FreeCamera final : public ICamera
 {
     Projection projection_;
 
@@ -44,29 +45,29 @@ public:
         update_camera_vectors();
     }
 
-    glm::mat4 view_matrix() const { return glm::lookAt(position_, position_ + front_, camera_up_); }
+    glm::mat4 view_matrix() const override { return glm::lookAt(position_, position_ + front_, camera_up_); }
 
-    float get_movement_speed() const { return movement_speed_; }
+    float get_movement_speed() const override{ return movement_speed_; }
 
     float get_sensitivity() const { return sensitivity_; }
 
-    Projection::ProjectionType get_projection_type() const { return projection_.get_type(); }
+    Projection::ProjectionType get_projection_type() const override { return projection_.get_type(); }
 
-    Projection::ProjectionInfo_t get_zoom() const {return projection_.get_zoom(); }
+    Projection::ProjectionInfo_t get_projection_info() const override {return projection_.get_zoom(); }
 
-    glm::mat4 projection_matrix(float scr_width, float scr_height) const 
+    glm::mat4 projection_matrix(float scr_width, float scr_height) const override
     {
         return projection_.matrix(scr_width, scr_height);
     }
 
 public: // setters and modifiers
     
-    void set_projection_type(Projection::ProjectionType type) 
+    void set_projection_type(Projection::ProjectionType type) override
     {
         projection_.set_type(type);
     }
 
-    void set_movement_speed(float movement_speed) 
+    void set_movement_speed(float movement_speed) override
     {
         if (movement_speed <= 0.0f)
             throw std::runtime_error("Camera movement speed should be greater than zero.");
@@ -82,7 +83,7 @@ public: // setters and modifiers
         sensitivity_ = sensitivity;
     }
 
-    void move(CameraMovement direction, float deltaTime)
+    void move(CameraMovement direction, float deltaTime) override
     {
         float velocity = movement_speed_ * deltaTime;
         if (direction == CameraMovement::FORWARD)
@@ -95,7 +96,7 @@ public: // setters and modifiers
             position_ += right_ * velocity;
     }
 
-    void change_direction(float xoffset, float yoffset, GLboolean constrain_pitch = true)
+    void rotate(float xoffset, float yoffset) override
     {
         xoffset *= sensitivity_;
         yoffset *= sensitivity_;
@@ -103,18 +104,15 @@ public: // setters and modifiers
         yaw_   += xoffset;
         pitch_ += yoffset;
 
-        if (constrain_pitch)
-        {
-            if (pitch_ > FreeCameraLimits::MaxPitch)
-                pitch_ = FreeCameraLimits::MaxPitch;
-            if (pitch_ < FreeCameraLimits::MinPitch)
-                pitch_ = FreeCameraLimits::MinPitch;
-        }
-
+        if (pitch_ > FreeCameraLimits::MaxPitch)
+            pitch_ = FreeCameraLimits::MaxPitch;
+        if (pitch_ < FreeCameraLimits::MinPitch)
+            pitch_ = FreeCameraLimits::MinPitch;
+        
         update_camera_vectors();
     }
 
-    void zoom(float delta)
+    void zoom(float delta) override
     {
         projection_.zoom(-delta);
     }

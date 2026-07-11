@@ -6,7 +6,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include <vector>
-#include "camera/free_camera.h"
+#include "camera/camera_implementation/free_camera.h"
+#include <memory>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -18,7 +19,7 @@ const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
 
 Projection free_cam_projection = Projection::Perspective(20.0f, 0.01f, 100.0f);
-FreeCamera free_camera(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
+std::unique_ptr<ICamera> free_camera = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -197,8 +198,8 @@ int main()
 
             glBindVertexArray(rectangle_vao);
 
-            glm::mat4 view = free_camera.view_matrix();
-            glm::mat4 projection = free_camera.projection_matrix(static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT));
+            glm::mat4 view = free_camera->view_matrix();
+            glm::mat4 projection = free_camera->projection_matrix(static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT));
             simple_shader.setMat4("u_view_matrix", view);
             simple_shader.setMat4("u_projection_matrix", projection);
 
@@ -232,13 +233,13 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        free_camera.move(CameraMovement::FORWARD, deltaTime);
+        free_camera->move(CameraMovement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        free_camera.move(CameraMovement::BACKWARD, deltaTime);
+        free_camera->move(CameraMovement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        free_camera.move(CameraMovement::LEFT, deltaTime);
+        free_camera->move(CameraMovement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        free_camera.move(CameraMovement::RIGHT, deltaTime);
+        free_camera->move(CameraMovement::RIGHT, deltaTime);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -265,12 +266,12 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    free_camera.change_direction(xoffset, yoffset);
+    free_camera->rotate(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    free_camera.zoom(static_cast<float>(yoffset));
+    free_camera->zoom(static_cast<float>(yoffset));
 }
