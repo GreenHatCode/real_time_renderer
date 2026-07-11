@@ -7,6 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <vector>
 #include "camera/camera_implementation/free_camera.h"
+#include "camera/camera_implementation/orbit_camera.h"
 #include <memory>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -18,8 +19,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
 
-Projection free_cam_projection = Projection::Perspective(20.0f, 0.01f, 100.0f);
-std::unique_ptr<ICamera> free_camera = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
+Projection free_cam_projection = Projection::Orthographic(45.0f, 0.01f, 100.0f);
+// std::unique_ptr<ICamera> free_camera = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
+std::unique_ptr<ICamera> free_camera = std::make_unique<OrbitCamera>(free_cam_projection);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;

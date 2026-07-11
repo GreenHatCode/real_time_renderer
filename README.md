@@ -19,11 +19,11 @@ Features:
 		- user can add light object to the scene (behaves like any object, but produces light of selected type)
 	- camera
         - behavior (movement type)
-            - orbit camera
-            - free camera
+            - orbit camera DONE
+            - free camera DONE
         - projection
-            - orthographic camera
-            - perspective
+            - orthographic DONE
+            - perspective DONE
 	- render statistics
 		- FPS
 		- frame time
