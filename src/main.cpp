@@ -17,7 +17,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
 
-FreeCamera fly_camera(CameraProjection::ORTHO, glm::vec3(0.0f, 0.0f, 3.0f));
+Projection free_cam_projection = Projection::Perspective(20.0f, 0.01f, 100.0f);
+FreeCamera free_camera(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -196,9 +197,8 @@ int main()
 
             glBindVertexArray(rectangle_vao);
 
-            glm::mat4 view = fly_camera.view_matrix();
-            // glm::mat4 projection = fly_camera.projection_matrix(static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT), 0.1f, 100.0f);
-            glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+            glm::mat4 view = free_camera.view_matrix();
+            glm::mat4 projection = free_camera.projection_matrix(static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT));
             simple_shader.setMat4("u_view_matrix", view);
             simple_shader.setMat4("u_projection_matrix", projection);
 
@@ -232,13 +232,13 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        fly_camera.move(FORWARD, deltaTime);
+        free_camera.move(CameraMovement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        fly_camera.move(BACKWARD, deltaTime);
+        free_camera.move(CameraMovement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        fly_camera.move(LEFT, deltaTime);
+        free_camera.move(CameraMovement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        fly_camera.move(RIGHT, deltaTime);
+        free_camera.move(CameraMovement::RIGHT, deltaTime);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -265,12 +265,12 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     lastX = xpos;
     lastY = ypos;
 
-    fly_camera.change_direction(xoffset, yoffset);
+    free_camera.change_direction(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    fly_camera.change_fov(static_cast<float>(yoffset));
+    free_camera.zoom(static_cast<float>(yoffset));
 }
