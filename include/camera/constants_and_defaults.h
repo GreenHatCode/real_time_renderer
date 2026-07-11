@@ -1,6 +1,6 @@
 #pragma once
 
-enum CameraMovement 
+enum class CameraMovement 
 {
     FORWARD,
     BACKWARD,

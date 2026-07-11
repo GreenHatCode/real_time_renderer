@@ -4,17 +4,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "camera/constants_and_defaults.h"
+#include "camera/projection.h"
 #include <stdexcept>
+
+namespace FreeCameraLimits 
+{
+    inline constexpr float MaxPitch = 89.0f;
+    inline constexpr float MinPitch = -89.0f;
+}
 
 class FreeCamera
 {
-    // camera limits
-    static constexpr float MaxPitch = 89.0f;
-    static constexpr float MinPitch = -89.0f;
-    static constexpr float MinFOV  = 1.0f;
-    static constexpr float MaxFOV  = 45.0f;
-
-    CameraProjection projection_type_;
+    Projection projection_;
 
     glm::vec3 position_;
     glm::vec3 front_;
@@ -27,12 +28,11 @@ class FreeCamera
 
     float movement_speed_;
     float sensitivity_;
-    float field_of_view_;
 
 public:
-    FreeCamera(CameraProjection projection_type = PERSPECTIVE, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
+    FreeCamera(Projection projection, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f),
     glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = CameraDefaults::YAW, float pitch = CameraDefaults::PITCH) 
-    : projection_type_(projection_type)
+    : projection_(projection)
     , front_(direction)
     , position_(position)
     , world_up_(world_up)
@@ -40,7 +40,6 @@ public:
     , pitch_(pitch)
     , movement_speed_(CameraDefaults::SPEED)
     , sensitivity_(CameraDefaults::SENSITIVITY)
-    , field_of_view_(CameraDefaults::ZOOM)
     {
         update_camera_vectors();
     }
@@ -49,30 +48,24 @@ public:
 
     float get_movement_speed() const { return movement_speed_; }
 
-    float get_fov() const { return field_of_view_; }
-
     float get_sensitivity() const { return sensitivity_; }
 
-    CameraProjection get_projection_type() const { return projection_type_; }
+    Projection::ProjectionType get_projection_type() const { return projection_.get_type(); }
 
-    glm::mat4 projection_matrix(float scr_width, float scr_height, float near, float far) const 
+    Projection::ProjectionInfo_t get_zoom() const {return projection_.get_zoom(); }
+
+    glm::mat4 projection_matrix(float scr_width, float scr_height) const 
     {
-        if (projection_type_ == PERSPECTIVE) {
-            return glm::perspective(glm::radians(field_of_view_), scr_width / scr_height, near, far);
-        }
-        else
-        {
-            return glm::ortho(0.0f, scr_width, 0.0f, scr_height, near, far);
-        }
+        return projection_.matrix(scr_width, scr_height);
     }
 
 public: // setters and modifiers
-
-    void set_projection_type(CameraProjection projection_type) 
-    {
-        projection_type_ = projection_type;
-    }
     
+    void set_projection_type(Projection::ProjectionType type) 
+    {
+        projection_.set_type(type);
+    }
+
     void set_movement_speed(float movement_speed) 
     {
         if (movement_speed <= 0.0f)
@@ -92,13 +85,13 @@ public: // setters and modifiers
     void move(CameraMovement direction, float deltaTime)
     {
         float velocity = movement_speed_ * deltaTime;
-        if (direction == FORWARD)
+        if (direction == CameraMovement::FORWARD)
             position_ += front_ * velocity;
-        if (direction == BACKWARD)
+        if (direction == CameraMovement::BACKWARD)
             position_ -= front_ * velocity;
-        if (direction == LEFT)
+        if (direction == CameraMovement::LEFT)
             position_ -= right_ * velocity;
-        if (direction == RIGHT)
+        if (direction == CameraMovement::RIGHT)
             position_ += right_ * velocity;
     }
 
@@ -112,22 +105,18 @@ public: // setters and modifiers
 
         if (constrain_pitch)
         {
-            if (pitch_ > MaxPitch)
-                pitch_ = 89.0f;
-            if (pitch_ < MinPitch)
-                pitch_ = -89.0f;
+            if (pitch_ > FreeCameraLimits::MaxPitch)
+                pitch_ = FreeCameraLimits::MaxPitch;
+            if (pitch_ < FreeCameraLimits::MinPitch)
+                pitch_ = FreeCameraLimits::MinPitch;
         }
 
         update_camera_vectors();
     }
 
-    void change_fov(float yoffset)
+    void zoom(float delta)
     {
-        field_of_view_ -= (float)yoffset;
-        if (field_of_view_ < MinFOV)
-            field_of_view_ = 1.0f;
-        if (field_of_view_ > MaxFOV)
-            field_of_view_ = 45.0f;
+        projection_.zoom(-delta);
     }
 
 private:
