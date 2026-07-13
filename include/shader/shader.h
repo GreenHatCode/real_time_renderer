@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include "shader/uniform_uploader.h"
 
 class Shader
 {
@@ -72,25 +73,11 @@ public:
     { 
         glUseProgram(ID); 
     }
-    // utility uniform functions
-    // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const
-    {         
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value); 
-    }
-    // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const
-    { 
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), value); 
-    }
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const
-    { 
-        glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
-    }
 
-    void setMat4(const std::string& name, const glm::mat4 value) const {
-        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    template <typename T>
+    void set_uniform(const std::string& name, const T& value) const {
+        int32_t uniform_location = glGetUniformLocation(ID, name.c_str());
+        uniform_traits::UniformUploader<T>::upload(uniform_location, value);
     }
 
     ~Shader() {
