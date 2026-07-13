@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
-namespace uniform_traits
+namespace detail
 {
     template <typename T>
     struct UniformUploader;
@@ -36,7 +36,7 @@ namespace uniform_traits
     template <> 
     struct UniformUploader<glm::mat4>
     {
-        static void upload(int32_t uniform_location, glm::mat4 value) {
+        static void upload(int32_t uniform_location, const glm::mat4& value) {
             glUniformMatrix4fv(uniform_location, 1, GL_FALSE, glm::value_ptr(value));
         }
     };

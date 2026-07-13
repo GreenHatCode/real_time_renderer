@@ -18,7 +18,7 @@ public:
     template <typename T>
     void set_uniform(const std::string &name, const T &value)
     {
-        uniform_traits::UniformUploader<T>::upload(get_uniform_location(name), value);
+        detail::UniformUploader<T>::upload(get_uniform_location(name), value);
     }
 
 private:
