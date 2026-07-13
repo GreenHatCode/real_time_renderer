@@ -19,7 +19,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
 
-Projection free_cam_projection = Projection::Orthographic(45.0f, 0.01f, 100.0f);
+Projection free_cam_projection = Projection::Orthographic(45.0f, -20.0f, 100.0f);
 // std::unique_ptr<ICamera> free_camera = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
 std::unique_ptr<ICamera> free_camera = std::make_unique<OrbitCamera>(free_cam_projection);
 float lastX = SCR_WIDTH / 2.0f;
@@ -178,8 +178,8 @@ int main()
         Shader simple_shader("shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
 
         simple_shader.use();
-        simple_shader.setInt("u_texture2", 0);
-        simple_shader.setInt("u_texture2", 1);
+        simple_shader.set_uniform("u_texture2", 0);
+        simple_shader.set_uniform("u_texture2", 1);
 
         while (!glfwWindowShouldClose(window))
         {
@@ -202,14 +202,14 @@ int main()
 
             glm::mat4 view = free_camera->view_matrix();
             glm::mat4 projection = free_camera->projection_matrix(static_cast<float>(SCR_WIDTH), static_cast<float>(SCR_HEIGHT));
-            simple_shader.setMat4("u_view_matrix", view);
-            simple_shader.setMat4("u_projection_matrix", projection);
+            simple_shader.set_uniform("u_view_matrix", view);
+            simple_shader.set_uniform("u_projection_matrix", projection);
 
             for (size_t i = 0; i < 10; ++i) {
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, cubePositions[i]);
                 model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
-                simple_shader.setMat4("u_model_matrix", model);
+                simple_shader.set_uniform("u_model_matrix", model);
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
             

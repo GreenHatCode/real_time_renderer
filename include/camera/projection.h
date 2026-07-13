@@ -6,7 +6,8 @@
 
 namespace ProjectionLimits 
 {
-    inline constexpr float MIN_NEAR = 0.001f;
+    inline constexpr float MIN_NEAR_PERSPECTIVE = 0.001f;
+    inline constexpr float MIN_NEAR_ORTHOGRAPHIC = -20.0f;
     inline constexpr float MIN_FOV = 1.0f;
     inline constexpr float MAX_FOV = 120.0f;
     inline constexpr float MIN_ORTHOGRAPHIC_SIZE = 1.0f;
@@ -61,7 +62,7 @@ private:
 
 public:
     static Projection Perspective(float field_of_view, float near, float far) {
-        if (near <= ProjectionLimits::MIN_NEAR || far <= near) {
+        if (near < ProjectionLimits::MIN_NEAR_PERSPECTIVE || far <= near) {
             throw std::invalid_argument("Incorrect values for near and far");
         }
 
@@ -73,7 +74,7 @@ public:
     }
 
     static Projection Orthographic(float orthographic_size, float near, float far) {
-        if (near <= ProjectionLimits::MIN_NEAR || far <= near) {
+        if (near < ProjectionLimits::MIN_NEAR_ORTHOGRAPHIC || far <= near) {
             throw std::invalid_argument("Incorrect values for near and far");
         }
 
