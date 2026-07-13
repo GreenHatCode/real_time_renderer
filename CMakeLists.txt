@@ -7,11 +7,20 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# glfw build config
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
+
+# assimp build config
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable Assimp tests" FORCE)
+set(ASSIMP_BUILD_MINIZIP OFF CACHE BOOL "Disable minizip" FORCE)
+set(ASSIMP_NO_EXPORT OFF CACHE BOOL "Disable export capabilities if not needed" FORCE)
+
+
 set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.external_deps")
 include(FetchContent)
 
@@ -24,6 +33,13 @@ FetchContent_Declare(
     GIT_TAG 3.4
 )
 FetchContent_MakeAvailable(glfw)
+
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG        v6.0.5
+)
+FetchContent_MakeAvailable(assimp)
 
 FetchContent_Declare(
     glm
@@ -97,6 +113,7 @@ target_link_libraries(${PROJECT_NAME}
         glad
         glm
         imgui
+        assimp::assimp
 )
 
 if(UNIX AND NOT APPLE)
@@ -107,14 +124,14 @@ if(UNIX AND NOT APPLE)
     )
 endif()
 
-# Copy shader sources
+# copy shader sources
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/shaders_sources
             $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders_sources
 )
 
-# Copy resources
+# copy resources
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/resources
