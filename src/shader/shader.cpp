@@ -50,23 +50,23 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glCompileShader(fragment);
     checkCompileErrors(fragment, "FRAGMENT");
     // shader Program
-    ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
-    glLinkProgram(ID);
-    checkCompileErrors(ID, "PROGRAM");
+    shader_program_id = glCreateProgram();
+    glAttachShader(shader_program_id, vertex);
+    glAttachShader(shader_program_id, fragment);
+    glLinkProgram(shader_program_id);
+    checkCompileErrors(shader_program_id, "PROGRAM");
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }
 void Shader::use()
 { 
-    glUseProgram(ID); 
+    glUseProgram(shader_program_id); 
 }
 
 Shader::~Shader() 
 {
-    glDeleteProgram(ID);
+    glDeleteProgram(shader_program_id);
 }
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)
@@ -91,4 +91,17 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
             std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
         }
     }
+}
+
+uint32_t Shader::get_uniform_location(const std::string &name)
+{
+    auto iter = cached_uniform_locations.find(name);
+    
+    if (iter == cached_uniform_locations.end()) {
+        int32_t uniform_location = glGetUniformLocation(shader_program_id, name.c_str());
+        cached_uniform_locations.emplace(name, uniform_location);
+        return uniform_location;
+    }
+
+    return iter->second;
 }

@@ -1,12 +1,14 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include "shader/uniform_uploader.h"
 
 class Shader
 {
 private:
-    uint32_t ID;
+    uint32_t shader_program_id;
+    std::unordered_map<std::string, int32_t> cached_uniform_locations;
 
 public:
     Shader(const char *vertexPath, const char *fragmentPath);
@@ -14,14 +16,12 @@ public:
     ~Shader();
 
     template <typename T>
-    void set_uniform(const std::string &name, const T &value) const
+    void set_uniform(const std::string &name, const T &value)
     {
-        int32_t uniform_location = glGetUniformLocation(ID, name.c_str());
-        uniform_traits::UniformUploader<T>::upload(uniform_location, value);
+        uniform_traits::UniformUploader<T>::upload(get_uniform_location(name), value);
     }
-
-    
 
 private:
     void checkCompileErrors(unsigned int shader, std::string type);
+    uint32_t get_uniform_location(const std::string &name);
 };
