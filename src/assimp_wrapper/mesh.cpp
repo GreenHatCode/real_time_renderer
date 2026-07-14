@@ -1,5 +1,4 @@
 #include "assimp_wrapper/mesh.h"
-#include "mesh.h"
 
 using namespace assimp_wrapper;
 
@@ -48,7 +47,7 @@ void assimp_wrapper::Mesh::Render(Shader shader_program)
         else if (name == "texture_specular") name += std::to_string(specular_sampler_number++);
 
         glActiveTexture(GL_TEXTURE0 + i);
-        shader_program.set_uniform("material." + name, i);
+        shader_program.set_uniform("material." + name, static_cast<int>(i));
         glBindTexture(GL_TEXTURE_2D, textures_[i].id);
     }
     glActiveTexture(GL_TEXTURE0);

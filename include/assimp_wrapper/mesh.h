@@ -20,6 +20,7 @@ namespace assimp_wrapper {
     };
     
     class Mesh final {
+    private:
         uint32_t vao_;
         uint32_t vbo_;
         uint32_t ebo_;

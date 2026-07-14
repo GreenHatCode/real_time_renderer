@@ -9,6 +9,8 @@
 #include "camera/camera_implementation/free_camera.h"
 #include "camera/camera_implementation/orbit_camera.h"
 #include <memory>
+#include "assimp_wrapper/model.h"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -173,6 +175,28 @@ int main()
     }
     stbi_image_free(data);
 
+#if 1
+    {
+        glEnable(GL_DEPTH_TEST);
+        assimp_wrapper::Model model("resources/models/cube.obj");
+        Shader model_shader("shaders_sources/assimp_cube/vertex_shader.vert", "shaders_sources/assimp_cube/fragment_shader.frag");
+
+        while(!glfwWindowShouldClose(window)) {
+
+            processInput(window);
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            model.draw(model_shader);
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+        
+    }
+#endif
+
+#if 0
     {
         glEnable(GL_DEPTH_TEST);
         Shader simple_shader("shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
@@ -224,6 +248,7 @@ int main()
         glDeleteBuffers(1, &rectangle_vbo);
 
     }
+#endif
 
     glfwTerminate();
     return 0;
