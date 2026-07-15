@@ -20,6 +20,12 @@ set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable Assimp tests" FORCE)
 set(ASSIMP_BUILD_MINIZIP OFF CACHE BOOL "Disable minizip" FORCE)
 set(ASSIMP_NO_EXPORT OFF CACHE BOOL "Disable export capabilities if not needed" FORCE)
 
+# spdlog build configuration
+set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_EXAMPLE_HO OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
 
 set(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.external_deps")
 include(FetchContent)
@@ -40,6 +46,13 @@ FetchContent_Declare(
     GIT_TAG        v6.0.5
 )
 FetchContent_MakeAvailable(assimp)
+
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.17.0
+)
+FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(
     glm
@@ -114,6 +127,7 @@ target_link_libraries(${PROJECT_NAME}
         glm
         imgui
         assimp::assimp
+        spdlog::spdlog_header_only
 )
 
 if(UNIX AND NOT APPLE)

@@ -1,4 +1,5 @@
 #include "frame_buffer.h"
+#include "spdlog/spdlog.h"
 
 FrameBuffer::FrameBuffer(float width, float height)
 {
@@ -18,9 +19,9 @@ FrameBuffer::FrameBuffer(float width, float height)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+        spdlog::error("FRAMEBUFFER: Framebuffer is not complete!");
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);  
 }

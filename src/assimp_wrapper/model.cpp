@@ -1,7 +1,7 @@
 #include "assimp_wrapper/model.h"
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
-#include <iostream>
+#include "spdlog/spdlog.h"
 
 using namespace assimp_wrapper;
 
@@ -18,7 +18,7 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path)
     );
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+        spdlog::error("ASSIMP:{}", importer.GetErrorString());
         return;
     }
 

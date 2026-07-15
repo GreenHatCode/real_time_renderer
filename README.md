@@ -17,7 +17,7 @@ Features:
 			- type
 			- color
 		- user can add light object to the scene (behaves like any object, but produces light of selected type)
-	- camera
+	- camera DONE
         - behavior (movement type)
             - orbit camera DONE
             - free camera DONE
