@@ -8,8 +8,14 @@ using namespace assimp_wrapper;
 void assimp_wrapper::Model::load_model(const std::filesystem::path &path)
 {
     Assimp::Importer importer;
+    
     const aiScene *scene = importer.ReadFile(
-        path.string(), aiProcess_Triangulate | aiProcess_FlipUVs);
+        path.string(),
+        aiProcess_Triangulate |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_ImproveCacheLocality |
+        aiProcess_ValidateDataStructure
+    );
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
