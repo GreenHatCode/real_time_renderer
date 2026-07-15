@@ -95,7 +95,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 }
 
 
-uint32_t Shader::get_uniform_location(const std::string &name)
+GLint Shader::get_uniform_location(const std::string &name)
 {
     auto iter = cached_uniform_locations.find(name);
     

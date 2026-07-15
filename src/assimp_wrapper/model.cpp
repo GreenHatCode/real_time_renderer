@@ -24,16 +24,24 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path)
 
     directory_ = path.parent_path();
 
+    spdlog::info("scene: mmRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
+
     process_node(scene->mRootNode, scene);
 }
 
-void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
+void assimp_wrapper::Model::process_node(const aiScene *scene)
 {
-    // processing all meshes in selected node
-    for (size_t i = 0; i < node->mNumMeshes; ++i) {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes_.push_back(process_mesh(mesh, scene));
+    for (size_t i = 0; i < scene->mNumMeshes; ++i) {
+        aiMesh* mesh = scene->mMeshes[i];
+        meshes_.push_back(process_mesh(mesh));
     }
+
+        // processing all meshes in selected node
+        for (size_t i = 0; i < node->mNumMeshes; ++i)
+        {
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+            meshes_.push_back(process_mesh(mesh, scene));
+        }
 
     // do the same for all child items
     for (size_t i = 0; i < node->mNumChildren; ++i) {
@@ -41,7 +49,7 @@ void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
     }
 }
 
-Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
+Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh)
 {
     std::vector<vertex> vertices;
     std::vector<uint32_t> indices;
