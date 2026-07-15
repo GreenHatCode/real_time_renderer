@@ -63,7 +63,13 @@ int main()
     {
         glEnable(GL_DEPTH_TEST);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        assimp_wrapper::Model loaded_model("resources/models/WusonOBJ.obj");
+        assimp_wrapper::Model loaded_model(
+            "resources/models/WusonOBJ.obj",
+            aiProcess_Triangulate |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_ImproveCacheLocality |
+            aiProcess_ValidateDataStructure
+    );
         Shader model_shader("shaders_sources/assimp_cube/vertex_shader.vert", "shaders_sources/assimp_cube/fragment_shader.frag");
 
         while (!glfwWindowShouldClose(window))

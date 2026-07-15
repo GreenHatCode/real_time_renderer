@@ -28,30 +28,21 @@ void assimp_wrapper::Mesh::mesh_init()
     glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::vector<vertex> &vertices, const std::vector<uint32_t> &vertex_indices, const std::vector<texture> &textures)
-    : vertices_(vertices),
-      vertex_indices_(vertex_indices),
-      textures_(textures)
+Mesh::Mesh(const std::vector<vertex> &vertices, const std::vector<uint32_t> &vertex_indices, uint32_t material_idx)
+    : vertices_(vertices)
+    ,   vertex_indices_(vertex_indices)
+    ,   material_idx(material_idx)
 {
     mesh_init();
 }
 
-void assimp_wrapper::Mesh::Render(Shader shader_program)
+uint32_t assimp_wrapper::Mesh::get_material_index() const
 {
-    uint32_t diffuse_sampler_number = 1;
-    uint32_t specular_sampler_number = 1;
-    for (size_t i = 0; i < textures_.size(); ++i) {
-        std::string texture_number;
-        std::string name = textures_[i].type;
-        if (name == "texture_diffuse") name += std::to_string(diffuse_sampler_number++);
-        else if (name == "texture_specular") name += std::to_string(specular_sampler_number++);
-
-        glActiveTexture(GL_TEXTURE0 + i);
-        shader_program.set_uniform("material." + name, static_cast<int>(i));
-        glBindTexture(GL_TEXTURE_2D, textures_[i].id);
-    }
+    return material_idx;
+}
+void assimp_wrapper::Mesh::render() const
+{
     glActiveTexture(GL_TEXTURE0);
-
     glBindVertexArray(vao_);
     glDrawElements(GL_TRIANGLES, vertex_indices_.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

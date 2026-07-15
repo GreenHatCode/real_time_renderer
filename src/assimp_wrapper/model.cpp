@@ -1,20 +1,16 @@
 #include "assimp_wrapper/model.h"
 #include "assimp/Importer.hpp"
-#include "assimp/postprocess.h"
 #include "spdlog/spdlog.h"
 
 using namespace assimp_wrapper;
 
-void assimp_wrapper::Model::load_model(const std::filesystem::path &path)
+void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32_t postprocess_flags)
 {
     Assimp::Importer importer;
     
     const aiScene *scene = importer.ReadFile(
         path.string(),
-        aiProcess_Triangulate |
-        aiProcess_JoinIdenticalVertices |
-        aiProcess_ImproveCacheLocality |
-        aiProcess_ValidateDataStructure
+        postprocess_flags
     );
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -29,19 +25,17 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path)
     process_node(scene->mRootNode, scene);
 }
 
-void assimp_wrapper::Model::process_node(const aiScene *scene)
+void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
 {
-    for (size_t i = 0; i < scene->mNumMeshes; ++i) {
-        aiMesh* mesh = scene->mMeshes[i];
-        meshes_.push_back(process_mesh(mesh));
+    // processing all meshes in selected node
+    for (size_t i = 0; i < node->mNumMeshes; ++i)
+    {
+        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        meshes_.push_back(process_mesh(mesh, scene));
+        
+        aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+        materials_.emplace(mesh->mMaterialIndex, process_material(material, scene));
     }
-
-        // processing all meshes in selected node
-        for (size_t i = 0; i < node->mNumMeshes; ++i)
-        {
-            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-            meshes_.push_back(process_mesh(mesh, scene));
-        }
 
     // do the same for all child items
     for (size_t i = 0; i < node->mNumChildren; ++i) {
@@ -49,12 +43,12 @@ void assimp_wrapper::Model::process_node(const aiScene *scene)
     }
 }
 
-Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh)
+Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
 {
     std::vector<vertex> vertices;
     std::vector<uint32_t> indices;
-    std::vector<texture> textures;
 
+    // read and push all vertices
     for (size_t i = 0; i < mesh->mNumVertices; ++i) {
 
         glm::vec3 position(
@@ -79,6 +73,7 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh)
         vertices.push_back(vertex{position, normal, texture_coords});
     }
 
+    // read and push all indices
     for (size_t i = 0; i < mesh->mNumFaces; ++i) {
         aiFace face = mesh->mFaces[i];
 
@@ -87,17 +82,28 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh)
         }
     }
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, mesh->mMaterialIndex);
 }
 
-assimp_wrapper::Model::Model(const std::filesystem::path &path)
+Material assimp_wrapper::Model::process_material(aiMaterial *, const aiScene *scene)
 {
-    load_model(path);
+    return Material();
 }
 
-void assimp_wrapper::Model::draw(const Shader &shader_program)
+std::vector<texture> assimp_wrapper::Model::load_material_textures(aiMaterial *material, aiTextureType texture_type, std::string type_name)
+{
+    return std::vector<texture>();
+}
+
+assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
+{
+    load_model(path, postprocess_flags);
+}
+
+void assimp_wrapper::Model::draw(Shader &shader_program)
 {
     for (auto& mesh : meshes_) {
-        mesh.Render(shader_program);
+        materials_[mesh.get_material_index()].bind(shader_program);
+        mesh.render();
     }
 }
