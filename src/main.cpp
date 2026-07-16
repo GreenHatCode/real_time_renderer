@@ -25,6 +25,7 @@ const uint32_t SCR_HEIGHT = 600;
 Projection free_cam_projection = Projection::Orthographic(45.0f, -20.0f, 100.0f);
 // std::unique_ptr<ICamera> free_camera = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
 std::unique_ptr<ICamera> free_camera = std::make_unique<OrbitCamera>(free_cam_projection);
+
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -64,13 +65,14 @@ int main()
         glEnable(GL_DEPTH_TEST);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         assimp_wrapper::Model loaded_model(
-            "resources/models/WusonOBJ.obj",
+            // "resources/assimp-mdb/model-db/glTF2/spider.glb",
+            "/home/greenhat/curr_tasks/real_time_renderer/resources/assimp-mdb/model-db/Obj/Spider/spider.obj",
             aiProcess_Triangulate |
             aiProcess_JoinIdenticalVertices |
             aiProcess_ImproveCacheLocality |
             aiProcess_ValidateDataStructure
     );
-        Shader model_shader("shaders_sources/assimp_cube/vertex_shader.vert", "shaders_sources/assimp_cube/fragment_shader.frag");
+        Shader model_shader("shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
 
         while (!glfwWindowShouldClose(window))
         {

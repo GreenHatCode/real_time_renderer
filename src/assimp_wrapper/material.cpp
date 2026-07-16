@@ -19,20 +19,20 @@ void Material::bind(Shader& shader) {
         std::string texture_number, texture_name;
         switch (textures_[i]->type)
         {
-        case TextureType::TEXTURE_DIFFUSE:
+        case aiTextureType::aiTextureType_DIFFUSE:
             texture_name = "texture_diffuse";
             texture_number = std::to_string(++diffuse_sampler_number);
             break;
-        case TextureType::TEXTURE_SPECULAR:
+        case aiTextureType::aiTextureType_SPECULAR:
             texture_name = "texture_specular";
             texture_number = std::to_string(++specular_sampler_number);
             break;
-        case TextureType::TEXTURE_NORMAL:
-            texture_name = "texture_normal";
+        case aiTextureType::aiTextureType_HEIGHT:
+            texture_name = "texture_height";
             texture_number = std::to_string(++normal_sampler_number);
             break;
-        case TextureType::TEXTURE_HEIGHT:
-            texture_name = "texture_height";
+        case aiTextureType::aiTextureType_AMBIENT:
+            texture_name = "texture_ambient";
             texture_number = std::to_string(++height_sampler_number);
             break;
         default:

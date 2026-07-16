@@ -7,17 +7,9 @@
 
 namespace assimp_wrapper {
 
-    enum class TextureType
-    {
-        TEXTURE_DIFFUSE,
-        TEXTURE_SPECULAR,
-        TEXTURE_NORMAL,
-        TEXTURE_HEIGHT
-    };
-
     struct texture {
         int32_t id;
-        TextureType type;
+        aiTextureType type;
     };
 
     class Material final {
