@@ -5,7 +5,9 @@ Features:
 	- mesh loading
 		load meshes with textures from files (obj, stl) dynamically. gITF - as bonus
 		- dynamic adding/removing meshes from scene
-		- load mesh from file
+		- load mesh from file DONE
+		- load mesh textures
+		- load embedded textures
 	- dynamic scene
 		- move objects across the scene
 		- scale and rotate objects on the scene

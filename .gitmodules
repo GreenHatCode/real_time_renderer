@@ -1,0 +1,3 @@
+[submodule "resources/assimp-mdb"]
+	path = resources/assimp-mdb
+	url = git@github.com:assimp/assimp-mdb.git
