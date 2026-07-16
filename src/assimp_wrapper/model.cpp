@@ -1,6 +1,8 @@
 #include "assimp_wrapper/model.h"
 #include "assimp/Importer.hpp"
 #include "spdlog/spdlog.h"
+#include "model.h"
+#include "stb_image.h"
 
 using namespace assimp_wrapper;
 
@@ -21,7 +23,7 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
     directory_ = path.parent_path();
 
     spdlog::info("scene: mmRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
-
+    load_materials(scene);
     process_node(scene->mRootNode, scene);
 }
 
@@ -85,14 +87,58 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
     return Mesh(vertices, indices, mesh->mMaterialIndex);
 }
 
-Material assimp_wrapper::Model::process_material(aiMaterial *, const aiScene *scene)
+void assimp_wrapper::Model::load_materials(const aiScene *scene)
 {
-    return Material();
+    for (size_t i = 0; i < scene->mNumMaterials; ++i) {
+        aiMaterial *material_ptr = scene->mMaterials[i];
+
+        // std::vector<std::shared_ptr<texture>> material_textures;
+        // load_material_textures(material_ptr, aiTextureType_AMBIENT, scene);
+
+        Material material(material_textures);
+        materials_.push_back(material);
+    }
 }
 
-std::vector<texture> assimp_wrapper::Model::load_material_textures(aiMaterial *material, aiTextureType texture_type, std::string type_name)
+std::vector<std::shared_ptr<texture>> assimp_wrapper::Model::load_material_textures(aiMaterial *material, aiTextureType type, const aiScene *scene)
 {
-    return std::vector<texture>();
+    // allocate memory for all material textures
+    // push every new textures to model 
+    // return verctor of textures, used by this material
+
+    std::vector<std::shared_ptr<texture>> loaded_textures;
+    for (size_t i = 0; i < material->GetTextureCount(type); ++i) {
+
+        aiString texture_file;
+        material->GetTexture(type, i, &texture_file);
+
+        auto texture_it = textures_.find(texture_file.C_Str());
+        if (texture_it != textures_.end()) { // new texture, load it to memory
+            std::filesystem::path texture_file_path = directory_ / std::filesystem::path(texture_file.C_Str());
+
+            GLuint texture_id;
+            glGenTextures(1, texture_id);
+
+            int width, height, components_number;
+            uint8_t *data = stbi_load(texture_file_path.c_str(), &width, &height, &components_number, 0);
+            if (!data) {
+                spdlog::error("Failed to load texture form file: {}", texture_file_path);
+                stbi_image_free(data);
+                throw std::runtime_error("Failed to load texture form file");
+            }
+
+            // allocate memory
+
+
+
+
+        }
+        else { // get ptr to already loaded texture
+            loaded_textures.push_back(texture_it->second);
+        }
+    }
+
+        return loaded_textures;
 }
 
 assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
