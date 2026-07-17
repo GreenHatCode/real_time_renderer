@@ -11,7 +11,7 @@ Features:
 	- dynamic scene
 		- move objects across the scene
 		- scale and rotate objects on the scene
-		- move camera across the scene
+		- move camera across the scene DONE
 	- lights
 		- types: directoinal, point, spot, ambient
 		- all lights can be edited dynamically

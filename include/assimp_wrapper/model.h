@@ -31,8 +31,8 @@ namespace assimp_wrapper
     class Model final {
         std::vector<Mesh> meshes_;
         std::vector<Material> materials_;
-        std::unordered_map<std::filesystem::path, std::shared_ptr<texture>> textures_; // stores all textures, used in model
-        std::filesystem::path directory_;
+        
+        
 
         void load_model(const std::filesystem::path &path, uint32_t postprocess_flags);
         void process_node(aiNode *node, const aiScene *scene);
