@@ -19,8 +19,6 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
         return;
     }
 
-    directory_ = path.parent_path();
-
     spdlog::info("scene: mmRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
     load_materials(scene); // load all meterial once
     process_node(scene->mRootNode, scene);
@@ -87,99 +85,13 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
 {
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial *material_ptr = scene->mMaterials[i];
-
-        std::vector<std::shared_ptr<texture>> material_textures, tmp; // TODO: allocate memory for all material textures at the beginning
-        
-        tmp = load_material_textures(material_ptr, aiTextureType_DIFFUSE, scene);
-        material_textures.insert(material_textures.end(), tmp.begin(), tmp.end());
-
-        tmp = load_material_textures(material_ptr, aiTextureType_SPECULAR, scene);
-        material_textures.insert(material_textures.end(), tmp.begin(), tmp.end());
-
-        tmp = load_material_textures(material_ptr, aiTextureType_HEIGHT, scene);
-        material_textures.insert(material_textures.end(), tmp.begin(), tmp.end());
-
-        tmp = load_material_textures(material_ptr, aiTextureType_AMBIENT, scene);
-        material_textures.insert(material_textures.end(), tmp.begin(), tmp.end());
-
-        Material material(material_textures);
+        Material material(textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
         materials_.push_back(material);
     }
 }
 
-std::vector<std::shared_ptr<texture>> assimp_wrapper::Model::load_material_textures(aiMaterial *material, aiTextureType type, const aiScene *scene)
-{
-    // allocate memory for all material textures
-    // push every new textures to model 
-    // return verctor of textures, used by this material
-
-    std::vector<std::shared_ptr<texture>> loaded_textures;
-    for (size_t i = 0; i < material->GetTextureCount(type); ++i) {
-        aiString texture_file;
-        material->GetTexture(type, i, &texture_file);
-        if (texture_file.Empty()) {
-            spdlog::info("For material {} there is no texture with type={}", material->GetName().C_Str(), static_cast<int>(type));
-            continue;
-        }
-
-        auto texture_it = textures_.find(texture_file.C_Str());
-        if (texture_it != textures_.end()) { // texture is already loaded, get ptr to it
-            loaded_textures.push_back(texture_it->second);
-            spdlog::info("Used previously loaded texture");
-        } else { // new texture, load it to memory
-            std::filesystem::path texture_file_path = make_texture_path(directory_, texture_file);
-
-            int width, height, components_number;
-            uint8_t *data = stbi_load(texture_file_path.c_str(), &width, &height, &components_number, 0);
-            if (!data) {
-                spdlog::error("Failed to load texture form file: texture_file_path={}, texture_file={}", texture_file_path.c_str(), texture_file.C_Str());
-                stbi_image_free(data);
-                throw std::runtime_error("Failed to load texture form file");
-            }
-
-            // allocate memory
-            GLenum format;
-            switch (components_number)
-            {
-            case 1:
-                format = GL_RED;
-                break;
-            case 3:
-                format = GL_RGB;
-            break;
-            case 4:
-                format = GL_RGBA;
-            break;
-            default:
-                spdlog::error("Failed to select texture format, read components_number={}", components_number);
-                assert(false);
-                break;
-            }
-
-            GLuint texture_id;
-            glGenTextures(1, &texture_id);
-            glBindTexture(GL_TEXTURE_2D, texture_id);
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            stbi_image_free(data);
-
-            auto ptr = std::make_shared<texture>(texture_id, type);
-            textures_.emplace(texture_file_path, ptr);
-            loaded_textures.push_back(ptr);
-            spdlog::info("Loaded texture: type={}, texture_file_path={}", static_cast<int>(type), texture_file_path.c_str());
-        }
-    }
-
-        return loaded_textures;
-}
-
 assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
+    : textures_manager_(path.parent_path())
 {
     load_model(path, postprocess_flags);
 }
