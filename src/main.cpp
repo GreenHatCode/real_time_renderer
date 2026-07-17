@@ -22,7 +22,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 const uint32_t SCR_WIDTH = 800;
 const uint32_t SCR_HEIGHT = 600;
 
-Projection free_cam_projection = Projection::Orthographic(45.0f, -20.0f, 100.0f);
+Projection free_cam_projection = Projection::Orthographic(95.0f, -100.0f, 300.0f);
 // std::unique_ptr<ICamera> free_camera = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
 std::unique_ptr<ICamera> free_camera = std::make_unique<OrbitCamera>(free_cam_projection);
 
@@ -63,10 +63,10 @@ int main()
 
     {
         glEnable(GL_DEPTH_TEST);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         assimp_wrapper::Model loaded_model(
             // "resources/assimp-mdb/model-db/glTF2/spider.glb",
-            "/home/greenhat/curr_tasks/real_time_renderer/resources/assimp-mdb/model-db/Obj/Spider/spider.obj",
+            "resources/assimp-mdb/model-db/Obj/Spider/spider.obj",
             aiProcess_Triangulate |
             aiProcess_JoinIdenticalVertices |
             aiProcess_ImproveCacheLocality |
