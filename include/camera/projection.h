@@ -7,7 +7,7 @@
 namespace ProjectionLimits 
 {
     inline constexpr float MIN_NEAR_PERSPECTIVE = 0.001f;
-    inline constexpr float MIN_NEAR_ORTHOGRAPHIC = -20.0f;
+    inline constexpr float MIN_NEAR_ORTHOGRAPHIC = -100.0f;
     inline constexpr float MIN_FOV = 1.0f;
     inline constexpr float MAX_FOV = 120.0f;
     inline constexpr float MIN_ORTHOGRAPHIC_SIZE = 1.0f;
