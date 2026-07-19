@@ -17,19 +17,85 @@ textures_vector assimp_wrapper::TexturesManager::load_material_textures(aiMateri
         spdlog::info("Loading embedded textures");
         material_textures = load_embedded_textures(scene);
     } 
-
-    textures_vector tmp;
-    for (auto type: textures_types) {
-        tmp = load_file_textures(material, type, scene);
-        material_textures.insert(material_textures.end(), tmp.begin(), tmp.end());
+    else {
+        spdlog::info("Loading file textures");
+        textures_vector tmp;
+        for (auto type: textures_types) {
+            tmp = load_file_textures(material, type, scene);
+            material_textures.insert(material_textures.end(), tmp.begin(), tmp.end());
+        }
     }
+
+
 
     return material_textures;
 }
 
 textures_vector assimp_wrapper::TexturesManager::load_embedded_textures(const aiScene *scene)
 {
-    return textures_vector();
+    std::vector<std::shared_ptr<texture>> loaded_textures;
+    for (size_t i = 0; i < scene->mNumTextures; ++i) 
+    {
+        aiTexture* texture_ptr = scene->mTextures[i];
+        auto texture_it = textures_.find(texture_ptr->mFilename.C_Str());
+        if (texture_it != textures_.end()) { // texture is already loaded, get ptr to it
+            loaded_textures.push_back(texture_it->second);
+            spdlog::info("Used previously loaded texture");
+        } else { // new texture, load it to memory
+            GLuint id;
+            glGenTextures(1, &id);
+            glBindTexture(GL_TEXTURE_2D, id);
+        
+            if (texture_ptr->mHeight == 0) {
+                // load with stbimage and decode texture format
+                spdlog::info("Received uncompressed texture");
+
+                int width, height, components_number;
+                uint8_t* data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(texture_ptr->pcData), texture_ptr->mWidth, &width, &height, &components_number, 0);
+
+                GLenum format;
+                switch (components_number)
+                {
+                case 1:
+                    format = GL_RED;
+                    break;
+                case 3:
+                    format = GL_RGB;
+                break;
+                case 4:
+                    format = GL_RGBA;
+                break;
+                default:
+                    spdlog::error("Failed to select texture format, read components_number={}", components_number);
+                    assert(false);
+                    break;
+                }
+
+                glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+                spdlog::info("Loaded uncompressed textures: format={}", static_cast<int>(format));
+
+            } else {
+                // raw pixel data
+                spdlog::info("Received compressed texture");
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texture_ptr->mWidth, texture_ptr->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_ptr->pcData);
+            }
+            glGenerateMipmap(GL_TEXTURE_2D);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (texture_ptr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (texture_ptr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
+        
+            auto ptr = std::make_shared<texture>(id, aiTextureType::aiTextureType_DIFFUSE);
+            textures_.emplace(texture_ptr->mFilename.C_Str(), ptr);
+            loaded_textures.push_back(ptr);
+            spdlog::info("Loaded embedded texture: texture_file_path={}",  texture_ptr->mFilename.C_Str());
+        }
+        
+    }   
+    glBindTexture(GL_TEXTURE_2D, 0); // return to default state
+
+    return loaded_textures;
 }
 
 textures_vector assimp_wrapper::TexturesManager::load_file_textures(aiMaterial *material, const aiTextureType type, const aiScene *scene)
@@ -97,7 +163,7 @@ textures_vector assimp_wrapper::TexturesManager::load_file_textures(aiMaterial *
             auto ptr = std::make_shared<texture>(texture_id, type);
             textures_.emplace(texture_file_path, ptr);
             loaded_textures.push_back(ptr);
-            spdlog::info("Loaded texture: type={}, texture_file_path={}", static_cast<int>(type), texture_file_path.c_str());
+            spdlog::info("Loaded texture from file: type={}, texture_file_path={}", static_cast<int>(type), texture_file_path.c_str());
         }
     }
 
