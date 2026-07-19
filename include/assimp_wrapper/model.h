@@ -4,7 +4,7 @@
 #include <filesystem>
 #include "assimp/postprocess.h"
 #include "assimp_wrapper/material.h"
-#include "assimp_wrapper/textures_manager.h"
+#include "assimp_wrapper/textures/textures_manager.h"
 #include <memory>
 
 

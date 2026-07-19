@@ -4,19 +4,15 @@
 #include <cstdint>
 #include "assimp/material.h"
 #include <memory>
+#include "assimp_wrapper/textures/texture_2d.h"
 
 namespace assimp_wrapper {
 
-    struct texture {
-        int32_t id;
-        aiTextureType type;
-    };
-
     class Material final {
-        std::vector<std::shared_ptr<texture>> textures_; // all textures, use by this material
+        std::vector<std::shared_ptr<Texture2D>> textures_; // all textures, use by this material
 
     public:
-        Material(const std::vector<std::shared_ptr<texture>>& textures);
+        Material(const std::vector<std::shared_ptr<Texture2D>>& textures);
         void bind(Shader &shader);
     };
     

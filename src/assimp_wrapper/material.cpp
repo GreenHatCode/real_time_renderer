@@ -3,7 +3,7 @@
 
 using namespace assimp_wrapper;
 
-Material::Material(const std::vector<std::shared_ptr<texture>>& textures) 
+Material::Material(const std::vector<std::shared_ptr<Texture2D>>& textures) 
     : textures_(textures)
 { }
 
@@ -17,7 +17,7 @@ void Material::bind(Shader& shader) {
 
     for (size_t i = 0; i < textures_.size(); ++i) {
         std::string texture_number, texture_name;
-        switch (textures_[i]->type)
+        switch (textures_[i]->type())
         {
         case aiTextureType::aiTextureType_DIFFUSE:
             texture_name = "texture_diffuse";
@@ -43,7 +43,7 @@ void Material::bind(Shader& shader) {
 
         glActiveTexture(GL_TEXTURE0 + i);
         shader.set_uniform(texture_name + texture_number, static_cast<int>(i));
-        glBindTexture(GL_TEXTURE_2D, textures_[i]->id);
+        glBindTexture(GL_TEXTURE_2D, textures_[i]->id());
     }
 }
 

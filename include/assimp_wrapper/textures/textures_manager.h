@@ -7,6 +7,7 @@
 #include "spdlog/spdlog.h"
 #include "assimp/scene.h"
 #include "assimp/material.h"
+#include "assimp_wrapper/textures/texture_2d.h"
 
 namespace assimp_wrapper {
 
@@ -19,14 +20,13 @@ namespace assimp_wrapper {
     };
 
     class TexturesManager final {
-        std::unordered_map<std::filesystem::path, std::shared_ptr<texture>> textures_; // stores all textures, used in model
+        std::unordered_map<std::filesystem::path, std::shared_ptr<Texture2D>> textures_; // stores all textures, used in model
         std::filesystem::path model_base_dir_;
     
     public:
-        using textures_vector = std::vector<std::shared_ptr<texture>>;
+        using textures_vector = std::vector<std::shared_ptr<Texture2D>>;
         TexturesManager(const std::filesystem::path &model_base_dir);
         textures_vector load_material_textures(aiMaterial *material, const aiScene *scene, std::span<const aiTextureType> textures_types);
-        
 
     private:
         textures_vector load_embedded_textures(const aiScene *scene);

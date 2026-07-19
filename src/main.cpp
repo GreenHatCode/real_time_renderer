@@ -65,8 +65,8 @@ int main()
         glEnable(GL_DEPTH_TEST);
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         assimp_wrapper::Model loaded_model(
-            // "resources/assimp-mdb/model-db/glTF2/spider.glb",
-            "resources/assimp-mdb/model-db/Obj/Spider/spider.obj",
+            "resources/assimp-mdb/model-db/glTF2/spider.glb",
+            // "resources/assimp-mdb/model-db/Obj/Spider/spider.obj",
             aiProcess_Triangulate |
             aiProcess_JoinIdenticalVertices |
             aiProcess_ImproveCacheLocality |
