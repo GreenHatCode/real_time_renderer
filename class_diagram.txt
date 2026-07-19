@@ -1,0 +1,75 @@
+
+класс приложения App выступает контейнером, который держит всю прогу в вечном цикле и запускает поочереди все элементы (рендерер, юи и его колбэки)
+
+
+рендерер хнанит внутри себя сцену и шейдеры, инкапсулируя цикл рендеринга опержл и его настройки.
+
+шейдеры хранятся в рендерере и имеют
+	- общие правила названия юниформ переменных
+		мы ставим названия им независимо от того, есть ли они реально в шейдере или нет (шейдер пишет пользователь)
+	- минимальный список переменных и формат, которые необходимы для нормального рендеринга модели
+	- уникальный ид (берём дескриптор), по которому модель связывается со своим шейдером
+
+на каждый запуск цикла рендеринга, рендерер получает объект камеры, из которого может вытащить матрици вида и проэкции (они зависят от камеры) и загоняет их в КАЖДЫЙ шейдер.
+матрица модели зависит от положения и размера модели, для этого, в самом классе модели помимо набора мэшей и текстур, хранится точка положения модели, угол её поворота по часовой стрелке и коэф размера по каждой оси.
+
+сцена
+- контейнер, который хранит все объекты, которые у нас есть на воображаемой сцене. 
+- также хранит общее кол-во вершин и плоскостей (статистика)
+- предоставляет методы для модификации положения/размера моделей (ибо значения будем получать из юи)
+
+
+объекты на сцене 
+принципиально есть два вида объектов: 
+	- загруженные из файла модели
+	- источники света
+отличаются они свойствами внутри приложения (источники света имеют форму из фиксированного набора - не пользовательские модели), но имеют свойства для вычисления параметров освещения
+
+загруженные модели - частично описанны выше, хранят ид шейдера, который используется при их рендеринге + доп параметры положения и размера. В остальном - простой контейнер для RAII мэшэй 
+
+Для объектов на сцене отдельно нужен загрузчик (класс модели лишь хранит её, загружает другой)
+
+
+model (one object on a scene) should:
+	- be movable (move(movement_type, direction))
+		- store position vec3
+		- store rotation angle (cw)
+	- be scalable (scale(axis, size))
+		- store size vec3
+	- user can change shader for this model 
+		- store shader_program_id
+	- store model_id and name (file from which the model was loaded)
+
+- each model has its shader (one shader can be used by many models)
+
+model_loader (assimp wrapper)
+	- loads model and its textures from file
+	- returns error if something is bad (absent file etc)
+	- constructs Model class
+
+
+
+renderer
+	- render all models to a buffer (screen, framebuffer etc)
+	- set and store opengl reder parameters (depth_testing, culling properties, filling etc)
+	- store shaders 
+		- provides methods to add/delete shader in runtime (avoid deleting shaders, used by models now)
+	- in main render loop set 'general' shader uniforms (model, view and projection matrices
+	- calculate fps, frame_time, cpu and gpu time
+
+
+in short, the renderer incapsulates all render loop (inlcuding calling .render() for each model). It performs configuring opengl context, enabling/disabling render options and clearing output buffer, handling some opengl callbacks
+
+scene
+	- container for all loaded models
+	- provides access to all models
+	- add/delete model
+
+	store and return:
+	- vertices, faces count
+	- objects hierarcy tree (possibly)
+
+camera
+	- represents scene camera
+	- return view and projection matrices
+
