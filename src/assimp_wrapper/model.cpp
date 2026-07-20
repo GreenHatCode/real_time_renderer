@@ -96,7 +96,7 @@ assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postpro
     load_model(path, postprocess_flags);
 }
 
-void assimp_wrapper::Model::draw(Shader &shader_program)
+void assimp_wrapper::Model::draw(Shader &shader_program) const
 {
     for (auto& mesh : meshes_) {
         materials_[mesh.get_material_index()].bind(shader_program);
