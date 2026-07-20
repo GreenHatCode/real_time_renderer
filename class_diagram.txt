@@ -54,7 +54,7 @@ renderer
 	- set and store opengl reder parameters (depth_testing, culling properties, filling etc)
 	- store shaders 
 		- provides methods to add/delete shader in runtime (avoid deleting shaders, used by models now)
-	- in main render loop set 'general' shader uniforms (model, view and projection matrices
+	- in main render loop set 'general' shader uniforms (model, view and projection matrices)
 	- calculate fps, frame_time, cpu and gpu time
 
 
