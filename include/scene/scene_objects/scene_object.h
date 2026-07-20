@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
+#include "shader/shader.h"
 
 namespace scene
 {   
@@ -22,6 +23,8 @@ namespace scene
         glm::vec3 get_scaling_axes() const;
 
         glm::mat4 model_matrix() const;
+
+        virtual void render(Shader &shader_program, const glm::mat4& view_mat, const glm::mat4& projection_mat) = 0;
 
         virtual ~SceneObject();
     };
