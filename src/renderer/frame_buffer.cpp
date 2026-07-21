@@ -1,4 +1,4 @@
-#include "frame_buffer.h"
+#include "renderer/frame_buffer.h"
 #include "spdlog/spdlog.h"
 
 FrameBuffer::FrameBuffer(float width, float height)
