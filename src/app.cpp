@@ -1,5 +1,9 @@
 #include "app.h"
 #include "spdlog/spdlog.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "camera/camera_implementation/orbit_camera.h"
+
 
 int32_t App::initialize_opengl()
 {
@@ -8,19 +12,20 @@ int32_t App::initialize_opengl()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window_ = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Read-Time Renderer", NULL, NULL);
-    if (window == NULL)
+    window_ = glfwCreateWindow(screen_width_, screen_height_, "Read-Time Renderer", NULL, NULL);
+    if (window_ == NULL)
     {
         spdlog::error("Failed to create GLFW window");
         glfwTerminate();
         return -1;
     }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // add callbacks namespace
-    glfwSetCursorPosCallback(window, mouse_callback); // add callbacks namespace
-    glfwSetScrollCallback(window, scroll_callback); // add callbacks namespace
+    glfwMakeContextCurrent(window_);
+    glfwSetWindowUserPointer(window_, this);
+    glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback); // add callbacks namespace
+    glfwSetCursorPosCallback(window_, mouse_callback); // add callbacks namespace
+    glfwSetScrollCallback(window_, scroll_callback); // add callbacks namespace
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -33,7 +38,7 @@ int32_t App::initialize_opengl()
 
     ImGui::StyleColorsDark();
 
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
     return 0;
@@ -41,46 +46,67 @@ int32_t App::initialize_opengl()
 
 void App::framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
+    App* app_ptr = static_cast<App*>(glfwGetWindowUserPointer(window));
+    assert(app_ptr);
+    app_ptr->framebuffer_size_callback_impl(width, height);
+}
+
+void App::mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    App* app_ptr = static_cast<App*>(glfwGetWindowUserPointer(window));
+    assert(app_ptr);
+    app_ptr->mouse_callback_impl(xpos, ypos);
+}
+
+void App::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    App* app_ptr = static_cast<App*>(glfwGetWindowUserPointer(window));
+    assert(app_ptr);
+    app_ptr->scroll_callback_impl(xoffset, yoffset);
+}
+
+void App::framebuffer_size_callback_impl(int width, int height)
+{
     glViewport(0, 0, width, height);
 }
 
-void App::processInput(GLFWwindow *window)
+void App::process_input(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_->move(CameraMovement::FORWARD, deltaTime);
+        camera_->move(CameraMovement::FORWARD, imgui_window_->get_delta_time());
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_->move(CameraMovement::BACKWARD, deltaTime);
+        camera_->move(CameraMovement::BACKWARD, imgui_window_->get_delta_time());
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera_->move(CameraMovement::LEFT, deltaTime);
+        camera_->move(CameraMovement::LEFT, imgui_window_->get_delta_time());
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera_->move(CameraMovement::RIGHT, deltaTime);
+        camera_->move(CameraMovement::RIGHT, imgui_window_->get_delta_time());
 }
 
-void App::mouse_callback(GLFWwindow *window, double xpos, double ypos)
+void App::mouse_callback_impl(double xpos_in, double ypos_in)
 {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
+    float xpos = static_cast<float>(xpos_in);
+    float ypos = static_cast<float>(ypos_in);
 
     if (first_mouse_)
     {
-        lastX = xpos;
-        lastY = ypos;
+        last_x_ = xpos;
+        last_y_ = ypos;
         first_mouse_ = false;
     }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float xoffset = xpos - last_x_;
+    float yoffset = last_y_ - ypos; // reversed since y-coordinates go from bottom to top
 
-    lastX = xpos;
-    lastY = ypos;
+    last_x_ = xpos;
+    last_y_ = ypos;
 
     camera_->rotate(xoffset, yoffset);
 }
 
-void App::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+void App::scroll_callback_impl(double xoffset, double yoffset)
 {
     camera_->zoom(static_cast<float>(yoffset));
 
@@ -88,23 +114,27 @@ void App::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 App::App(uint32_t screen_width, uint32_t screen_height)
     : window_(NULL)
-    , first_mouse_(false)
+    , first_mouse_(true)
+    , last_x_(screen_width/2.0f)
+    , last_y_(screen_height/2.0f)
+    , screen_width_(screen_width)
+    , screen_height_(screen_height)
 {
     // camera_ = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
-    camera_ = std::make_shared<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f););
+    camera_ = std::make_shared<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
 
-    scene_ = std::make_shared<Scene>(/ ... /);
-
-    imgui_window_ = std::unique_ptr<ImGuiWindow>(scene_);
-    renderer_ = std::unique_ptr<Renderer>(scene_, screen_width, screen_height);
+    scene_ = std::make_shared<scene::Scene>();
+    imgui_window_ = std::make_unique<ImGuiWindow>(scene_);
+    renderer_ = std::make_unique<Renderer>(scene_, screen_width, screen_height);
 }
 
 int32_t App::run()
 {
     if (initialize_opengl() != 0) return -1;
 
-    while (true)
+    while (!glfwWindowShouldClose(window_))
     {
+        process_input(window_);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
