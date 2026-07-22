@@ -9,7 +9,7 @@
 
 class Renderer final {
 
-    std::shared_ptr<Scene> scene_;
+    std::shared_ptr<scene::Scene> scene_;
     const uint32_t scr_width_;
     const uint32_t scr_height_;
     std::shared_ptr<Shader> curr_shader_ptr_;
@@ -24,7 +24,6 @@ class Renderer final {
     void render_scene_object(const std::shared_ptr<scene::SceneObject>& obj);
 
 public:
-    Renderer(const std::shared_ptr<Scene>& scene, uint32_t screen_width, uint32_t screen_height);
-
+    Renderer(const std::shared_ptr<scene::Scene>& scene, uint32_t screen_width, uint32_t screen_height);
     void render_scene(const std::shared_ptr<ICamera>& camera);
 };

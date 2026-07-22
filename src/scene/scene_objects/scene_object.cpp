@@ -1,5 +1,6 @@
 #include "scene/scene_objects/scene_object.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "scene_object.h"
 
 void scene::SceneObject::move(glm::vec3 move_vector)
 {
@@ -51,6 +52,16 @@ glm::mat4 scene::SceneObject::model_matrix() const
     model = glm::scale(model, scaling_axes_ * scaling_prescaler_);
 
     return model;
+}
+
+void scene::SceneObject::set_shader(const std::shared_ptr<Shader> &shader)
+{
+    shader_ = shader;
+}
+
+std::shared_ptr<Shader> scene::SceneObject::get_shader() const
+{
+    return shader_;
 }
 
 scene::SceneObject::~SceneObject()

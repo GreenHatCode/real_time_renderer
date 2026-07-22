@@ -1,6 +1,7 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "shader/shader.h"
+#include <memory>
 
 namespace scene
 {   
@@ -10,6 +11,8 @@ namespace scene
         glm::vec3 rotation_axes_;
         float scaling_prescaler_;
         glm::vec3 scaling_axes_;
+
+        std::shared_ptr<Shader> shader_;
 
     public:
         void move(glm::vec3 move_vector);
@@ -23,6 +26,9 @@ namespace scene
         glm::vec3 get_scaling_axes() const;
 
         glm::mat4 model_matrix() const;
+
+        void set_shader(const std::shared_ptr<Shader>& shader);
+        std::shared_ptr<Shader> get_shader() const;
 
         virtual void render(Shader &shader_program, const glm::mat4& view_mat, const glm::mat4& projection_mat) = 0;
 

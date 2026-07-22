@@ -22,10 +22,10 @@ void Renderer::render_scene_object(const std::shared_ptr<scene::SceneObject> &ob
 
     set_general_shader_uniforms(curr_shader_ptr_);
     set_model_shader_uniforms(curr_shader_ptr_);
-    obj->render(*curr_shader_ptr_);
+    obj->render(*curr_shader_ptr_, view_mat_, projection_mat_);
 }
 
-Renderer::Renderer(const std::shared_ptr<Scene> &scene, uint32_t screen_width, uint32_t screen_height)
+Renderer::Renderer(const std::shared_ptr<scene::Scene> &scene, uint32_t screen_width, uint32_t screen_height)
     : scene_(scene), scr_width_(screen_width), scr_height_(screen_height)
 {
     // OpenGL configuration
