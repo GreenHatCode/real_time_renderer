@@ -4,44 +4,39 @@
 #include "imgui.h"
 #include "glm/glm.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include "scene/scene.h"
 
 class ImGuiWindow final {
 
     // do not expose outside
+    std::shared_ptr<scene::Scene> scene_;
+
     double prev_s = 0.0;
     double title_countdown_s = 0.1;
     double fps = 0.0;
     
+
     // should be accessible through getters and setters respectively
     float f = 0.0f;
     int counter = 0;
     glm::vec4 clear_color;
+    double delta_time = 0.0f;
 
 public:
-    void render_window() {
-        ImGui::Text("Hello, World!");
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-        ImGui::ColorEdit4("clear color", glm::value_ptr(clear_color));
-
-        if (ImGui::Button("Button")) counter++;
-
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-        ImGui::Text("App average FPS: %.2f", calculate_fps());
-    }
-
-    glm::vec4 get_clear_color() const { return clear_color; }
-
+    ImGuiWindow(const std::shared_ptr<scene::Scene>& scene);
+    void render_window();
+    glm::vec4 get_clear_color() const;
+    float get_delta_time() const;
 
 private:
     double calculate_fps() {
         double curr_s = glfwGetTime();
-        double elapsed_s = curr_s - prev_s;
+        delta_time = curr_s - prev_s;
         prev_s = curr_s;
 
-        title_countdown_s -= elapsed_s;
-        if (title_countdown_s <= 0.0 && elapsed_s > 0.0) {
-            fps = 1.0 / elapsed_s;
+        title_countdown_s -= delta_time;
+        if (title_countdown_s <= 0.0 && delta_time > 0.0) {
+            fps = 1.0 / delta_time;
             title_countdown_s = 0.1;
             return fps;
         }
