@@ -11,10 +11,10 @@ void Renderer::set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_p
     // add setting lights uniforms (preferably using structs or glbuffers)
 }
 
-void Renderer::render_scene_object(const std::shared_ptr<scene::SceneObject> &obj)
+void Renderer::render_scene_object(const std::shared_ptr<scene::ModelObject> &obj)
 {
-    const std::shared_ptr<Shader> shader_ptr = obj.get_shader();
-    if (shader_ptr!= curr_shader_ptr_) 
+    std::shared_ptr<Shader> shader_ptr = obj->get_shader();
+    if (shader_ptr != curr_shader_ptr_) 
     {
         curr_shader_ptr_ = shader_ptr;
         curr_shader_ptr_->use();
@@ -22,7 +22,7 @@ void Renderer::render_scene_object(const std::shared_ptr<scene::SceneObject> &ob
 
     set_general_shader_uniforms(curr_shader_ptr_);
     set_model_shader_uniforms(curr_shader_ptr_);
-    obj->render(*curr_shader_ptr_, view_mat_, projection_mat_);
+    obj->render();
 }
 
 Renderer::Renderer(const std::shared_ptr<scene::Scene> &scene, uint32_t screen_width, uint32_t screen_height)
@@ -40,7 +40,10 @@ void Renderer::render_scene(const std::shared_ptr<ICamera> &camera)
     view_mat_ = camera->view_matrix();
     projection_mat_ = camera->projection_matrix(scr_width_, scr_height_);
 
-    for (const auto& obj : scene_.get_models()) {
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (const auto& obj : scene_->get_models()) {
         render_scene_object(obj);
     }
 }

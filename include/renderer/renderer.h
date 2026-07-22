@@ -1,5 +1,5 @@
 #pragma once
-#include "glad/glad.h"
+#include "opengl.h"
 #include "scene/scene.h"
 #include "camera/i_camera.h"
 #include <memory>
@@ -21,7 +21,7 @@ class Renderer final {
     void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
     void set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
-    void render_scene_object(const std::shared_ptr<scene::SceneObject>& obj);
+    void render_scene_object(const std::shared_ptr<scene::ModelObject>& obj);
 
 public:
     Renderer(const std::shared_ptr<scene::Scene>& scene, uint32_t screen_width, uint32_t screen_height);

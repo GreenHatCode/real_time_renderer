@@ -12,6 +12,7 @@ namespace scene
         float scaling_prescaler_;
         glm::vec3 scaling_axes_;
 
+    protected:
         std::shared_ptr<Shader> shader_;
 
     public:
@@ -30,7 +31,7 @@ namespace scene
         void set_shader(const std::shared_ptr<Shader>& shader);
         std::shared_ptr<Shader> get_shader() const;
 
-        virtual void render(Shader &shader_program, const glm::mat4& view_mat, const glm::mat4& projection_mat) = 0;
+        virtual void render() = 0;
 
         virtual ~SceneObject();
     };

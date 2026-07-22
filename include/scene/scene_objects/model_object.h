@@ -8,8 +8,8 @@ namespace scene
         assimp_wrapper::Model model_;
 
     public:
-        ModelObject(const assimp_wrapper::Model& loaded_model);
-        void render(Shader &shader_program, const glm::mat4& view_mat, const glm::mat4& projection_mat) override;
+        ModelObject(assimp_wrapper::Model&& loaded_model);
+        void render() override;
     };
 
 } // namespace scene

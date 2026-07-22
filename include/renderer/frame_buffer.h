@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <glad/glad.h>
+#include "opengl.h"
 #include <glm/glm.hpp>
 
 class FrameBuffer final {

@@ -7,7 +7,7 @@
 class App {
 
     std::shared_ptr<ICamera> camera_;
-    std::shared_ptr<Scene> scene_;
+    std::shared_ptr<scene::Scene> scene_;
     std::unique_ptr<Renderer> renderer_;
     std::unique_ptr<ImGuiWindow> imgui_window_;
 
@@ -16,7 +16,7 @@ class App {
     float last_x_, last_y_;
     float screen_width_, screen_height_;
 
-    int32_t initialize_opengl();
+    void initialize_opengl();
 
 
 

@@ -5,7 +5,7 @@
 #include "camera/camera_implementation/orbit_camera.h"
 
 
-int32_t App::initialize_opengl()
+void App::initialize_opengl()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -15,9 +15,8 @@ int32_t App::initialize_opengl()
     window_ = glfwCreateWindow(screen_width_, screen_height_, "Read-Time Renderer", NULL, NULL);
     if (window_ == NULL)
     {
-        spdlog::error("Failed to create GLFW window");
         glfwTerminate();
-        return -1;
+        std::runtime_error("Failed to create GLFW window");
     }
     glfwMakeContextCurrent(window_);
     glfwSetWindowUserPointer(window_, this);
@@ -29,8 +28,7 @@ int32_t App::initialize_opengl()
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        spdlog::error("Failed to initialize GLAD");
-        return -1;
+        std::runtime_error("Failed to initialize GLAD");
     }
 
     IMGUI_CHECKVERSION();
@@ -41,7 +39,7 @@ int32_t App::initialize_opengl()
 	ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
-    return 0;
+    spdlog::info("Initialized opengl");
 }
 
 void App::framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -120,26 +118,35 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     , screen_width_(screen_width)
     , screen_height_(screen_height)
 {
+
+    initialize_opengl();
+
     // camera_ = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
     camera_ = std::make_shared<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
 
     scene_ = std::make_shared<scene::Scene>();
     imgui_window_ = std::make_unique<ImGuiWindow>(scene_);
     renderer_ = std::make_unique<Renderer>(scene_, screen_width, screen_height);
+
+    spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);
+
+    // tmp add objects and shaders
+
+    auto spider = scene_->add_model("resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
+    auto spider_shader = scene_->add_shader("shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
+    spider->set_shader(spider_shader);
 }
 
 int32_t App::run()
 {
-    if (initialize_opengl() != 0) return -1;
-
     while (!glfwWindowShouldClose(window_))
     {
         process_input(window_);
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        imgui_window_->render_window();
-        ImGui::Render();
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui::NewFrame();
+        // imgui_window_->render_window();
+        // ImGui::Render();
         // process imgui_window_ input and modify scene objects and camera
         // this includes:
         //      - add/delete object form scene
@@ -151,7 +158,7 @@ int32_t App::run()
         
         renderer_->render_scene(camera_); 
 
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window_);
         glfwPollEvents();
     }

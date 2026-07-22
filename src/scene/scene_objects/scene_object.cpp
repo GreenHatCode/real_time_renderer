@@ -1,6 +1,6 @@
 #include "scene/scene_objects/scene_object.h"
 #include "glm/gtc/matrix_transform.hpp"
-#include "scene_object.h"
+#include "scene/scene_objects/scene_object.h"
 
 void scene::SceneObject::move(glm::vec3 move_vector)
 {

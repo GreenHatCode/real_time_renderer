@@ -1,4 +1,4 @@
-#include "imgui_window.h"
+#include "imgui_window/imgui_window.h"
 
 ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)

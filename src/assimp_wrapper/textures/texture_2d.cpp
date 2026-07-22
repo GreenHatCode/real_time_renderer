@@ -1,5 +1,5 @@
 #include "assimp_wrapper/textures/texture_2d.h"
-#include "glad/glad.h"
+#include "opengl.h"
 
 assimp_wrapper::Texture2D::Texture2D(aiTextureType type)
     : type_(type)

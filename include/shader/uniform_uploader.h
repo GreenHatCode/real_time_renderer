@@ -1,5 +1,5 @@
 #pragma once
-#include <glad/glad.h>
+#include "opengl.h"
 #include <cstdint>
 #include "glm/glm.hpp"
 #include <glm/gtc/type_ptr.hpp>

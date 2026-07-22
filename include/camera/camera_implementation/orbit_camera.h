@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "opengl.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "camera/i_camera.h"
