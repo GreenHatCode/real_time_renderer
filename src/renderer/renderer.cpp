@@ -2,8 +2,8 @@
 
 void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
-    shader_ptr->set_uniform("view_mat", view_mat_);
-    shader_ptr->set_uniform("projection_mat", projection_mat_);
+    shader_ptr->set_uniform("u_view_mat", view_mat_);
+    shader_ptr->set_uniform("u_projection_mat", projection_mat_);
 }
 
 void Renderer::set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)

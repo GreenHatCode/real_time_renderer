@@ -3,6 +3,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "camera/camera_implementation/orbit_camera.h"
+#include "camera/camera_implementation/free_camera.h"
 
 
 void App::initialize_opengl()
@@ -121,7 +122,7 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
     initialize_opengl();
 
-    // camera_ = std::make_unique<FreeCamera>(free_cam_projection, glm::vec3(0.0f, 0.0f, 3.0f));
+    // camera_ = std::make_shared<FreeCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f), glm::vec3(0.0f, 0.0f, 3.0f));
     camera_ = std::make_shared<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
 
     scene_ = std::make_shared<scene::Scene>();
@@ -142,11 +143,11 @@ int32_t App::run()
     while (!glfwWindowShouldClose(window_))
     {
         process_input(window_);
-        // ImGui_ImplOpenGL3_NewFrame();
-        // ImGui_ImplGlfw_NewFrame();
-        // ImGui::NewFrame();
-        // imgui_window_->render_window();
-        // ImGui::Render();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        imgui_window_->render_window();
+        ImGui::Render();
         // process imgui_window_ input and modify scene objects and camera
         // this includes:
         //      - add/delete object form scene
@@ -158,7 +159,7 @@ int32_t App::run()
         
         renderer_->render_scene(camera_); 
 
-        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window_);
         glfwPollEvents();
     }
