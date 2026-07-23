@@ -36,6 +36,7 @@ public:
     glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f), 
     float yaw = CameraDefaults::YAW, float pitch = CameraDefaults::PITCH) 
     : projection_(projection)
+    , target_(target)
     , radius_(radius)
     , front_(direction)
     , position_(target - direction * radius)
