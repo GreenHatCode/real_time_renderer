@@ -9,9 +9,7 @@
 
 class Renderer final {
 
-    std::shared_ptr<scene::Scene> scene_;
-    const uint32_t scr_width_;
-    const uint32_t scr_height_;
+    const std::shared_ptr<const scene::Scene> scene_;
     std::shared_ptr<Shader> curr_shader_ptr_;
 
     glm::mat4 view_mat_;
@@ -24,6 +22,6 @@ class Renderer final {
     void render_scene_object(const std::shared_ptr<scene::ModelObject>& obj);
 
 public:
-    Renderer(const std::shared_ptr<scene::Scene>& scene, uint32_t screen_width, uint32_t screen_height);
-    void render_scene(const std::shared_ptr<ICamera>& camera);
+    Renderer(std::shared_ptr<const scene::Scene> scene);
+    void render_scene(const glm::mat4& view_mat, const glm::mat4& projection_mat);
 };

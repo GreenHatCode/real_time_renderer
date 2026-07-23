@@ -122,12 +122,12 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
     initialize_opengl();
 
-    // camera_ = std::make_shared<FreeCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f), glm::vec3(0.0f, 0.0f, 3.0f));
-    camera_ = std::make_shared<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
+    // camera_ = std::make_shared<FreeCamera>(Projection::Perspective(45.0f, 10.0f, 300.0f), glm::vec3(0.0f, 0.0f, 30.0f));
+    camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
 
     scene_ = std::make_shared<scene::Scene>();
     imgui_window_ = std::make_unique<ImGuiWindow>(scene_);
-    renderer_ = std::make_unique<Renderer>(scene_, screen_width, screen_height);
+    renderer_ = std::make_unique<Renderer>(scene_);
 
     spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);
 
@@ -157,7 +157,7 @@ int32_t App::run()
         //      - change other properties from ui
 
         
-        renderer_->render_scene(camera_); 
+        renderer_->render_scene(camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window_);

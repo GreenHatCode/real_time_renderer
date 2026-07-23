@@ -6,7 +6,7 @@
 
 class App {
 
-    std::shared_ptr<ICamera> camera_;
+    std::unique_ptr<ICamera> camera_;
     std::shared_ptr<scene::Scene> scene_;
     std::unique_ptr<Renderer> renderer_;
     std::unique_ptr<ImGuiWindow> imgui_window_;

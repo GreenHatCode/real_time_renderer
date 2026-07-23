@@ -25,8 +25,8 @@ void Renderer::render_scene_object(const std::shared_ptr<scene::ModelObject> &ob
     obj->render();
 }
 
-Renderer::Renderer(const std::shared_ptr<scene::Scene> &scene, uint32_t screen_width, uint32_t screen_height)
-    : scene_(scene), scr_width_(screen_width), scr_height_(screen_height)
+Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
+    : scene_(scene)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -35,10 +35,10 @@ Renderer::Renderer(const std::shared_ptr<scene::Scene> &scene, uint32_t screen_w
 
 }
 
-void Renderer::render_scene(const std::shared_ptr<ICamera> &camera)
+void Renderer::render_scene(const glm::mat4& view_mat, const glm::mat4& projection_mat)
 {
-    view_mat_ = camera->view_matrix();
-    projection_mat_ = camera->projection_matrix(scr_width_, scr_height_);
+    view_mat_ = view_mat;
+    projection_mat_ = projection_mat;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
