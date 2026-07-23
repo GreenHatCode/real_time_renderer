@@ -8,7 +8,7 @@ namespace scene
         assimp_wrapper::Model model_;
 
     public:
-        ModelObject(assimp_wrapper::Model&& loaded_model);
+        ModelObject(assimp_wrapper::Model&& loaded_model, std::shared_ptr<Shader> shader = nullptr);
         void render() override;
     };
 

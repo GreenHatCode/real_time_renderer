@@ -7,24 +7,24 @@ namespace scene
 {   
     class SceneObject {
         glm::vec3 move_vector_;
-        float rotation_angle_cw_;
+        float rotation_angle_cw_; // radians
         glm::vec3 rotation_axes_;
-        float scaling_prescaler_;
-        glm::vec3 scaling_axes_;
+        glm::vec3 scaling_vec_;
 
     protected:
         std::shared_ptr<Shader> shader_;
 
     public:
+        SceneObject(std::shared_ptr<Shader> shader = nullptr);
+
         void move(glm::vec3 move_vector);
         void rotate(float angle_rad, glm::vec3 axes_vec); // CW direction
-        void scale(float prescaler, glm::vec3 axes_vec);
+        void scale(glm::vec3 prescaling_vec);
 
         glm::vec3 get_move_vector() const;
         float get_rotation_angle_cw() const;
         glm::vec3 get_rotation_axes() const;
-        float get_scaling_prescaler() const;
-        glm::vec3 get_scaling_axes() const;
+        glm::vec3 get_scaling_vector() const;
 
         glm::mat4 model_matrix() const;
 
