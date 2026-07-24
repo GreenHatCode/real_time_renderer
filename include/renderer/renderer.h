@@ -23,5 +23,5 @@ class Renderer final {
 
 public:
     Renderer(std::shared_ptr<const scene::Scene> scene);
-    void render_scene(const glm::mat4& view_mat, const glm::mat4& projection_mat);
+    void render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat);
 };

@@ -35,12 +35,12 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 
 }
 
-void Renderer::render_scene(const glm::mat4& view_mat, const glm::mat4& projection_mat)
+void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat)
 {
     view_mat_ = view_mat;
     projection_mat_ = projection_mat;
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(clear_color_rgba.r, clear_color_rgba.g, clear_color_rgba.b, clear_color_rgba.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto& obj : scene_->get_models()) {

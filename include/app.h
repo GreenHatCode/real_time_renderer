@@ -6,6 +6,12 @@
 
 class App {
 
+    enum class InputMode
+    {
+        Viewport,
+        UI
+    };
+
     std::unique_ptr<ICamera> camera_;
     std::shared_ptr<scene::Scene> scene_;
     std::unique_ptr<Renderer> renderer_;
@@ -15,10 +21,10 @@ class App {
     bool first_mouse_;
     float last_x_, last_y_;
     float screen_width_, screen_height_;
+    InputMode input_mode_;
 
+    // initial configuration
     void initialize_opengl();
-
-
 
     // wrappers for C OpenGL api
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -29,6 +35,10 @@ class App {
     void mouse_callback_impl(double xpos, double ypos);
     void scroll_callback_impl(double xoffset, double yoffset);
     void process_input(GLFWwindow *window);
+
+    // ui behavior
+    void enter_viewport_mode();
+    void enter_ui_mode();
 
 public:
     App(uint32_t screen_width = 800, uint32_t screen_height = 600);

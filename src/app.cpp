@@ -25,7 +25,7 @@ void App::initialize_opengl()
     glfwSetCursorPosCallback(window_, mouse_callback); // add callbacks namespace
     glfwSetScrollCallback(window_, scroll_callback); // add callbacks namespace
 
-    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -71,8 +71,24 @@ void App::framebuffer_size_callback_impl(int width, int height)
 
 void App::process_input(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    // quit app
+    bool quit_app = glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+    if (quit_app) glfwSetWindowShouldClose(window, true);
+
+    bool escape_pressed = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+    if (escape_pressed && input_mode_ != InputMode::UI) {
+        enter_ui_mode();
+    }
+
+    bool lbt_pressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    bool imgui_wants_mouse = ImGui::GetIO().WantCaptureMouse;
+    if (input_mode_ != InputMode::Viewport && !imgui_wants_mouse && lbt_pressed)
+    {
+        enter_viewport_mode();
+    }
+
+    // viewport mode functions
+    if (input_mode_ != InputMode::Viewport) return;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera_->move(CameraMovement::FORWARD, imgui_window_->get_delta_time());
@@ -84,8 +100,25 @@ void App::process_input(GLFWwindow *window)
         camera_->move(CameraMovement::RIGHT, imgui_window_->get_delta_time());
 }
 
+void App::enter_viewport_mode()
+{
+    input_mode_ = InputMode::Viewport;
+    first_mouse_ = true;
+    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    spdlog::info("Enter viewport mode");
+}
+
+void App::enter_ui_mode()
+{
+    input_mode_ = InputMode::UI;
+    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    spdlog::info("Enter ui mode");
+}
+
 void App::mouse_callback_impl(double xpos_in, double ypos_in)
 {
+    if (input_mode_ != InputMode::Viewport) return;
+
     float xpos = static_cast<float>(xpos_in);
     float ypos = static_cast<float>(ypos_in);
 
@@ -107,8 +140,8 @@ void App::mouse_callback_impl(double xpos_in, double ypos_in)
 
 void App::scroll_callback_impl(double xoffset, double yoffset)
 {
+    if (input_mode_ != InputMode::Viewport) return;
     camera_->zoom(static_cast<float>(yoffset));
-
 }
 
 App::App(uint32_t screen_width, uint32_t screen_height)
@@ -118,6 +151,7 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     , last_y_(screen_height/2.0f)
     , screen_width_(screen_width)
     , screen_height_(screen_height)
+    , input_mode_(InputMode::UI)
 {
 
     initialize_opengl();
@@ -157,7 +191,7 @@ int32_t App::run()
         //      - change other properties from ui
 
         
-        renderer_->render_scene(camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
+        renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window_);

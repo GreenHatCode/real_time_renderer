@@ -7,14 +7,12 @@ ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
 
 void ImGuiWindow::render_window()
 {
-    ImGui::Text("Hello, World!");
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
+
+    ImGui::Text("Read-Timer Renderer");
     ImGui::ColorEdit4("clear color", glm::value_ptr(clear_color));
 
-    if (ImGui::Button("Button")) counter++;
-
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
+    ImGui::Separator();
     ImGui::Text("App average FPS: %.2f", calculate_fps());
 }
 
