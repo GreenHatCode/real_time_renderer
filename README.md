@@ -27,7 +27,7 @@ Features:
             - orthographic DONE
             - perspective DONE
 	- render statistics
-		- FPS
+		- FPS DONE
 		- frame time
 		- cpu time
 		- gpu time (possibly)

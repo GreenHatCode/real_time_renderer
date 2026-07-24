@@ -29,18 +29,5 @@ public:
     float get_delta_time() const;
 
 private:
-    double calculate_fps() {
-        double curr_s = glfwGetTime();
-        delta_time = curr_s - prev_s;
-        prev_s = curr_s;
-
-        title_countdown_s -= delta_time;
-        if (title_countdown_s <= 0.0 && delta_time > 0.0) {
-            fps = 1.0 / delta_time;
-            title_countdown_s = 0.1;
-            return fps;
-        }
-        return fps;
-    }
-
+    double calculate_fps();
 };
