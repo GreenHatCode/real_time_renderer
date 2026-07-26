@@ -11,17 +11,32 @@ class ImGuiWindow final {
 
     struct AddModelDialog_t {
         std::string model_file_path;
-        std::string shader_file_path;
-        std::string object_name;
+        std::string shader_name;
+        std::string name;
+    };
+
+    struct AddShaderDialog_t {
+        std::string vert_shader_file_path;
+        std::string frag_shader_file_path;
+        std::string name;
+    };
+
+    struct ModelInspectorState_t {
+        std::shared_ptr<scene::ModelObject> selected_model_ptr;
+
     };
 
     // do not expose outside
     std::shared_ptr<scene::Scene> scene_;
+    std::vector<std::string> loaded_models_names_;
+    std::vector<std::string> loaded_shaders_names_;
 
     double prev_s_ = 0.0;
     double title_countdown_s_ = 0.1;
     double fps_ = 0.0;
-    AddModelDialog_t add_model_dialog_state_;    
+    AddModelDialog_t model_dialog_state_;  
+    AddShaderDialog_t shader_dialog_state_;
+    ModelInspectorState_t model_inspector_state_;
 
     // should be accessible through getters and setters respectively
     glm::vec4 clear_color_;
@@ -35,6 +50,7 @@ public:
 
 private:
     double calculate_fps();
-    void render_add_model_dialog();
-    void render_add_shader_dialog();
+    void render_model_dialog();
+    void render_shader_dialog();
+    void render_model_inspector();
 };

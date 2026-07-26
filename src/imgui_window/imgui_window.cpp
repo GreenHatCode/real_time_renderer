@@ -3,8 +3,11 @@
 
 ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
-    , add_model_dialog_state_{.model_file_path="", .shader_file_path="", .object_name=""}
+    , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
+    , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .name=""}
+    , model_inspector_state_{.selected_model_ptr=nullptr}
 {
+
 }
 
 void ImGuiWindow::render_window()
@@ -18,18 +21,20 @@ void ImGuiWindow::render_window()
 
     // loading models and shaders
     
-    if (ImGui::Button("add model")) {
-        ImGui::OpenPopup("add model");
+    if (ImGui::Button("manage model")) {
+        ImGui::OpenPopup("manage model");
     }
-    render_add_model_dialog();
-    
+    render_model_dialog();
     ImGui::SameLine();
     
-    if (ImGui::Button("add shader")) {
-        ImGui::OpenPopup("add shader");
+    if (ImGui::Button("manage shader")) {
+        ImGui::OpenPopup("manage shader");
     }
-    render_add_shader_dialog();
+    render_shader_dialog();
+    ImGui::Separator();
 
+
+    render_model_inspector();
     ImGui::Separator();
 
 
@@ -63,29 +68,40 @@ double ImGuiWindow::calculate_fps()
     return fps_;
 }
 
-void ImGuiWindow::render_add_model_dialog()
+void ImGuiWindow::render_model_dialog()
 {
-    if (ImGui::BeginPopupModal("add model", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (ImGui::BeginPopupModal("manage model", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Load a model into the scene");
+        ImGui::Text("Manage model on the scene");
         ImGui::Separator();
-        ImGui::InputText("File", &add_model_dialog_state_.model_file_path);
-        ImGui::InputText("Shader file", &add_model_dialog_state_.shader_file_path);
-        ImGui::InputText("Object name", &add_model_dialog_state_.object_name);
+        ImGui::InputText("File", &model_dialog_state_.model_file_path);
+        ImGui::InputText("Shader name", &model_dialog_state_.shader_name);
+        ImGui::InputText("Object name", &model_dialog_state_.name);
         ImGui::Spacing();
 
         if (ImGui::Button("Load"))
         {
-            // add model to scene
-            add_model_dialog_state_ = {};
+            std::shared_ptr<Shader> model_shader = scene_->get_shader(model_dialog_state_.shader_name);
+            auto loaded_model = scene_->add_model(model_dialog_state_.name, model_dialog_state_.model_file_path);
+            if (model_shader != nullptr && loaded_model != nullptr) {
+                loaded_model->set_shader(model_shader);
+                loaded_models_names_.push_back(model_dialog_state_.name);
+            }
+
+            model_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }
-
         ImGui::SameLine();
 
-        if (ImGui::Button("Cancel"))
+        if (ImGui::Button("Delete")) {
+            model_inspector_state_.selected_model_ptr = nullptr;
+            scene_->delete_model(model_dialog_state_.name);
+        }
+        ImGui::SameLine();     
+
+        if (ImGui::Button("Exit"))
         {
-            add_model_dialog_state_ = {};
+            model_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }
 
@@ -94,31 +110,104 @@ void ImGuiWindow::render_add_model_dialog()
 
 }
 
-void ImGuiWindow::render_add_shader_dialog()
+void ImGuiWindow::render_shader_dialog()
 {
-    if (ImGui::BeginPopupModal("add shader", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text("Load a shader into the scene");
+    if (ImGui::BeginPopupModal("manage shader", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Manage shader");
         ImGui::Separator();
-        ImGui::InputText("File", &add_model_dialog_state_.model_file_path);
-        ImGui::InputText("Shader file", &add_model_dialog_state_.shader_file_path);
+        ImGui::InputText("Vertex shader", &shader_dialog_state_.vert_shader_file_path);
+        ImGui::InputText("Fragmet shader", &shader_dialog_state_.frag_shader_file_path);
+        ImGui::InputText("Shader name", &shader_dialog_state_.name);
         ImGui::Spacing();
 
-        if (ImGui::Button("Load"))
-        {
-            // add shader to scene
-            add_model_dialog_state_ = {};
-            ImGui::CloseCurrentPopup();
+        if (ImGui::Button("Load")) {
+            std::shared_ptr<Shader> new_shader = scene_->add_shader(shader_dialog_state_.name, 
+                shader_dialog_state_.vert_shader_file_path, shader_dialog_state_.frag_shader_file_path);
+            
+            if (new_shader != nullptr) {
+                loaded_shaders_names_.push_back(shader_dialog_state_.name);
+                spdlog::info("Successfully loaded shader: name={}", shader_dialog_state_.name);
+                shader_dialog_state_ = {};
+                ImGui::CloseCurrentPopup();
+            }
         }
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Cancel"))
-        {
-            add_model_dialog_state_ = {};
+        if (ImGui::Button("Delete")) {
+            scene_->delete_shader(shader_dialog_state_.name);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel")) {
+            shader_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }
 
         ImGui::EndPopup();
     }
+}
+void ImGuiWindow::render_model_inspector()
+{
+    // list box of loaded models
+    ImGui::Text("Scene Objects");
+    ImVec2 list_box_size = ImGui::GetWindowSize();
+    list_box_size.y = 60;
+    if (ImGui::BeginListBox("##", list_box_size)) {
+        for (const auto& m : scene_->get_models()) {
+            bool selected = model_inspector_state_.selected_model_ptr == m;
+
+            if (ImGui::Selectable(m->get_name().c_str(), selected)) {
+                model_inspector_state_.selected_model_ptr = m;
+            }
+
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndListBox();
+    }
+
+    
+    if (model_inspector_state_.selected_model_ptr)
+    {
+        ImGui::Separator();
+        ImGui::Text("Selected Object");
+
+        glm::vec3 pos = model_inspector_state_.selected_model_ptr->get_move_vector();
+        if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f))
+            model_inspector_state_.selected_model_ptr->move(pos);
+
+        float angle = model_inspector_state_.selected_model_ptr->get_rotation_angle_cw();
+        if (ImGui::DragFloat("Rotation", &angle, 0.01f))
+            model_inspector_state_.selected_model_ptr->rotate(angle, model_inspector_state_.selected_model_ptr->get_rotation_axes());
+
+        glm::vec3 axis = model_inspector_state_.selected_model_ptr->get_rotation_axes();
+        if (ImGui::DragFloat3("Axis", glm::value_ptr(axis), 0.01f))
+            model_inspector_state_.selected_model_ptr->rotate(model_inspector_state_.selected_model_ptr->get_rotation_angle_cw(), axis);
+
+        glm::vec3 scale = model_inspector_state_.selected_model_ptr->get_scaling_vector();
+        if (ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f))
+            model_inspector_state_.selected_model_ptr->scale(scale);
+   
+        auto shader_ptr = model_inspector_state_.selected_model_ptr->get_shader();
+        if (ImGui::BeginCombo("Shader", shader_ptr->get_name().c_str()))
+        {
+            for (const auto& shader : scene_->get_shaders())
+            {
+                bool selected = shader == shader_ptr;
+
+                if (ImGui::Selectable(shader->get_name().c_str(), selected))
+                    model_inspector_state_.selected_model_ptr->set_shader(shader);
+
+                if (selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+
+            ImGui::EndCombo();
+        }
+    
+    }
+
+
+
 }

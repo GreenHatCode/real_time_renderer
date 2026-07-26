@@ -17,7 +17,7 @@ void App::initialize_opengl()
     if (window_ == NULL)
     {
         glfwTerminate();
-        std::runtime_error("Failed to create GLFW window");
+        throw std::runtime_error("Failed to create GLFW window");
     }
     glfwMakeContextCurrent(window_);
     glfwSetWindowUserPointer(window_, this);
@@ -29,7 +29,7 @@ void App::initialize_opengl()
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::runtime_error("Failed to initialize GLAD");
+        throw std::runtime_error("Failed to initialize GLAD");
     }
 
     IMGUI_CHECKVERSION();
@@ -164,12 +164,6 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     renderer_ = std::make_unique<Renderer>(scene_);
 
     spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);
-
-    // tmp add objects and shaders
-
-    auto spider = scene_->add_model("resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
-    auto spider_shader = scene_->add_shader("shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
-    spider->set_shader(spider_shader);
 }
 
 int32_t App::run()
@@ -182,14 +176,6 @@ int32_t App::run()
         ImGui::NewFrame();
         imgui_window_->render_window();
         ImGui::Render();
-        // process imgui_window_ input and modify scene objects and camera
-        // this includes:
-        //      - add/delete object form scene
-        //      - change scene object's shader
-        //      - move camera
-        //      - change camera/projection type
-        //      - change other properties from ui
-
         
         renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
 
