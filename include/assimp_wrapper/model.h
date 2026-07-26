@@ -18,7 +18,7 @@ namespace assimp_wrapper
         
     public:
         Model(const std::filesystem::path &path, uint32_t postprocess_flags);
-        void draw(Shader &shader_program);
+        void draw(Shader &shader_program) const;
 
     private:
         void load_model(const std::filesystem::path &path, uint32_t postprocess_flags);

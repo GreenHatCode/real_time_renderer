@@ -7,7 +7,7 @@ Material::Material(const std::vector<std::shared_ptr<Texture2D>>& textures)
     : textures_(textures)
 { }
 
-void Material::bind(Shader& shader) {
+void Material::bind(Shader& shader) const{
 
     uint32_t diffuse_sampler_number = 1;
     uint32_t specular_sampler_number = 1;

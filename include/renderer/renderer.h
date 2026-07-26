@@ -19,7 +19,7 @@ class Renderer final {
     void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
     void set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
-    void render_scene_object(const std::shared_ptr<scene::ModelObject>& obj);
+    void render_scene_object(const std::shared_ptr<const scene::ModelObject>& obj);
 
 public:
     Renderer(std::shared_ptr<const scene::Scene> scene);

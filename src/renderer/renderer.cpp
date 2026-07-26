@@ -11,7 +11,7 @@ void Renderer::set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_p
     // add setting lights uniforms (preferably using structs or glbuffers)
 }
 
-void Renderer::render_scene_object(const std::shared_ptr<scene::ModelObject> &obj)
+void Renderer::render_scene_object(const std::shared_ptr<const scene::ModelObject> &obj)
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
     if (shader_ptr != curr_shader_ptr_) 

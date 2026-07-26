@@ -13,7 +13,7 @@ namespace assimp_wrapper {
 
     public:
         Material(const std::vector<std::shared_ptr<Texture2D>>& textures);
-        void bind(Shader &shader);
+        void bind(Shader &shader) const;
     };
     
 }
