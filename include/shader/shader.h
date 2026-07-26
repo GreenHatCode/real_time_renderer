@@ -7,12 +7,14 @@
 class Shader
 {
 private:
-    uint32_t shader_program_id;
-    std::unordered_map<std::string, int32_t> cached_uniform_locations;
+    uint32_t shader_program_id_;
+    std::unordered_map<std::string, int32_t> cached_uniform_locations_;
+    std::string name_;
 
 public:
-    Shader(const char *vertexPath, const char *fragmentPath);
+    Shader(const std::string& name, const char *vertexPath, const char *fragmentPath);
     void use();
+    std::string get_name() const;
     ~Shader();
 
     template <typename T>

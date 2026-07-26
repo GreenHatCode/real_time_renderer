@@ -6,7 +6,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "spdlog/spdlog.h"
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(const std::string& name, const char* vertexPath, const char* fragmentPath)
+    : name_(name)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -51,23 +52,27 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glCompileShader(fragment);
     checkCompileErrors(fragment, "FRAGMENT");
     // shader Program
-    shader_program_id = glCreateProgram();
-    glAttachShader(shader_program_id, vertex);
-    glAttachShader(shader_program_id, fragment);
-    glLinkProgram(shader_program_id);
-    checkCompileErrors(shader_program_id, "PROGRAM");
+    shader_program_id_ = glCreateProgram();
+    glAttachShader(shader_program_id_, vertex);
+    glAttachShader(shader_program_id_, fragment);
+    glLinkProgram(shader_program_id_);
+    checkCompileErrors(shader_program_id_, "PROGRAM");
     // delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }
 void Shader::use()
 { 
-    glUseProgram(shader_program_id); 
+    glUseProgram(shader_program_id_); 
 }
 
-Shader::~Shader() 
+std::string Shader::get_name() const
 {
-    glDeleteProgram(shader_program_id);
+    return name_;
+}
+Shader::~Shader()
+{
+    glDeleteProgram(shader_program_id_);
 }
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)
@@ -80,7 +85,13 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            spdlog::error("SHADER_COMPILATION_ERROR of type: {}. {}", type, infoLog);
+            std::stringstream ss;
+            ss << "SHADER_COMPILATION_ERROR of type: "
+            << type << ". "
+            << infoLog;
+
+            spdlog::error(ss.str());
+            throw std::runtime_error(ss.str());
         }
     }
     else
@@ -89,7 +100,13 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            spdlog::error("PROGRAM_LINKING_ERROR of type: {}. {}", type, infoLog);
+            std::stringstream ss;
+            ss << "PROGRAM_LINKING_ERROR of type: "
+            << type << ". "
+            << infoLog;
+
+            spdlog::error(ss.str());
+            throw std::runtime_error(ss.str());
         }
     }
 }
@@ -97,11 +114,11 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 
 GLint Shader::get_uniform_location(const std::string &name)
 {
-    auto iter = cached_uniform_locations.find(name);
+    auto iter = cached_uniform_locations_.find(name);
     
-    if (iter == cached_uniform_locations.end()) {
-        int32_t uniform_location = glGetUniformLocation(shader_program_id, name.c_str());
-        cached_uniform_locations.emplace(name, uniform_location);
+    if (iter == cached_uniform_locations_.end()) {
+        int32_t uniform_location = glGetUniformLocation(shader_program_id_, name.c_str());
+        cached_uniform_locations_.emplace(name, uniform_location);
         return uniform_location;
     }
 

@@ -11,11 +11,13 @@ namespace scene
         glm::vec3 rotation_axes_;
         glm::vec3 scaling_vec_;
 
+        std::string name_;
+
     protected:
         std::shared_ptr<Shader> shader_;
 
     public:
-        SceneObject(std::shared_ptr<Shader> shader = nullptr);
+        SceneObject(const std::string& name, std::shared_ptr<Shader> shader = nullptr);
 
         void move(glm::vec3 move_vector);
         void rotate(float angle_rad, glm::vec3 axes_vec); // CW direction
@@ -31,7 +33,9 @@ namespace scene
         void set_shader(const std::shared_ptr<Shader>& shader);
         std::shared_ptr<Shader> get_shader() const;
 
-        virtual void render() = 0;
+        std::string get_name() const;
+
+        virtual void render() const = 0;
 
         virtual ~SceneObject();
     };

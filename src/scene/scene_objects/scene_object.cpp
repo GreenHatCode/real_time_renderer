@@ -2,12 +2,13 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "scene/scene_objects/scene_object.h"
 
-scene::SceneObject::SceneObject(std::shared_ptr<Shader> shader)
+scene::SceneObject::SceneObject(const std::string& name, std::shared_ptr<Shader> shader)
     : move_vector_(0.0f, 0.0f, 0.0f)
     , rotation_angle_cw_(0.0f)
     , rotation_axes_(1.0f, 1.0f, 1.0f)
     , scaling_vec_(1.0f, 1.0f, 1.0f)
     , shader_(shader)
+    , name_(name)
 {
 }
 
@@ -65,6 +66,11 @@ void scene::SceneObject::set_shader(const std::shared_ptr<Shader> &shader)
 std::shared_ptr<Shader> scene::SceneObject::get_shader() const
 {
     return shader_;
+}
+
+std::string scene::SceneObject::get_name() const
+{
+    return name_;
 }
 
 scene::SceneObject::~SceneObject()
