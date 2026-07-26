@@ -2,15 +2,15 @@ UBISOFT OpenGL project
 A lightweight real-time rendering framework and scene editor built with Modern OpenGL.
 
 Features:
-	- mesh loading
-		load meshes with textures from files (obj, stl) dynamically. gITF - as bonus
-		- dynamic adding/removing meshes from scene
+	- mesh loading DONE
+		load meshes with textures from files (obj, stl) dynamically. gITF - as bonus DONE
+		- dynamic adding/removing meshes from scene DONE
 		- load mesh from file DONE
 		- load mesh textures DONE
 		- load embedded textures DONE
-	- dynamic scene
-		- move objects across the scene
-		- scale and rotate objects on the scene
+	- dynamic scene DONE
+		- move objects across the scene DONE
+		- scale and rotate objects on the scene DONE
 		- move camera across the scene DONE
 	- lights
 		- types: directoinal, point, spot, ambient
@@ -28,14 +28,17 @@ Features:
             - perspective DONE
 	- render statistics
 		- FPS DONE
-		- frame time
+		- frame time DONE
 		- cpu time
 		- gpu time (possibly)
 		- total vertices count
 		- total triangles count
-		- objects hierarcy tree (imgui control)
-	- shaders (possibly)
+		- objects hierarcy tree (imgui control) DONE
+	- shaders (possibly) DONE
 		hot shader reload. Select a shader file during runtime and use it (compile and run in app). I think, this can be used for each mesh: you load mesh with generic shader, but can select a specific one
 	- shadow mapping
-	- using imgui as a wrap for a project and as lib for generic controllers
+	- using imgui as a wrap for a project and as lib for generic controllers DONE
 
+	- switch on/off from ui:
+		- main axes (rgb - xyz)
+		- xz face in wireframe style (net)

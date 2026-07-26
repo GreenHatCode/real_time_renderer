@@ -37,7 +37,7 @@ model (one object on a scene) should:
 	- be scalable (scale(axis, size))
 		- store size vec3
 	- user can change shader for this model 
-		- store shader_program_id
+		- store shader_program_id_
 	- store model_id and name (file from which the model was loaded)
 
 - each model has its shader (one shader can be used by many models)
