@@ -78,6 +78,9 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
         }
     }
 
+    vertices_count_ += mesh->mNumVertices;
+    faces_count_ += mesh->mNumFaces;
+
     return Mesh(vertices, indices, mesh->mMaterialIndex);
 }
 
@@ -92,6 +95,8 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
 
 assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
     : textures_manager_(path.parent_path())
+    , vertices_count_(0)
+    , faces_count_(0)
 {
     load_model(path, postprocess_flags);
 }
@@ -102,4 +107,14 @@ void assimp_wrapper::Model::draw(Shader &shader_program) const
         materials_[mesh.get_material_index()].bind(shader_program);
         mesh.render();
     }
+}
+
+uint32_t assimp_wrapper::Model::get_vertices_count() const
+{
+    return vertices_count_;
+}
+
+uint32_t assimp_wrapper::Model::get_faces_count() const
+{
+    return faces_count_;
 }

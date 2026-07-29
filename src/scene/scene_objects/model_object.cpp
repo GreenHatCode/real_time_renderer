@@ -11,3 +11,13 @@ void scene::ModelObject::render() const
     shader_->set_uniform("u_model_mat", model_matrix());
     model_.draw(*shader_);
 }
+
+uint32_t scene::ModelObject::get_vertices_count() const
+{
+    return model_.get_vertices_count();
+}
+
+uint32_t scene::ModelObject::get_faces_count() const
+{
+    return model_.get_faces_count();
+}

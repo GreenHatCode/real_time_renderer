@@ -36,6 +36,8 @@ namespace scene
         std::string get_name() const;
 
         virtual void render() const = 0;
+        virtual uint32_t get_vertices_count() const = 0;
+        virtual uint32_t get_faces_count() const = 0;
 
         virtual ~SceneObject();
     };

@@ -15,10 +15,12 @@ namespace scene
     private:
         std::unordered_map<std::string, std::shared_ptr<ModelObject>> models_map_;
         std::unordered_map<std::string, std::shared_ptr<Shader>> shaders_map_;
+        uint32_t total_vertices_count;
+        uint32_t total_faces_count;
 
-//  all objects on the scene must have properties of SceneObject, but
-//  during render stage, every object: ModelObject, LightSource ... will do different things in different stages
-//  so, here we store them separately and use through SceneObject only when need to edit it's properties
+    //  all objects on the scene must have properties of SceneObject, but
+    //  during render stage, every object: ModelObject, LightSource ... will do different things in different stages
+    //  so, here we store them separately and use through SceneObject only when need to edit it's properties
 
     public:
         std::shared_ptr<ModelObject> add_model(const std::string& name, const std::filesystem::path& model_file_path);
@@ -30,6 +32,9 @@ namespace scene
         std::vector<std::shared_ptr<Shader>> get_shaders() const;
         std::shared_ptr<Shader> get_shader(const std::string& name) const;
         std::shared_ptr<ModelObject> get_model(const std::string &name) const;
+
+        uint32_t get_total_vertices_count() const;
+        uint32_t get_total_faces_count() const;
     };
 
 

@@ -10,6 +10,8 @@ namespace scene
     public:
         ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, std::shared_ptr<Shader> shader = nullptr);
         void render() const override;
+        uint32_t get_vertices_count() const override;
+        uint32_t get_faces_count() const override;
     };
 
 } // namespace scene

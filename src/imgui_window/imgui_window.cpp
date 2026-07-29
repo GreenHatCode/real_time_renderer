@@ -41,6 +41,8 @@ void ImGuiWindow::render_window()
     // rendering statistics
     ImGui::Text("App average FPS: %.2f", calculate_fps());
     ImGui::Text("App frame time: %.2f", delta_time_);
+    ImGui::Text("Total vertices count: %d", scene_->get_total_vertices_count());
+    ImGui::Text("Total faces count: %d", scene_->get_total_faces_count());
 }
 
 glm::vec4 ImGuiWindow::get_clear_color() const

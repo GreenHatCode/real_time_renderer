@@ -26,6 +26,9 @@ std::shared_ptr<ModelObject> scene::Scene::add_model(const std::string &name, co
         return model;
     }
     
+    total_vertices_count += model->get_vertices_count();
+    total_faces_count += model->get_faces_count();
+
     models_map_.emplace(name, model);
     return model;
 }
@@ -51,10 +54,15 @@ std::shared_ptr<Shader> scene::Scene::add_shader(const std::string &name, const 
 
 bool scene::Scene::delete_model(const std::string &name)
 {
-    if (models_map_.find(name) == models_map_.end()) {
+    std::shared_ptr<ModelObject> model = get_model(name);
+    if (model == nullptr) {
         spdlog::error("Attempt to delete model that isn't loaded to scene. Model name = {}", name);
         return false;
     }
+
+    total_vertices_count -= model->get_vertices_count();
+    total_faces_count -= model->get_faces_count();
+
     models_map_.erase(name);
     spdlog::info("Deleted model: {}", name);
     return true;
@@ -112,4 +120,14 @@ std::shared_ptr<ModelObject> scene::Scene::get_model(const std::string &name) co
     if (it != models_map_.end()) return it->second;
         
     return nullptr;
+}
+
+uint32_t scene::Scene::get_total_vertices_count() const
+{
+    return total_vertices_count;
+}
+
+uint32_t scene::Scene::get_total_faces_count() const
+{
+    return total_faces_count;
 }
