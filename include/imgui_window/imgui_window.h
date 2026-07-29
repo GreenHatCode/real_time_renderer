@@ -53,4 +53,8 @@ private:
     void render_model_dialog();
     void render_shader_dialog();
     void render_model_inspector();
+
+public: // dev methods to add models and shader by hand from code
+    void load_model(const std::string& shader_name, const std::string& name, const std::filesystem::path& file_path);
+    void load_shader(const std::string& name, const std::filesystem::path& vertex_shader_file, const std::filesystem::path& fragment_shader_file);
 };

@@ -166,6 +166,14 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);
 }
 
+void App::load_sources_debug() 
+{
+    imgui_window_->load_shader("simple", "shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
+    imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
+
+    imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
+}
+
 int32_t App::run()
 {
     while (!glfwWindowShouldClose(window_))

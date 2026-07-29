@@ -83,13 +83,7 @@ void ImGuiWindow::render_model_dialog()
 
         if (ImGui::Button("Load"))
         {
-            std::shared_ptr<Shader> model_shader = scene_->get_shader(model_dialog_state_.shader_name);
-            auto loaded_model = scene_->add_model(model_dialog_state_.name, model_dialog_state_.model_file_path);
-            if (model_shader != nullptr && loaded_model != nullptr) {
-                loaded_model->set_shader(model_shader);
-                loaded_models_names_.push_back(model_dialog_state_.name);
-            }
-
+            load_model(model_dialog_state_.shader_name, model_dialog_state_.name, model_dialog_state_.model_file_path);
             model_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }
@@ -123,15 +117,9 @@ void ImGuiWindow::render_shader_dialog()
         ImGui::Spacing();
 
         if (ImGui::Button("Load")) {
-            std::shared_ptr<Shader> new_shader = scene_->add_shader(shader_dialog_state_.name, 
-                shader_dialog_state_.vert_shader_file_path, shader_dialog_state_.frag_shader_file_path);
-            
-            if (new_shader != nullptr) {
-                loaded_shaders_names_.push_back(shader_dialog_state_.name);
-                spdlog::info("Successfully loaded shader: name={}", shader_dialog_state_.name);
-                shader_dialog_state_ = {};
-                ImGui::CloseCurrentPopup();
-            }
+            load_shader(shader_dialog_state_.name, shader_dialog_state_.vert_shader_file_path, shader_dialog_state_.frag_shader_file_path);
+            shader_dialog_state_ = {};
+            ImGui::CloseCurrentPopup();
         }
 
         ImGui::SameLine();
@@ -209,7 +197,24 @@ void ImGuiWindow::render_model_inspector()
         }
     
     }
+}
+void ImGuiWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
+{
+    std::shared_ptr<Shader> model_shader = scene_->get_shader(shader_name);
+    auto loaded_model = scene_->add_model(name, file_path);
+    if (model_shader == nullptr) spdlog::error("Failed to load model. There isn't shader with name={}", shader_name.c_str());
+    if (loaded_model == nullptr) spdlog::error("Failed to load model. Failed to load model object from file: {}", file_path.c_str());
 
+    loaded_model->set_shader(model_shader);
+    loaded_models_names_.push_back(name);
+}
 
-
+void ImGuiWindow::load_shader(const std::string &name, const std::filesystem::path &vertex_shader_file, const std::filesystem::path &fragment_shader_file)
+{
+    std::shared_ptr<Shader> new_shader = scene_->add_shader(name, vertex_shader_file, fragment_shader_file);
+    if (new_shader == nullptr) {
+        spdlog::error("Failed to load shader");
+        return; 
+    }
+    loaded_shaders_names_.push_back(shader_dialog_state_.name);
 }
