@@ -138,13 +138,21 @@ void ImGuiWindow::render_shader_dialog()
         ImGui::EndPopup();
     }
 }
+
 void ImGuiWindow::render_model_inspector()
 {
     // list box of loaded models
-    ImGui::Text("Scene Objects");
     ImVec2 list_box_size = ImGui::GetWindowSize();
     list_box_size.y = 60;
-    if (ImGui::BeginListBox("##", list_box_size)) {
+    if (ImGui::BeginListBox("##ShadersList", list_box_size)) {
+        for (const auto& s : scene_->get_shaders()) {
+            bool selected = false;
+            ImGui::Selectable(s->get_name().c_str(), selected);
+        }
+        ImGui::EndListBox();
+    }
+
+    if (ImGui::BeginListBox("##ModelsList", list_box_size)) {
         for (const auto& m : scene_->get_models()) {
             bool selected = model_inspector_state_.selected_model_ptr == m;
 
