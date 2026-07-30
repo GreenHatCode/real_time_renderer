@@ -1,4 +1,5 @@
 #include "renderer/renderer.h"
+#include "renderer.h"
 
 void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
@@ -43,7 +44,20 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
     glClearColor(clear_color_rgba.r, clear_color_rgba.g, clear_color_rgba.b, clear_color_rgba.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (const auto& obj : scene_->get_models()) {
+    // add deleting curr shader if scene is empty
+
+    for (const auto& obj : scene_->get_models()) { 
         render_scene_object(obj);
     }
+
+}
+
+uint64_t Renderer::get_gpu_time() const
+{
+    return 0;
+}
+
+uint64_t Renderer::get_cpu_time() const
+{
+    return 0;
 }

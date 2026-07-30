@@ -31,8 +31,8 @@ Features:
 		- frame time DONE
 		- cpu time
 		- gpu time (possibly)
-		- total vertices count
-		- total triangles count
+		- total vertices count DONE
+		- total triangles count DONE
 		- objects hierarcy tree (imgui control) DONE
 	- shaders (possibly) DONE
 		hot shader reload. Select a shader file during runtime and use it (compile and run in app). I think, this can be used for each mesh: you load mesh with generic shader, but can select a specific one
