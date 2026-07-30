@@ -1,5 +1,4 @@
 #include "renderer/renderer.h"
-#include "renderer.h"
 
 void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
@@ -46,18 +45,21 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
 
     // add deleting curr shader if scene is empty
 
+
+    profiler_.begin_gpu_profiling_query();
     for (const auto& obj : scene_->get_models()) { 
         render_scene_object(obj);
     }
+    profiler_.end_gpu_profiling_query();
 
 }
 
-uint64_t Renderer::get_gpu_time() const
+double Renderer::get_gpu_time() const
 {
-    return 0;
+    return profiler_.gpu_elapsed_time();
 }
 
-uint64_t Renderer::get_cpu_time() const
+double Renderer::get_cpu_time() const
 {
     return 0;
 }

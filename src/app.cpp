@@ -179,13 +179,15 @@ int32_t App::run()
     while (!glfwWindowShouldClose(window_))
     {
         process_input(window_);
-        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();   
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         imgui_window_->render_window();
         ImGui::Render();
         
         renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
+
+        spdlog::info("gpu profiling time {0:.3f}", renderer_->get_gpu_time());
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window_);
