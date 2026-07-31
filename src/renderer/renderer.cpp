@@ -14,14 +14,14 @@ void Renderer::set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_p
 void Renderer::render_scene_object(const std::shared_ptr<const scene::ModelObject> &obj)
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
-    if (shader_ptr != curr_shader_ptr_) 
+    if (shader_ptr.get() != curr_shader_ptr_) 
     {
-        curr_shader_ptr_ = shader_ptr;
-        curr_shader_ptr_->use();
+        curr_shader_ptr_ = shader_ptr.get();
+        shader_ptr->use();
     }
 
-    set_general_shader_uniforms(curr_shader_ptr_);
-    set_model_shader_uniforms(curr_shader_ptr_);
+    set_general_shader_uniforms(shader_ptr);
+    set_model_shader_uniforms(shader_ptr);
     obj->render();
 }
 
@@ -40,16 +40,14 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
     view_mat_ = view_mat;
     projection_mat_ = projection_mat;
 
+    profiler_.begin_gpu_profiling_query();
     glClearColor(clear_color_rgba.r, clear_color_rgba.g, clear_color_rgba.b, clear_color_rgba.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // add deleting curr shader if scene is empty
-
-
-    profiler_.begin_gpu_profiling_query();
+    
     for (const auto& obj : scene_->get_models()) { 
         render_scene_object(obj);
     }
+
     profiler_.end_gpu_profiling_query();
 
 }

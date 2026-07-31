@@ -12,7 +12,7 @@ class Renderer final {
 
     profiling::SimpleProfiler profiler_;
     const std::shared_ptr<const scene::Scene> scene_;
-    std::shared_ptr<Shader> curr_shader_ptr_;
+    Shader* curr_shader_ptr_; // can be a dangling pointeri
 
     glm::mat4 view_mat_;
     glm::mat4 projection_mat_;
