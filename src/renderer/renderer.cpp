@@ -37,6 +37,8 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 
 void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat)
 {
+    profiler_.begin_cpu_profiling_query();
+
     view_mat_ = view_mat;
     projection_mat_ = projection_mat;
 
@@ -49,7 +51,7 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
     }
 
     profiler_.end_gpu_profiling_query();
-
+    profiler_.end_cpu_profiling_query();
 }
 
 double Renderer::get_gpu_time() const
@@ -59,5 +61,5 @@ double Renderer::get_gpu_time() const
 
 double Renderer::get_cpu_time() const
 {
-    return 0;
+    return profiler_.cpu_elapsed_time();
 }

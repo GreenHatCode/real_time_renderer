@@ -32,7 +32,23 @@ void SimpleProfiler::end_gpu_profiling_query()
 
 }
 
+void profiling::SimpleProfiler::begin_cpu_profiling_query()
+{
+    start_ = std::chrono::high_resolution_clock::now();
+}
+
+void profiling::SimpleProfiler::end_cpu_profiling_query()
+{
+    auto end = std::chrono::high_resolution_clock::now();
+    cpu_time_elapsed_ = std::chrono::duration<double, std::milli>(end - start_).count();
+}
+
 double SimpleProfiler::gpu_elapsed_time() const
 {
     return gpu_time_elapsed_;
+}
+
+double profiling::SimpleProfiler::cpu_elapsed_time() const
+{
+    return cpu_time_elapsed_;
 }

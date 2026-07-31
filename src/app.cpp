@@ -187,7 +187,7 @@ int32_t App::run()
         
         renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
 
-        spdlog::info("gpu profiling time {0:.3f}", renderer_->get_gpu_time());
+        spdlog::info("profiling time gpu:{0:.3f}, cpu:{0:.3f}", renderer_->get_gpu_time(), renderer_->get_cpu_time());
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window_);
