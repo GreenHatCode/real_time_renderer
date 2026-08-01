@@ -29,8 +29,8 @@ Features:
 	- render statistics
 		- FPS DONE
 		- frame time DONE
-		- cpu time
-		- gpu time (possibly)
+		- cpu time DONE
+		- gpu time (possibly) DONE
 		- total vertices count DONE
 		- total triangles count DONE
 		- objects hierarcy tree (imgui control) DONE
@@ -42,3 +42,4 @@ Features:
 	- switch on/off from ui:
 		- main axes (rgb - xyz)
 		- xz face in wireframe style (net)
+		- faces' normals (short red lines)
