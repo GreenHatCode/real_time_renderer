@@ -6,6 +6,8 @@ ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
     , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
     , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .name=""}
     , model_inspector_state_{.selected_model_ptr=nullptr}
+    , gpu_time_to_display_(0.0)
+    , cpu_time_to_display_(0.0)
 {
 
 }
@@ -43,6 +45,8 @@ void ImGuiWindow::render_window()
     ImGui::Text("App frame time: %.2f", delta_time_);
     ImGui::Text("Total vertices count: %d", scene_->get_total_vertices_count());
     ImGui::Text("Total faces count: %d", scene_->get_total_faces_count());
+    ImGui::Text("GPU time: %.2f", gpu_time_to_display_);
+    ImGui::Text("CPU time: %.2f", cpu_time_to_display_);
 }
 
 glm::vec4 ImGuiWindow::get_clear_color() const
@@ -53,6 +57,16 @@ glm::vec4 ImGuiWindow::get_clear_color() const
 float ImGuiWindow::get_delta_time() const
 {
     return static_cast<float>(delta_time_);
+}
+
+void ImGuiWindow::set_gpu_time_to_display(double value)
+{
+    gpu_time_to_display_ = value;
+}
+
+void ImGuiWindow::set_cpu_time_to_display(double value)
+{
+    cpu_time_to_display_ = value;
 }
 
 double ImGuiWindow::calculate_fps()
@@ -130,7 +144,7 @@ void ImGuiWindow::render_shader_dialog()
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Cancel")) {
+        if (ImGui::Button("Exit")) {
             shader_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }

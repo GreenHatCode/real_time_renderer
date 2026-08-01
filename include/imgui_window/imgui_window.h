@@ -38,7 +38,10 @@ class ImGuiWindow final {
     AddShaderDialog_t shader_dialog_state_;
     ModelInspectorState_t model_inspector_state_;
 
-    // should be accessible through getters and setters respectively
+    double gpu_time_to_display_;
+    double cpu_time_to_display_;
+
+private: // should be accessible 
     glm::vec4 clear_color_;
     double delta_time_ = 0.0f;
 
@@ -47,6 +50,9 @@ public:
     void render_window();
     glm::vec4 get_clear_color() const;
     float get_delta_time() const;
+
+    void set_gpu_time_to_display(double value);
+    void set_cpu_time_to_display(double value);
 
 private:
     double calculate_fps();
