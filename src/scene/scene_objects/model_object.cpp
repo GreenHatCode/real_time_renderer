@@ -8,7 +8,12 @@ scene::ModelObject::ModelObject(assimp_wrapper::Model&& loaded_model, const std:
 
 void scene::ModelObject::render() const 
 {
-    shader_->set_uniform("u_model_mat", model_matrix());
+    glm::mat4 model = model_matrix();
+    shader_->set_uniform("u_model_mat", model);
+
+    model = glm::inverse(model);
+    model = glm::transpose(model);
+    shader_->set_uniform("u_normal_mat", glm::mat3(model));
     model_.draw(*shader_);
 }
 

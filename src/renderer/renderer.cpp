@@ -9,6 +9,10 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
 void Renderer::set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
     // add setting lights uniforms (preferably using structs or glbuffers)
+
+    shader_ptr->set_uniform("u_object_color", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader_ptr->set_uniform("u_light_pos", glm::vec3(glm::vec3(1.2f, 50.0f, 2.0f) * glm::mat3(1.0)));
+    shader_ptr->set_uniform("u_light_color", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void Renderer::render_scene_object(const std::shared_ptr<const scene::ModelObject> &obj)

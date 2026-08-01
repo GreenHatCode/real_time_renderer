@@ -156,8 +156,12 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
     initialize_opengl();
 
-    // camera_ = std::make_shared<FreeCamera>(Projection::Perspective(45.0f, 10.0f, 300.0f), glm::vec3(0.0f, 0.0f, 30.0f));
-    camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
+    camera_ = std::make_unique<FreeCamera>(
+        Projection::Perspective(45.0f, 0.1f, 300.0f), 
+        glm::vec3(0.0f, 0.0f, -10.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
+    // camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
 
     scene_ = std::make_shared<scene::Scene>();
     imgui_window_ = std::make_unique<ImGuiWindow>(scene_);
@@ -169,9 +173,11 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 void App::load_sources_debug() 
 {
     imgui_window_->load_shader("simple", "shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
-    imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
+    imgui_window_->load_shader("lighting", "shaders_sources/lighting/vertex_shader.vert", "shaders_sources/lighting/fragment_shader.frag");
+    // imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
 
-    imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
+    // imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
+    imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
 }
 
 int32_t App::run()
