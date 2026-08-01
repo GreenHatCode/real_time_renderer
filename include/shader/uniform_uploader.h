@@ -41,6 +41,21 @@ namespace detail
         }
     };
 
+    template <> 
+    struct UniformUploader<glm::mat3>
+    {
+        static void upload(int32_t uniform_location, const glm::mat3& value) {
+            glUniformMatrix3fv(uniform_location, 1, GL_FALSE, glm::value_ptr(value));
+        }
+    };
+
+    template <> 
+    struct UniformUploader<glm::vec3>
+    {
+        static void upload(int32_t uniform_location, const glm::vec3& value) {
+            glUniform3fv(uniform_location, 1, glm::value_ptr(value));
+        }
+    };
 
 }
 // namespace uniform_traits
