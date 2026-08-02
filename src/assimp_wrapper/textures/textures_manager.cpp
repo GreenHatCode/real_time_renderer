@@ -158,7 +158,7 @@ textures_vector assimp_wrapper::TexturesManager::load_file_textures(aiMaterial *
 
             textures_.emplace(texture_file_path, loaded_texture_ptr);
             loaded_textures.push_back(loaded_texture_ptr);
-            spdlog::info("Loaded texture from file: type={}, texture_file_path={}", static_cast<int>(type), texture_file_path.c_str());
+            spdlog::info("Loaded texture from file: type={}, texture_file_path={}", helpers::texture_type_name(type).data(), texture_file_path.c_str());
         }
     }
 

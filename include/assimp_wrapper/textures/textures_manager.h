@@ -11,6 +11,21 @@
 
 namespace assimp_wrapper {
 
+    namespace helpers {
+        inline std::string_view texture_type_name(aiTextureType type) {
+            switch (type)
+            {
+            case aiTextureType_DIFFUSE: return "aiTextureType_DIFFUSE";
+            case aiTextureType_SPECULAR: return "aiTextureType_SPECULAR";
+            case aiTextureType_HEIGHT: return "aiTextureType_HEIGHT";
+            case aiTextureType_AMBIENT: return "aiTextureType_AMBIENT";
+            default:
+                spdlog::error("Failed to get texture type name. No such a type.");
+                assert(false);
+                return "Unknown";
+            }
+        }
+    }
     
     constexpr std::array kMaterialTextureTypes{
         aiTextureType_DIFFUSE,
