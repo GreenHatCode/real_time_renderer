@@ -18,8 +18,7 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
         spdlog::error("ASSIMP:{}", importer.GetErrorString());
         throw std::runtime_error(importer.GetErrorString());
     }
-
-    spdlog::info("scene: mmRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
+    spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", path.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
     load_materials(scene); // load all meterial once
     process_node(scene->mRootNode, scene);
 }
@@ -94,9 +93,7 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
 }
 
 assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
-    : textures_manager_(path.parent_path())
-    , vertices_count_(0)
-    , faces_count_(0)
+    : textures_manager_(path.parent_path()), vertices_count_(0), faces_count_(0)
 {
     load_model(path, postprocess_flags);
 }

@@ -24,6 +24,14 @@ namespace detail
             glUniform1i(uniform_location, value);
         }
     };
+
+    template <> 
+    struct UniformUploader<uint32_t>
+    {
+        static void upload(int32_t uniform_location, uint32_t value) {
+            glUniform1i(uniform_location, value);
+        }
+    };
     
     template <> 
     struct UniformUploader<float>
