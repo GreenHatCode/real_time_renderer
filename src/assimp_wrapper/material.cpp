@@ -9,31 +9,28 @@ Material::Material(const std::vector<std::shared_ptr<Texture2D>>& textures)
 
 void Material::bind(Shader& shader) const{
 
-    uint32_t diffuse_sampler_number = 1;
-    uint32_t specular_sampler_number = 1;
-    uint32_t normal_sampler_number = 1;
-    uint32_t height_sampler_number = 1;
+    uint32_t diffuse_sampler_idx = 0;
+    uint32_t specular_sampler_idx = 0;
+    uint32_t normal_sampler_idx = 0;
+    uint32_t height_sampler_idx = 0;
 
+    // how to load and consume arbitrary amount of textures of different types
 
     for (size_t i = 0; i < textures_.size(); ++i) {
-        std::string texture_number, texture_name;
+        std::string uniform_name;
         switch (textures_[i]->type())
         {
         case aiTextureType::aiTextureType_DIFFUSE:
-            texture_name = "texture_diffuse";
-            texture_number = std::to_string(++diffuse_sampler_number);
+            uniform_name = "texture_diffuse[" + std::to_string(diffuse_sampler_idx++) + "]";
             break;
         case aiTextureType::aiTextureType_SPECULAR:
-            texture_name = "texture_specular";
-            texture_number = std::to_string(++specular_sampler_number);
+            uniform_name = "texture_specular[" + std::to_string(specular_sampler_idx++) + "]";
             break;
         case aiTextureType::aiTextureType_HEIGHT:
-            texture_name = "texture_height";
-            texture_number = std::to_string(++normal_sampler_number);
+            uniform_name = "texture_height[" + std::to_string(normal_sampler_idx++) + "]";
             break;
         case aiTextureType::aiTextureType_AMBIENT:
-            texture_name = "texture_ambient";
-            texture_number = std::to_string(++height_sampler_number);
+            uniform_name = "texture_ambient[" + std::to_string(height_sampler_idx++) + "]";
             break;
         default:
             spdlog::error("Unknown texture type");
@@ -42,9 +39,14 @@ void Material::bind(Shader& shader) const{
         }
 
         glActiveTexture(GL_TEXTURE0 + i);
-        shader.set_uniform(texture_name + texture_number, static_cast<int>(i));
+        shader.set_uniform(uniform_name, static_cast<int>(i));
         glBindTexture(GL_TEXTURE_2D, textures_[i]->id());
     }
+
+    shader.set_uniform("diffuse_count", diffuse_sampler_idx+1);
+    shader.set_uniform("specular_count", specular_sampler_idx+1);
+    shader.set_uniform("height_count", normal_sampler_idx+1);
+    shader.set_uniform("ambient_count", height_sampler_idx+1);
 }
 
 
