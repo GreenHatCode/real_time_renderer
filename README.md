@@ -13,12 +13,24 @@ Features:
 		- scale and rotate objects on the scene DONE
 		- move camera across the scene DONE
 	- lights
-		- types: directoinal, point, spot, ambient
-		- all lights can be edited dynamically
-			- intensity
-			- type
+		- type
+			- directional
+			- point
+			- spot
+		- diplay data in imgui
+			- position
 			- color
+			- components: ambient, diffuse, specular
+				- attenuation: constant, linear, quadrantic
+				- spot light: direction, cut_off angle
+		- edited dynamically from imgui
+			- position
+			- intensity
+			- color
+			- components (for each light type separately)
+		- passing and processing arbitrary amount of lights of differenty types to shaders
 		- user can add light object to the scene (behaves like any object, but produces light of selected type)
+			the light renderer as a sphere of light's color
 	- camera DONE
         - behavior (movement type)
             - orbit camera DONE
