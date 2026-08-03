@@ -45,7 +45,7 @@ void main() {
 }
 
 vec3 ambient_color_from_texture() {
-    vec3 result_color;
+    vec3 result_color = vec3(0.0);
     for (int i = 0; i < ambient_count; ++i) {
         result_color += texture(texture_ambient[i], o_tex_coords).rgb;
     }
@@ -53,7 +53,7 @@ vec3 ambient_color_from_texture() {
 }
 
 vec3 diffuse_color_from_texture() {
-    vec3 result_color;
+    vec3 result_color = vec3(0.0);
     for (int i = 0; i < diffuse_count; ++i) {
         result_color += texture(texture_diffuse[i], o_tex_coords).rgb;
     }
@@ -61,7 +61,7 @@ vec3 diffuse_color_from_texture() {
 }
 
 vec3 specualr_color_from_texture() {
-    vec3 result_color;
+    vec3 result_color = vec3(0.0);
     for (int i = 0; i < specular_count; ++i) {
         result_color += texture(texture_specular[i], o_tex_coords).rgb;
     }
