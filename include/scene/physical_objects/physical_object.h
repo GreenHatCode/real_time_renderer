@@ -3,22 +3,16 @@
 #include "shader/shader.h"
 #include <memory>
 
-namespace scene
+namespace scene::physical_objects
 {   
-    class SceneObject {
+    class PhysicalObject {
         glm::vec3 move_vector_;
         float rotation_angle_cw_; // radians
         glm::vec3 rotation_axes_;
         glm::vec3 scaling_vec_;
 
-        std::string name_;
-
-    protected:
-        std::shared_ptr<Shader> shader_;
-
     public:
-        SceneObject(const std::string& name, std::shared_ptr<Shader> shader = nullptr);
-
+        PhysicalObject();
         void move(glm::vec3 move_vector);
         void rotate(float angle_rad, glm::vec3 axes_vec); // CW direction
         void scale(glm::vec3 prescaling_vec);
@@ -30,16 +24,7 @@ namespace scene
 
         glm::mat4 model_matrix() const;
 
-        void set_shader(const std::shared_ptr<Shader>& shader);
-        std::shared_ptr<Shader> get_shader() const;
-
-        std::string get_name() const;
-
-        virtual void render() const = 0;
-        virtual uint32_t get_vertices_count() const = 0;
-        virtual uint32_t get_faces_count() const = 0;
-
-        virtual ~SceneObject();
+        virtual ~PhysicalObject() = 0;
     };
 } // namespace scene
 
