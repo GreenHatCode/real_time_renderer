@@ -8,11 +8,11 @@ uniform mat4 u_model_mat;
 uniform mat4 u_view_mat;
 uniform mat4 u_projection_mat;
 
-out vec3 o_normal;
-out vec3 o_frag_pos;
+out vec3 v_normal;
+out vec3 v_frag_pos;
 
 void main() {
     gl_Position = u_projection_mat * u_view_mat * u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0);
-    o_normal = u_normal_mat * a_normal;
-    o_frag_pos = vec3(u_model_mat * vec4(a_pos, 1.0));
+    v_normal = u_normal_mat * a_normal;
+    v_frag_pos = vec3(u_model_mat * vec4(a_pos, 1.0));
 }

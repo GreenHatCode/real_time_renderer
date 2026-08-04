@@ -1,36 +1,56 @@
 #version 460 core
 
-in vec3 o_normal;
-in vec3 o_frag_pos;
+struct DirectionalLight {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 color;
+    vec3 direction;
+};
+
+const uint MAX_DIRECTION_LIGHTS = 10;
+
+in vec3 v_normal;
+in vec3 v_frag_pos;
 
 out vec4 FragColor;
 
 uniform vec3 u_object_color;
-uniform vec3 u_light_pos;
-uniform vec3 u_light_color;
+
+uniform DirectionalLight directional_lights[MAX_DIRECTION_LIGHTS];
+
+uniform int u_directional_lights_count;
+
+
+
+vec3 process_directional_lights();
 
 void main() {
-    
-    float ambient_strength = 0.1;
-    float specular_intensity = 0.5;
 
-    // ambient color
-    vec3 ambient_color = 0.1 * u_light_color;
+    vec3 direction_lights_color = process_directional_lights();
 
-    // diffuse color
-    vec3 unit_normal = normalize(o_normal);
-    vec3 light_direction = normalize(u_light_pos - o_frag_pos);
-
-    float diff = max(dot(unit_normal, light_direction), 0.0);
-    vec3 diffuse_color = diff * u_light_color;
-
-    // specular color
-    vec3 view_direction = normalize(-o_frag_pos);
-    vec3 reflection_direction = reflect(-light_direction, unit_normal);
-    float spec = pow(max(dot(view_direction, reflection_direction), 0.0), 32);
-    vec3 specular = specular_intensity * spec * u_light_color;
-
-
-    vec3 result = (ambient_color + diffuse_color + specular) * u_object_color;
+    vec3 result = (direction_lights_color) * u_object_color;
     FragColor = vec4(result, 1.0);
+}
+
+vec3 process_directional_lights() {
+    vec3 ambient = vec3(0.0);
+    vec3 diffuse = vec3(0.0);
+    vec3 specular = vec3(0.0);
+
+    vec3 unit_normal = normalize(v_normal);
+    vec3 view_dir = normalize(-v_frag_pos);
+
+    for (int i = 0; i < u_directional_lights_count; ++i) {
+        ambient += directional_lights[i].ambient * directional_lights[i].color;
+
+        float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
+        diffuse += diff * directional_lights[i].color;
+
+        vec3 reflect_dir = reflect(-directional_lights[i].direction, unit_normal);
+        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
+        specular += spec * directional_lights[i].color;
+    }
+    
+    return ambient + diffuse + specular;
 }
