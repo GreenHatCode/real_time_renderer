@@ -1,11 +1,12 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "shader/shader.h"
+#include "scene/physical_objects/i_render.h"
 #include <memory>
 
 namespace scene::physical_objects
 {   
-    class PhysicalObject {
+    class PhysicalObject: public IRender {
         glm::vec3 move_vector_;
         float rotation_angle_cw_; // radians
         glm::vec3 rotation_axes_;
@@ -24,7 +25,7 @@ namespace scene::physical_objects
 
         glm::mat4 model_matrix() const;
 
-        virtual ~PhysicalObject() = 0;
+        virtual ~PhysicalObject() = default;
     };
 } // namespace scene
 
