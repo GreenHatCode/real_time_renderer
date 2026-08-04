@@ -1,13 +1,13 @@
 #pragma once
 #include "scene/lights/light_base.h"
-#include "scene/i_scene_object.h"
 #include <string>
 
 namespace scene::lights
 {
-    class DirectionalLight final: public ISceneObject, public LightBase {
+    class DirectionalLight final: public LightBase {
         glm::vec3 direction_;
         std::string name_;
+        LightType type_;
 
     public:
         DirectionalLight(glm::vec3 ambient, glm::vec3 diffuse, 
@@ -15,6 +15,8 @@ namespace scene::lights
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;
         std::string get_name() const override;
+        LightType get_type() const override;
+        void upload_components(Shader &obj_shader, size_t light_idx) const override;
     };
-    
+
 } // namespace scene::lights

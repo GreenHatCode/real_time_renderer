@@ -7,9 +7,9 @@ scene::lights::DirectionalLight::DirectionalLight(
     glm::vec4 rgba_color, 
     glm::vec3 direction
 )
-    : ISceneObject()
-    , LightBase(ambient, diffuse, specular, rgba_color)
+    : LightBase(ambient, diffuse, specular, rgba_color)
     , direction_(glm::normalize(direction))
+    , type_(LightType::DIRECTIONAL_LIGHT)
 {
 }
 
@@ -26,4 +26,19 @@ glm::vec3 scene::lights::DirectionalLight::get_direction() const
 std::string scene::lights::DirectionalLight::get_name() const
 {
     return name_;
+}
+
+scene::lights::LightType scene::lights::DirectionalLight::get_type() const
+{
+    return type_;
+}
+
+void scene::lights::DirectionalLight::upload_components(Shader& obj_shader, size_t light_idx) const
+{
+    std::string uniform_name = "DirectionalLight[" + std::to_string(light_idx) + "]";
+    obj_shader.set_uniform(uniform_name + ".ambient", get_ambient());
+    obj_shader.set_uniform(uniform_name + ".diffuse", get_diffuse());
+    obj_shader.set_uniform(uniform_name + ".specular", get_specular());
+    obj_shader.set_uniform(uniform_name + ".color", get_color());
+    obj_shader.set_uniform(uniform_name + ".direction", direction_);
 }
