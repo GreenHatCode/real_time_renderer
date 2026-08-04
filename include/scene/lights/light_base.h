@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
+#include "scene/lights/i_light.h"
 
 namespace scene::lights {
 
@@ -10,7 +11,7 @@ namespace scene::lights {
         inline constexpr float MAX_LIGHTING_COMPONENT_VALUE = 1.0f;
     }
 
-    class LightBase {
+    class LightBase: public ILight {
         glm::vec3 ambient_;
         glm::vec3 diffuse_;
         glm::vec3 specular_;
@@ -26,7 +27,7 @@ namespace scene::lights {
         glm::vec3 get_diffuse() const;
         void set_specular(glm::vec3 value);
         glm::vec3 get_specular() const;
-        virtual ~LightBase() = 0;
+        virtual ~LightBase() = default;
     };
 
 } // namespace scene::lights
