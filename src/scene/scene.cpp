@@ -3,69 +3,37 @@
 
 using namespace scene;
 
-std::shared_ptr<ModelObject> scene::Scene::add_model(const std::string &name, const std::filesystem::path &model_file_path)
+void scene::Scene::add_object(const std::string &name, const std::shared_ptr<scene::physical_objects::PhysicalObject> &ptr)
 {
-    std::shared_ptr<ModelObject> model = nullptr;
-    try
-    {
-        model = std::make_shared<ModelObject>(
-        assimp_wrapper::Model(
-            model_file_path,
-            aiProcess_Triangulate |
-            aiProcess_JoinIdenticalVertices |
-            aiProcess_ImproveCacheLocality |
-            aiProcess_ValidateDataStructure
-        ),
-        name
-        );
-
-    }
-    catch(const std::exception& e)
-    {
-        spdlog::error("Failed to load model: {}", e.what());
-        return model;
-    }
-    
-    total_vertices_count += model->get_vertices_count();
-    total_faces_count += model->get_faces_count();
-
-    models_map_.emplace(name, model);
-    return model;
+    renderable_objects_map_.emplace(name, ptr);
+    total_vertices_count += ptr->get_vertices_count();
+    total_faces_count += ptr->get_faces_count();
 }
 
-std::shared_ptr<Shader> scene::Scene::add_shader(const std::string &name, const std::filesystem::path &vert_shader_file_path, const std::filesystem::path &frag_shader_file_path)
+void scene::Scene::add_light(const std::string &name, const std::shared_ptr<scene::lights::ILight> &ptr)
 {
-    std::shared_ptr<Shader> shader = get_shader(name);
-    if (shader != nullptr) return shader;
-
-    try
-    {
-        shader = std::make_shared<Shader>(name, vert_shader_file_path.c_str(), frag_shader_file_path.c_str());
-    }
-    catch(const std::exception& e)
-    {
-        spdlog::error(e.what());
-        return shader;
-    }
-    
-    shaders_map_.emplace(name, shader);
-    return shader;
+    lights_map_.emplace(name, ptr);
 }
 
-bool scene::Scene::delete_model(const std::string &name)
+void scene::Scene::add_shader(const std::string &name, const std::shared_ptr<Shader> &ptr)
 {
-    std::shared_ptr<ModelObject> model = get_model(name);
-    if (model == nullptr) {
-        spdlog::error("Attempt to delete model that isn't loaded to scene. Model name = {}", name);
-        return false;
+    shaders_map_.emplace(name, ptr);
+}
+
+bool scene::Scene::delete_scene_object(const std::string &name)
+{
+    if (renderable_objects_map_.find(name) != renderable_objects_map_.end()) {
+        renderable_objects_map_.erase(name);
+        return true;
+    }
+    
+    if (lights_map_.find(name) != lights_map_.end()) {
+        lights_map_.erase(name);
+        return true;
     }
 
-    total_vertices_count -= model->get_vertices_count();
-    total_faces_count -= model->get_faces_count();
-
-    models_map_.erase(name);
-    spdlog::info("Deleted model: {}", name);
-    return true;
+    spdlog::error("Failed to delete non-existent scene object, name = {}", name);
+    return false;
 }
 
 bool scene::Scene::delete_shader(const std::string &name)
@@ -86,14 +54,22 @@ bool scene::Scene::delete_shader(const std::string &name)
     return true;
 }
 
-std::vector<std::shared_ptr<ModelObject>> scene::Scene::get_models() const
+std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> scene::Scene::get_objects() const
 {
-    std::vector<std::shared_ptr<ModelObject>> models;
-    for (const auto& m : models_map_) {
-        models.push_back(m.second);
+    std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> objects;
+    for (const auto& m : renderable_objects_map_) {
+        objects.push_back(m.second);
     }
+    return objects;
+}
 
-    return models;
+std::vector<std::shared_ptr<scene::lights::ILight>> scene::Scene::get_lights() const
+{
+    std::vector<std::shared_ptr<scene::lights::ILight>> lights;
+    for (const auto& l : lights_map_) {
+        lights.push_back(l.second);
+    }
+    return lights;
 }
 
 std::vector<std::shared_ptr<Shader>> scene::Scene::get_shaders() const
@@ -106,18 +82,26 @@ std::vector<std::shared_ptr<Shader>> scene::Scene::get_shaders() const
     return shaders;
 }
 
-std::shared_ptr<Shader> scene::Scene::get_shader(const std::string &name) const
+std::shared_ptr<scene::physical_objects::PhysicalObject> scene::Scene::get_object(const std::string &name) const
 {
-    auto it = shaders_map_.find(name);
-    if (it != shaders_map_.end()) return it->second;
+    auto it = renderable_objects_map_.find(name);
+    if (it != renderable_objects_map_.end()) return it->second;
         
     return nullptr;
 }
 
-std::shared_ptr<ModelObject> scene::Scene::get_model(const std::string &name) const
+std::shared_ptr<scene::lights::ILight> scene::Scene::get_light(const std::string &name) const
 {
-    auto it = models_map_.find(name);
-    if (it != models_map_.end()) return it->second;
+    auto it = lights_map_.find(name);
+    if (it != lights_map_.end()) return it->second;
+        
+    return nullptr;
+}
+
+std::shared_ptr<Shader> scene::Scene::get_shader(const std::string &name) const
+{
+    auto it = shaders_map_.find(name);
+    if (it != shaders_map_.end()) return it->second;
         
     return nullptr;
 }
