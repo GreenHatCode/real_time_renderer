@@ -105,7 +105,7 @@ void ImGuiWindow::render_model_dialog()
 
         if (ImGui::Button("Delete")) {
             model_inspector_state_.selected_model_ptr = nullptr;
-            scene_->delete_model(model_dialog_state_.name);
+            scene_->delete_scene_object(model_dialog_state_.name);
         }
         ImGui::SameLine();     
 
@@ -167,7 +167,7 @@ void ImGuiWindow::render_model_inspector()
     }
 
     if (ImGui::BeginListBox("##ModelsList", list_box_size)) {
-        for (const auto& m : scene_->get_models()) {
+        for (const auto& m : scene_->get_objects()) {
             bool selected = model_inspector_state_.selected_model_ptr == m;
 
             if (ImGui::Selectable(m->get_name().c_str(), selected)) {
@@ -223,20 +223,40 @@ void ImGuiWindow::render_model_inspector()
 void ImGuiWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
 {
     std::shared_ptr<Shader> model_shader = scene_->get_shader(shader_name);
-    auto loaded_model = scene_->add_model(name, file_path);
-    if (model_shader == nullptr) spdlog::error("Failed to load model. There isn't shader with name={}", shader_name.c_str());
-    if (loaded_model == nullptr) spdlog::error("Failed to load model. Failed to load model object from file: {}", file_path.c_str());
+    if (model_shader == nullptr) {
+        spdlog::error("Failed to load model {}. There isn't shader with name={}", file_path.c_str(), shader_name.c_str());
+        return;
+    }
 
-    loaded_model->set_shader(model_shader);
-    loaded_models_names_.push_back(name);
+    try {
+        std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
+            assimp_wrapper::Model(
+                file_path,
+                aiProcess_Triangulate |
+                aiProcess_JoinIdenticalVertices |
+                aiProcess_ImproveCacheLocality |
+                aiProcess_ValidateDataStructure
+            ),
+            name
+        );
+
+        loaded_model->set_shader(model_shader);
+        scene_->add_object(name, loaded_model);
+        loaded_models_names_.push_back(name);
+    } catch (const std::exception &e) {
+        spdlog::error("Caught exception during loading model {}, what: {}", file_path.c_str(), e.what());
+    }
 }
 
 void ImGuiWindow::load_shader(const std::string &name, const std::filesystem::path &vertex_shader_file, const std::filesystem::path &fragment_shader_file)
 {
-    std::shared_ptr<Shader> new_shader = scene_->add_shader(name, vertex_shader_file, fragment_shader_file);
-    if (new_shader == nullptr) {
-        spdlog::error("Failed to load shader");
-        return; 
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(name, vertex_shader_file.c_str(), fragment_shader_file.c_str());
+        scene_->add_shader(name, shader);
+        loaded_shaders_names_.push_back(shader_dialog_state_.name);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load shader: {}", e.what());
     }
-    loaded_shaders_names_.push_back(shader_dialog_state_.name);
+    
 }

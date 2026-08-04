@@ -22,7 +22,7 @@ class ImGuiWindow final {
     };
 
     struct ModelInspectorState_t {
-        std::shared_ptr<scene::ModelObject> selected_model_ptr;
+        std::shared_ptr<scene::physical_objects::PhysicalObject> selected_model_ptr;
 
     };
 
