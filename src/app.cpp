@@ -184,6 +184,16 @@ void App::load_sources_debug()
 
     imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");    
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
+
+    std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
+        glm::vec3(0.2f, 0.2f, 0.2f),
+        glm::vec3(0.8f, 0.8f, 0.8f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(1.0f, 0.98f, 0.9f),
+        glm::vec3(-0.2f, -1.0f, -0.3f)
+    );
+    scene_->add_light("direction1", dl);
+
 }
 
 int32_t App::run()

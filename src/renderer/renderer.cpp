@@ -9,17 +9,11 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
     // add setting lights uniforms (preferably using structs or glbuffers)
-
-#if 1
     shader_ptr->set_uniform("u_object_color", glm::vec3(1.0f, 0.5f, 0.31f));
-    shader_ptr->set_uniform("u_light_pos", glm::vec3(glm::vec3(1.2f, 50.0f, 2.0f) * glm::mat3(1.0)));
-    shader_ptr->set_uniform("u_light_color", glm::vec3(1.0f, 1.0f, 1.0f));
 
-#else
-
-    size_t directional_light_idx = 0;
-    size_t point_light_idx = 0;
-    size_t spot_light_idx = 0;
+    uint32_t directional_light_idx = 0;
+    uint32_t point_light_idx = 0;
+    uint32_t spot_light_idx = 0;
 
     for (const auto& light: scene_lights_buffer_) {
         switch (light->get_type())
@@ -39,7 +33,11 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
             break;
         }   
     }
-#endif
+
+    shader_ptr->set_uniform("u_directional_lights_count", directional_light_idx);
+    shader_ptr->set_uniform("u_point_lights_count", point_light_idx);
+    shader_ptr->set_uniform("u_spot_lights_count", spot_light_idx);
+
 }
 
 void Renderer::render_scene_object(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
