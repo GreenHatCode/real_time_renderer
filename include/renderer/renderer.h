@@ -5,14 +5,15 @@
 #include <memory>
 #include <vector>
 #include "shader/shader.h"
-#include "scene/scene_objects/scene_object.h"
+#include "scene/physical_objects/i_render.h"
 #include "renderer/simple_profiler.h"
 
 class Renderer final {
 
     profiling::SimpleProfiler profiler_;
     const std::shared_ptr<const scene::Scene> scene_;
-    Shader* curr_shader_ptr_; // can be a dangling pointeri
+    Shader* curr_shader_ptr_; // can be a dangling pointer
+    std::vector<std::shared_ptr<scene::lights::ILight>> scene_lights_buffer_;
 
     glm::mat4 view_mat_;
     glm::mat4 projection_mat_;
@@ -22,9 +23,9 @@ class Renderer final {
 
     // uniforms and shaders
     void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
-    void set_model_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
+    void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
-    void render_scene_object(const std::shared_ptr<const scene::ModelObject>& obj);
+    void render_scene_object(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
 
 public:
     Renderer(std::shared_ptr<const scene::Scene> scene);
