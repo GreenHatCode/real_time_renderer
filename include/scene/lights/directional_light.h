@@ -11,7 +11,7 @@ namespace scene::lights
 
     public:
         DirectionalLight(glm::vec3 ambient, glm::vec3 diffuse, 
-            glm::vec3 specular, glm::vec4 rgba_color, glm::vec3 direction);
+            glm::vec3 specular, glm::vec3 rgb_color, glm::vec3 direction);
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;
         std::string get_name() const override;

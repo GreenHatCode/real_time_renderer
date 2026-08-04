@@ -15,12 +15,12 @@ namespace scene::lights {
         glm::vec3 ambient_;
         glm::vec3 diffuse_;
         glm::vec3 specular_;
-        glm::vec4 color_rgba_;
+        glm::vec3 color_rgb_;
     
     public:
-        LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec4 rgba_color);
-        void set_color(glm::vec4 rgba_color);
-        glm::vec4 get_color() const;
+        LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 rgb_color);
+        void set_color(glm::vec3 rgb_color);
+        glm::vec3 get_color() const;
         void set_ambient(glm::vec3 value);
         glm::vec3 get_ambient() const;
         void set_diffuse(glm::vec3 value);
