@@ -65,5 +65,13 @@ namespace detail
         }
     };
 
+    template <> 
+    struct UniformUploader<glm::vec4>
+    {
+        static void upload(int32_t uniform_location, const glm::vec4& value) {
+            glUniform4fv(uniform_location, 1, glm::value_ptr(value));
+        }
+    };
+
 }
 // namespace uniform_traits
