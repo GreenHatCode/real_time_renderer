@@ -1,12 +1,11 @@
 #pragma once
 #include "scene/physical_objects/physical_object.h"
 #include "scene/i_scene_object.h"
-#include "scene/i_render.h"
 #include "assimp_wrapper/model.h"
 
 namespace scene::physical_objects
 {
-    class ModelObject final: public PhysicalObject, public ISceneObject, public IRender {
+    class ModelObject final: public PhysicalObject {
         assimp_wrapper::Model model_;
         std::shared_ptr<Shader> shader_;
         std::string name_;

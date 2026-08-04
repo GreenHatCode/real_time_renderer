@@ -3,6 +3,8 @@
 scene::physical_objects::ModelObject::ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, std::shared_ptr<Shader> shader)
     : PhysicalObject()
     , model_(std::move(loaded_model))
+    , name_(object_name)
+    , shader_(shader)
 {
 }
 
