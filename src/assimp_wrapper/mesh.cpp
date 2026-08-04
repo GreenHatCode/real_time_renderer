@@ -1,4 +1,5 @@
 #include "assimp_wrapper/mesh.h"
+#include <iostream>
 
 using namespace assimp_wrapper;
 
@@ -84,5 +85,5 @@ assimp_wrapper::Mesh::~Mesh()
 {
     glDeleteVertexArrays(1, &vao_);
     glDeleteBuffers(1, &vbo_);
-    glDeleteBuffers(1, &ebo_); 
+    glDeleteBuffers(1, &ebo_);
 }

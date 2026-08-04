@@ -19,6 +19,10 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
         throw std::runtime_error(importer.GetErrorString());
     }
     spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", path.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
+
+    materials_.reserve(scene->mNumMaterials);
+    meshes_.reserve(scene->mNumMeshes);
+
     load_materials(scene); // load all meterial once
     process_node(scene->mRootNode, scene);
 }
