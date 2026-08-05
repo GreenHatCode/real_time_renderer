@@ -37,7 +37,7 @@ glm::vec3 scene::lights::PointLight::get_position() const
 void scene::lights::PointLight::set_constant(float value)
 {
     if (value < POINT_LIGHT_MIN_CONSTANT) {
-        spdlog::error("Constant component out of range, clipping to fit range. Passed value: {}", value);
+        spdlog::error("Constant component out of range, clamping to fit range. Passed value: {}", value);
         constant_ = std::min(value, POINT_LIGHT_MIN_CONSTANT);
         return;
     }
@@ -53,7 +53,7 @@ float scene::lights::PointLight::get_constant() const
 void scene::lights::PointLight::set_linear(float value)
 {
     if (value < POINT_LIGHT_MIN_LINEAR) {
-        spdlog::error("Linear component out of range, clipping to fit range. Passed value: {}", value);
+        spdlog::error("Linear component out of range, clamping to fit range. Passed value: {}", value);
         linear_ = std::min(value, POINT_LIGHT_MIN_LINEAR);
         return;
     }
@@ -69,7 +69,7 @@ float scene::lights::PointLight::get_linear() const
 void scene::lights::PointLight::set_quadratic(float value)
 {
     if (value < POINT_LIGHT_MIN_QUADRATIC) {
-        spdlog::error("Quadratic component out of range, clipping to fit range. Passed value: {}", value);
+        spdlog::error("Quadratic component out of range, clamping to fit range. Passed value: {}", value);
         quadratic_ = std::min(value, POINT_LIGHT_MIN_QUADRATIC);
         return;
     }

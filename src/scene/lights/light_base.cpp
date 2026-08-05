@@ -1,6 +1,5 @@
 #include "scene/lights/light_base.h"
-#include <stdexcept>
-#include <sstream>
+#include "spdlog/spdlog.h"
 
 using namespace scene::lights::lighting_constants;
 
@@ -18,12 +17,13 @@ void scene::lights::LightBase::set_color(glm::vec3 rgb_color)
         rgb_color.g < MIN_COLOR || rgb_color.g > MAX_COLOR ||
         rgb_color.b < MIN_COLOR || rgb_color.b > MAX_COLOR
     ) {
-        std::stringstream ss;
-        ss << "rgb_color out of range. Passed value:" 
-        << " r=" << rgb_color.r 
-        << " g=" << rgb_color.g
-        << " b=" << rgb_color.b;
-        throw std::out_of_range(ss.str());
+        spdlog::error("RGB color component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", rgb_color.r, rgb_color.g, rgb_color.b);
+        std::clamp(rgb_color.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(rgb_color.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(rgb_color.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+
+        color_rgb_ = rgb_color;
+        return;
     }
 
     color_rgb_ = rgb_color;
@@ -40,12 +40,13 @@ void scene::lights::LightBase::set_ambient(glm::vec3 value)
         value.g < MIN_LIGHTING_COMPONENT_VALUE || value.g > MAX_LIGHTING_COMPONENT_VALUE ||
         value.b < MIN_LIGHTING_COMPONENT_VALUE || value.b > MAX_LIGHTING_COMPONENT_VALUE
     ) {
-        std::stringstream ss;
-        ss << "Ambient component out of range. Passed value:" 
-        << " r=" << value.r 
-        << " g=" << value.g
-        << " b=" << value.b;
-        throw std::out_of_range(ss.str());
+        spdlog::error("Ambient component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
+        std::clamp(value.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(value.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(value.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+
+        ambient_ = value;
+        return;
     }
 
     ambient_ = value;
@@ -62,12 +63,13 @@ void scene::lights::LightBase::set_diffuse(glm::vec3 value)
         value.g < MIN_LIGHTING_COMPONENT_VALUE || value.g > MAX_LIGHTING_COMPONENT_VALUE ||
         value.b < MIN_LIGHTING_COMPONENT_VALUE || value.b > MAX_LIGHTING_COMPONENT_VALUE
     ) {
-        std::stringstream ss;
-        ss << "Diffuse component out of range. Passed value:" 
-        << " r=" << value.r 
-        << " g=" << value.g
-        << " b=" << value.b;
-        throw std::out_of_range(ss.str());
+        spdlog::error("Diffuse component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
+        std::clamp(value.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(value.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(value.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+
+        diffuse_ = value;
+        return;
     }
 
     diffuse_ = value;
@@ -84,12 +86,13 @@ void scene::lights::LightBase::set_specular(glm::vec3 value)
         value.g < MIN_LIGHTING_COMPONENT_VALUE || value.g > MAX_LIGHTING_COMPONENT_VALUE ||
         value.b < MIN_LIGHTING_COMPONENT_VALUE || value.b > MAX_LIGHTING_COMPONENT_VALUE
     ) {
-        std::stringstream ss;
-        ss << "Specular component out of range. Passed value:" 
-        << " r=" << value.r 
-        << " g=" << value.g
-        << " b=" << value.b;
-        throw std::out_of_range(ss.str());
+        spdlog::error("Specular component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
+        std::clamp(value.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(value.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+        std::clamp(value.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+
+        specular_ = value;
+        return;
     }
 
     specular_ = value;
