@@ -6,6 +6,7 @@ ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
     , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
     , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .name=""}
     , model_inspector_state_{.selected_model_ptr=nullptr}
+    , light_inspector_state_{.selected_light_ptr=nullptr}
     , gpu_time_to_display_(0.0)
     , cpu_time_to_display_(0.0)
 {
@@ -21,7 +22,6 @@ void ImGuiWindow::render_window()
     ImGui::ColorEdit4("clear color", glm::value_ptr(clear_color_));
     ImGui::Separator();
 
-    // loading models and shaders
     
     if (ImGui::Button("manage model")) {
         ImGui::OpenPopup("manage model");
@@ -39,6 +39,8 @@ void ImGuiWindow::render_window()
     render_model_inspector();
     ImGui::Separator();
 
+    render_lights_inspector();
+    ImGui::Separator();
 
     // rendering statistics
     ImGui::Text("App average FPS: %.2f", calculate_fps());
@@ -158,7 +160,9 @@ void ImGuiWindow::render_model_inspector()
     // list box of loaded models
     ImVec2 list_box_size = ImGui::GetWindowSize();
     list_box_size.y = 60;
-    if (ImGui::BeginListBox("##ShadersList", list_box_size)) {
+    ImGui::Text("Shaders List");
+    if (ImGui::BeginListBox("##ShadersList", list_box_size))
+    {
         for (const auto& s : scene_->get_shaders()) {
             bool selected = false;
             ImGui::Selectable(s->get_name().c_str(), selected);
@@ -166,7 +170,9 @@ void ImGuiWindow::render_model_inspector()
         ImGui::EndListBox();
     }
 
-    if (ImGui::BeginListBox("##ModelsList", list_box_size)) {
+    ImGui::Text("Models List");
+    if (ImGui::BeginListBox("##ModelsList", list_box_size))
+    {
         for (const auto& m : scene_->get_objects()) {
             bool selected = model_inspector_state_.selected_model_ptr == m;
 
@@ -179,7 +185,6 @@ void ImGuiWindow::render_model_inspector()
         ImGui::EndListBox();
     }
 
-    
     if (model_inspector_state_.selected_model_ptr)
     {
         ImGui::Separator();
@@ -220,6 +225,78 @@ void ImGuiWindow::render_model_inspector()
     
     }
 }
+
+void ImGuiWindow::render_lights_inspector()
+{
+    ImVec2 list_box_size = ImGui::GetWindowSize();
+    list_box_size.y = 60;
+    ImGui::Text("LightsList");
+    if (ImGui::BeginListBox("##LightsList", list_box_size))
+    {
+        for (const auto& m : scene_->get_lights()) {
+            bool selected = (light_inspector_state_.selected_light_ptr == m);
+
+            if (ImGui::Selectable(m->get_name().c_str(), selected)) {
+                if (selected) {
+                    light_inspector_state_.selected_light_ptr = nullptr;
+                } else {
+                    light_inspector_state_.selected_light_ptr = m;
+                }
+            }
+
+            if (selected) ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndListBox();
+    }
+
+    if (light_inspector_state_.selected_light_ptr)
+    {
+        ImGui::Separator();
+        ImGui::Text("Selected Light");
+
+        switch (light_inspector_state_.selected_light_ptr->get_type())
+        {
+        case scene::lights::LightType::DIRECTIONAL_LIGHT:
+            render_directional_light_editor(static_cast<scene::lights::DirectionalLight &>(*light_inspector_state_.selected_light_ptr));
+            break;
+
+        default:
+            spdlog::error("Unknow light type to render imgui editor, type={}", static_cast<int>(light_inspector_state_.selected_light_ptr->get_type()));
+            assert(false);
+            break;
+        }
+    }
+
+}
+
+void ImGuiWindow::render_common_lights_editor(scene::lights::LightBase &light)
+{
+    auto ambient = light.get_ambient();
+    if (ImGui::DragFloat3("Ambient", glm::value_ptr(ambient)))
+        light.set_ambient(ambient);
+
+    auto diffuse = light.get_diffuse();
+    if (ImGui::DragFloat3("Diffuse", glm::value_ptr(diffuse)))
+        light.set_diffuse(diffuse);
+
+    auto specular = light.get_specular();
+    if (ImGui::DragFloat3("Specular", glm::value_ptr(specular)))
+        light.set_specular(specular);
+
+    auto color = light.get_color();
+    if (ImGui::ColorEdit3("Color", glm::value_ptr(color)))
+        light.set_color(color);
+}
+
+void ImGuiWindow::render_directional_light_editor(scene::lights::DirectionalLight &light)
+{
+    render_common_lights_editor(light);
+
+    auto dir = light.get_direction();
+    if (ImGui::DragFloat3("Direction", glm::value_ptr(dir), 0.05f))
+        light.set_direction(dir);
+}
+
 void ImGuiWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
 {
     std::shared_ptr<Shader> model_shader = scene_->get_shader(shader_name);

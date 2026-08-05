@@ -23,7 +23,10 @@ class ImGuiWindow final {
 
     struct ModelInspectorState_t {
         std::shared_ptr<scene::physical_objects::PhysicalObject> selected_model_ptr;
+    };
 
+    struct LightInspectorState_t {
+        std::shared_ptr<scene::lights::LightBase> selected_light_ptr;
     };
 
     // do not expose outside
@@ -37,6 +40,7 @@ class ImGuiWindow final {
     AddModelDialog_t model_dialog_state_;  
     AddShaderDialog_t shader_dialog_state_;
     ModelInspectorState_t model_inspector_state_;
+    LightInspectorState_t light_inspector_state_;
 
     double gpu_time_to_display_;
     double cpu_time_to_display_;
@@ -59,6 +63,13 @@ private:
     void render_model_dialog();
     void render_shader_dialog();
     void render_model_inspector();
+
+
+    void render_lights_inspector();
+    void render_common_lights_editor(scene::lights::LightBase& light);
+    void render_directional_light_editor(scene::lights::DirectionalLight& light);
+    // void render_point_light_editor(scene::lights::PointLight& light);
+    // void render_spot_light_editor(scene::lights::SpotLight& light);
 
 public: // dev methods to add models and shader by hand from code
     void load_model(const std::string& shader_name, const std::string& name, const std::filesystem::path& file_path);
