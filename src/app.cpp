@@ -187,7 +187,7 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
 
     scene_ = std::make_shared<scene::Scene>();
-    imgui_window_ = std::make_unique<ImGuiWindow>(scene_);
+    imgui_window_ = std::make_unique<UIWindow>(scene_);
     renderer_ = std::make_unique<Renderer>(scene_);
 
     spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);

@@ -1,7 +1,7 @@
-#include "imgui_window/imgui_window.h"
+#include "ui_window/ui_window.h"
 #include "misc/cpp/imgui_stdlib.h"
 
-ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
+UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
     , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
     , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .name=""}
@@ -16,7 +16,7 @@ ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
 
 }
 
-void ImGuiWindow::render_window()
+void UIWindow::render_window()
 {
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
 
@@ -59,27 +59,27 @@ void ImGuiWindow::render_window()
     ImGui::Text("CPU time: %.2f", cpu_time_to_display_);
 }
 
-glm::vec4 ImGuiWindow::get_clear_color() const
+glm::vec4 UIWindow::get_clear_color() const
 {
     return clear_color_;
 }
 
-float ImGuiWindow::get_delta_time() const
+float UIWindow::get_delta_time() const
 {
     return static_cast<float>(delta_time_);
 }
 
-void ImGuiWindow::set_gpu_time_to_display(double value)
+void UIWindow::set_gpu_time_to_display(double value)
 {
     gpu_time_to_display_ = value;
 }
 
-void ImGuiWindow::set_cpu_time_to_display(double value)
+void UIWindow::set_cpu_time_to_display(double value)
 {
     cpu_time_to_display_ = value;
 }
 
-double ImGuiWindow::calculate_fps()
+double UIWindow::calculate_fps()
 {
     double curr_s = glfwGetTime();
     delta_time_ = curr_s - prev_s_;
@@ -94,7 +94,7 @@ double ImGuiWindow::calculate_fps()
     return fps_;
 }
 
-void ImGuiWindow::render_model_dialog()
+void UIWindow::render_model_dialog()
 {
     if (ImGui::BeginPopupModal("manage model", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -130,7 +130,7 @@ void ImGuiWindow::render_model_dialog()
 
 }
 
-void ImGuiWindow::render_shader_dialog()
+void UIWindow::render_shader_dialog()
 {
     if (ImGui::BeginPopupModal("manage shader", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Manage shader");
@@ -163,7 +163,7 @@ void ImGuiWindow::render_shader_dialog()
     }
 }
 
-void ImGuiWindow::render_light_dialog()
+void UIWindow::render_light_dialog()
 {
     if (ImGui::BeginPopupModal("manage light", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("Manage light");
@@ -195,7 +195,7 @@ void ImGuiWindow::render_light_dialog()
     }
 }
 
-void ImGuiWindow::render_model_inspector()
+void UIWindow::render_model_inspector()
 {
     // list box of loaded models
     ImVec2 list_box_size = ImGui::GetWindowSize();
@@ -270,7 +270,7 @@ void ImGuiWindow::render_model_inspector()
     }
 }
 
-void ImGuiWindow::render_lights_inspector()
+void UIWindow::render_lights_inspector()
 {
     ImVec2 list_box_size = ImGui::GetWindowSize();
     list_box_size.y = 60;
@@ -313,7 +313,7 @@ void ImGuiWindow::render_lights_inspector()
 
 }
 
-void ImGuiWindow::render_common_lights_editor(scene::lights::LightBase &light)
+void UIWindow::render_common_lights_editor(scene::lights::LightBase &light)
 {
     auto ambient = light.get_ambient();
     if (ImGui::DragFloat3("Ambient", glm::value_ptr(ambient)))
@@ -332,7 +332,7 @@ void ImGuiWindow::render_common_lights_editor(scene::lights::LightBase &light)
         light.set_color(color);
 }
 
-void ImGuiWindow::render_directional_light_editor(scene::lights::DirectionalLight &light)
+void UIWindow::render_directional_light_editor(scene::lights::DirectionalLight &light)
 {
     render_common_lights_editor(light);
 
@@ -341,7 +341,7 @@ void ImGuiWindow::render_directional_light_editor(scene::lights::DirectionalLigh
         light.set_direction(dir);
 }
 
-void ImGuiWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
+void UIWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
 {
     std::shared_ptr<Shader> model_shader = scene_->get_shader(shader_name);
     if (model_shader == nullptr) {
@@ -368,7 +368,7 @@ void ImGuiWindow::load_model(const std::string &shader_name, const std::string &
     }
 }
 
-void ImGuiWindow::load_shader(const std::string &name, const std::filesystem::path &vertex_shader_file, const std::filesystem::path &fragment_shader_file)
+void UIWindow::load_shader(const std::string &name, const std::filesystem::path &vertex_shader_file, const std::filesystem::path &fragment_shader_file)
 {
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(name, vertex_shader_file.c_str(), fragment_shader_file.c_str());
@@ -380,7 +380,7 @@ void ImGuiWindow::load_shader(const std::string &name, const std::filesystem::pa
     
 }
 
-void ImGuiWindow::add_light(const std::string &name, scene::lights::LightType type)
+void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
 {
     switch (type)
     {

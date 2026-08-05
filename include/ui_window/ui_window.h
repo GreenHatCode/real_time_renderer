@@ -7,7 +7,7 @@
 #include "scene/scene.h"
 #include <filesystem>
 
-class ImGuiWindow final {
+class UIWindow final {
 
     struct AddModelDialog_t {
         std::string model_file_path;
@@ -55,7 +55,7 @@ private: // should be accessible
     double delta_time_;
 
 public:
-    ImGuiWindow(const std::shared_ptr<scene::Scene>& scene);
+    UIWindow(const std::shared_ptr<scene::Scene>& scene);
     void render_window();
     glm::vec4 get_clear_color() const;
     float get_delta_time() const;

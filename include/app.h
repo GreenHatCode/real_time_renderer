@@ -2,7 +2,7 @@
 #include "camera/i_camera.h"
 #include "renderer/renderer.h"
 #include "scene/scene.h"
-#include "imgui_window/imgui_window.h"
+#include "ui_window/ui_window.h"
 
 class App {
 
@@ -15,7 +15,7 @@ class App {
     std::unique_ptr<ICamera> camera_;
     std::shared_ptr<scene::Scene> scene_;
     std::unique_ptr<Renderer> renderer_;
-    std::unique_ptr<ImGuiWindow> imgui_window_;
+    std::unique_ptr<UIWindow> imgui_window_;
 
     GLFWwindow *window_;
     bool first_mouse_;
