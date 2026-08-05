@@ -303,6 +303,9 @@ void UIWindow::render_lights_inspector()
         case scene::lights::LightType::DIRECTIONAL_LIGHT:
             render_directional_light_editor(static_cast<scene::lights::DirectionalLight &>(*light_inspector_state_.selected_light_ptr));
             break;
+        case scene::lights::LightType::POINT_LIGHT:
+            render_point_light_editor(static_cast<scene::lights::PointLight &>(*light_inspector_state_.selected_light_ptr));
+            break;
 
         default:
             spdlog::error("Unknow light type to render imgui editor, type={}", static_cast<int>(light_inspector_state_.selected_light_ptr->get_type()));
@@ -339,6 +342,27 @@ void UIWindow::render_directional_light_editor(scene::lights::DirectionalLight &
     auto dir = light.get_direction();
     if (ImGui::DragFloat3("Direction", glm::value_ptr(dir), 0.05f))
         light.set_direction(dir);
+}
+
+void UIWindow::render_point_light_editor(scene::lights::PointLight &light)
+{
+    render_common_lights_editor(light);
+
+    auto pos = light.get_position();
+    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f))
+        light.set_position(pos);
+
+    auto constant = light.get_constant();
+    if (ImGui::DragFloat("Constant", &constant, 0.05f))
+        light.set_constant(constant);
+
+    auto linear = light.get_linear();
+    if (ImGui::DragFloat("Linear", &linear, 0.05f))
+        light.set_constant(linear);
+
+    auto quadratic = light.get_quadratic();
+    if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
+        light.set_constant(quadratic);
 }
 
 void UIWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
