@@ -170,8 +170,7 @@ void ImGuiWindow::render_light_dialog()
         ImGui::Separator();
         ImGui::InputText("Name", &light_dialog_state_.light_name);
 
-        const char *light_types_names[] = {"DIRECTIONAL_LIGHT", "POINT_LIGHT", "SPOT_LIGHT"};
-        ImGui::Combo("Light type", &light_dialog_state_.type, light_types_names, IM_ARRAYSIZE(light_types_names));
+        ImGui::Combo("Light type", &light_dialog_state_.type, scene::lights::get_light_type_names(), static_cast<int>(scene::lights::LightType::COUNT));
 
         if (ImGui::Button("Add")) {
             add_light(light_dialog_state_.light_name, static_cast<scene::lights::LightType>(light_dialog_state_.type));
@@ -393,7 +392,7 @@ void ImGuiWindow::add_light(const std::string &name, scene::lights::LightType ty
                 glm::vec3(0.8f, 0.8f, 0.8f),
                 glm::vec3(1.0f, 1.0f, 1.0f),
                 glm::vec3(1.0f, 0.98f, 0.9f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
+                glm::vec3(1.0f, 0.0f, 0.0f)
             );
             scene_->add_light(name, dl);
 

@@ -8,8 +8,19 @@ namespace scene::lights {
     {
         DIRECTIONAL_LIGHT,
         POINT_LIGHT,
-        SPOT_LIGHT
+        SPOT_LIGHT,
+        COUNT
     };
+
+    inline const char* const* get_light_type_names() 
+    {
+        static const char* names[] = {
+            "Directional Light",
+            "Point Light",
+            "Spot Light"
+        };
+        return names;
+    }
 
     class ILight: public ISceneObject {
     public:
