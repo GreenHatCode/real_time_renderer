@@ -17,12 +17,8 @@ void scene::lights::LightBase::set_color(glm::vec3 rgb_color)
         rgb_color.g < MIN_COLOR || rgb_color.g > MAX_COLOR ||
         rgb_color.b < MIN_COLOR || rgb_color.b > MAX_COLOR
     ) {
-        spdlog::error("RGB color component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", rgb_color.r, rgb_color.g, rgb_color.b);
-        std::clamp(rgb_color.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(rgb_color.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(rgb_color.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-
-        color_rgb_ = rgb_color;
+        spdlog::warn("RGB color component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", rgb_color.r, rgb_color.g, rgb_color.b);
+        color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
         return;
     }
 
@@ -40,12 +36,8 @@ void scene::lights::LightBase::set_ambient(glm::vec3 value)
         value.g < MIN_LIGHTING_COMPONENT_VALUE || value.g > MAX_LIGHTING_COMPONENT_VALUE ||
         value.b < MIN_LIGHTING_COMPONENT_VALUE || value.b > MAX_LIGHTING_COMPONENT_VALUE
     ) {
-        spdlog::error("Ambient component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
-        std::clamp(value.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(value.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(value.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-
-        ambient_ = value;
+        spdlog::warn("Ambient component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
+        ambient_ = glm::clamp(value, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
         return;
     }
 
@@ -63,12 +55,8 @@ void scene::lights::LightBase::set_diffuse(glm::vec3 value)
         value.g < MIN_LIGHTING_COMPONENT_VALUE || value.g > MAX_LIGHTING_COMPONENT_VALUE ||
         value.b < MIN_LIGHTING_COMPONENT_VALUE || value.b > MAX_LIGHTING_COMPONENT_VALUE
     ) {
-        spdlog::error("Diffuse component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
-        std::clamp(value.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(value.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(value.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-
-        diffuse_ = value;
+        spdlog::warn("Diffuse component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
+        diffuse_ = glm::clamp(value, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
         return;
     }
 
@@ -86,12 +74,8 @@ void scene::lights::LightBase::set_specular(glm::vec3 value)
         value.g < MIN_LIGHTING_COMPONENT_VALUE || value.g > MAX_LIGHTING_COMPONENT_VALUE ||
         value.b < MIN_LIGHTING_COMPONENT_VALUE || value.b > MAX_LIGHTING_COMPONENT_VALUE
     ) {
-        spdlog::error("Specular component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
-        std::clamp(value.r, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(value.g, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-        std::clamp(value.b, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
-
-        specular_ = value;
+        spdlog::warn("Specular component out of range, clamping to fit range. Passed value: r={}, g={}, b={}", value.r, value.g, value.b);
+        specular_ = glm::clamp(value, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
         return;
     }
 
