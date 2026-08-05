@@ -5,10 +5,13 @@ ImGuiWindow::ImGuiWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
     , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
     , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .name=""}
+    , light_dialog_state_{.light_name="", .type=static_cast<int32_t>(scene::lights::LightType::DIRECTIONAL_LIGHT)}
     , model_inspector_state_{.selected_model_ptr=nullptr}
     , light_inspector_state_{.selected_light_ptr=nullptr}
     , gpu_time_to_display_(0.0)
     , cpu_time_to_display_(0.0)
+    , clear_color_(0.0f, 0.0f, 0.0f, 1.0f)
+    , delta_time_(0.0)
 {
 
 }
@@ -33,8 +36,13 @@ void ImGuiWindow::render_window()
         ImGui::OpenPopup("manage shader");
     }
     render_shader_dialog();
-    ImGui::Separator();
+    ImGui::SameLine();
 
+    if (ImGui::Button("manage light")) {
+        ImGui::OpenPopup("manage light");
+    }
+    render_light_dialog();
+    ImGui::Separator();
 
     render_model_inspector();
     ImGui::Separator();
@@ -155,6 +163,39 @@ void ImGuiWindow::render_shader_dialog()
     }
 }
 
+void ImGuiWindow::render_light_dialog()
+{
+    if (ImGui::BeginPopupModal("manage light", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Manage light");
+        ImGui::Separator();
+        ImGui::InputText("Name", &light_dialog_state_.light_name);
+
+        const char *light_types_names[] = {"DIRECTIONAL_LIGHT", "POINT_LIGHT", "SPOT_LIGHT"};
+        ImGui::Combo("Light type", &light_dialog_state_.type, light_types_names, IM_ARRAYSIZE(light_types_names));
+
+        if (ImGui::Button("Add")) {
+            add_light(light_dialog_state_.light_name, static_cast<scene::lights::LightType>(light_dialog_state_.type));
+            light_dialog_state_ = {};
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Delete")) {
+            scene_->delete_scene_object(light_dialog_state_.light_name);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Exit")) {
+            light_dialog_state_ = {};
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+}
+
 void ImGuiWindow::render_model_inspector()
 {
     // list box of loaded models
@@ -177,7 +218,11 @@ void ImGuiWindow::render_model_inspector()
             bool selected = model_inspector_state_.selected_model_ptr == m;
 
             if (ImGui::Selectable(m->get_name().c_str(), selected)) {
-                model_inspector_state_.selected_model_ptr = m;
+                if (selected) {
+                    model_inspector_state_.selected_model_ptr = nullptr;
+                } else {
+                    model_inspector_state_.selected_model_ptr = m;
+                }
             }
 
             if (selected) ImGui::SetItemDefaultFocus();
@@ -319,7 +364,6 @@ void ImGuiWindow::load_model(const std::string &shader_name, const std::string &
 
         loaded_model->set_shader(model_shader);
         scene_->add_object(name, loaded_model);
-        loaded_models_names_.push_back(name);
     } catch (const std::exception &e) {
         spdlog::error("Caught exception during loading model {}, what: {}", file_path.c_str(), e.what());
     }
@@ -330,10 +374,35 @@ void ImGuiWindow::load_shader(const std::string &name, const std::filesystem::pa
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(name, vertex_shader_file.c_str(), fragment_shader_file.c_str());
         scene_->add_shader(name, shader);
-        loaded_shaders_names_.push_back(shader_dialog_state_.name);
 
     } catch (const std::exception& e) {
         spdlog::error("Failed to load shader: {}", e.what());
     }
     
+}
+
+void ImGuiWindow::add_light(const std::string &name, scene::lights::LightType type)
+{
+    switch (type)
+    {
+    case scene::lights::LightType::DIRECTIONAL_LIGHT:
+        try {
+            std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
+                name,
+                glm::vec3(0.2f, 0.2f, 0.2f),
+                glm::vec3(0.8f, 0.8f, 0.8f),
+                glm::vec3(1.0f, 1.0f, 1.0f),
+                glm::vec3(1.0f, 0.98f, 0.9f),
+                glm::vec3(1.0f, 1.0f, 1.0f)
+            );
+            scene_->add_light(name, dl);
+
+        } catch (const std::exception& e) {
+            spdlog::error("Failed to add DirectionalLight: {}", e.what());
+        }
+        break;
+    
+    default:
+        break;
+    }
 }

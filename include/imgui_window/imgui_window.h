@@ -21,7 +21,13 @@ class ImGuiWindow final {
         std::string name;
     };
 
-    struct ModelInspectorState_t {
+    struct AddLightDialog_t {
+        std::string light_name;
+        int32_t type;
+    };
+
+    struct ModelInspectorState_t
+    {
         std::shared_ptr<scene::physical_objects::PhysicalObject> selected_model_ptr;
     };
 
@@ -29,16 +35,15 @@ class ImGuiWindow final {
         std::shared_ptr<scene::lights::LightBase> selected_light_ptr;
     };
 
-    // do not expose outside
+private: // do not expose outside
     std::shared_ptr<scene::Scene> scene_;
-    std::vector<std::string> loaded_models_names_;
-    std::vector<std::string> loaded_shaders_names_;
 
     double prev_s_ = 0.0;
     double title_countdown_s_ = 0.1;
     double fps_ = 0.0;
     AddModelDialog_t model_dialog_state_;  
     AddShaderDialog_t shader_dialog_state_;
+    AddLightDialog_t light_dialog_state_;
     ModelInspectorState_t model_inspector_state_;
     LightInspectorState_t light_inspector_state_;
 
@@ -47,7 +52,7 @@ class ImGuiWindow final {
 
 private: // should be accessible 
     glm::vec4 clear_color_;
-    double delta_time_ = 0.0f;
+    double delta_time_;
 
 public:
     ImGuiWindow(const std::shared_ptr<scene::Scene>& scene);
@@ -62,8 +67,8 @@ private:
     double calculate_fps();
     void render_model_dialog();
     void render_shader_dialog();
+    void render_light_dialog();
     void render_model_inspector();
-
 
     void render_lights_inspector();
     void render_common_lights_editor(scene::lights::LightBase& light);
@@ -74,4 +79,5 @@ private:
 public: // dev methods to add models and shader by hand from code
     void load_model(const std::string& shader_name, const std::string& name, const std::filesystem::path& file_path);
     void load_shader(const std::string& name, const std::filesystem::path& vertex_shader_file, const std::filesystem::path& fragment_shader_file);
+    void add_light(const std::string &name, scene::lights::LightType type);
 };
