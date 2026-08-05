@@ -5,6 +5,8 @@
 #include "glm/glm.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include "scene/scene.h"
+#include "scene/lights/directional_light.h"
+#include "scene/lights/point_light.h"
 #include <filesystem>
 
 class UIWindow final {
@@ -73,7 +75,7 @@ private:
     void render_lights_inspector();
     void render_common_lights_editor(scene::lights::LightBase& light);
     void render_directional_light_editor(scene::lights::DirectionalLight& light);
-    // void render_point_light_editor(scene::lights::PointLight& light);
+    void render_point_light_editor(scene::lights::PointLight& light);
     // void render_spot_light_editor(scene::lights::SpotLight& light);
 
 public: // dev methods to add models and shader by hand from code

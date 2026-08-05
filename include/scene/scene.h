@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "scene/physical_objects/physical_object.h"
 #include "scene/physical_objects/model_object.h"
-#include "scene/lights/directional_light.h"
+#include "scene/lights/light_base.h"
 #include <memory>
 #include <map>
 #include <filesystem>
