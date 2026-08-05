@@ -1,6 +1,7 @@
 #include "scene/lights/directional_light.h"
 
 scene::lights::DirectionalLight::DirectionalLight(
+    const std::string& name, 
     glm::vec3 ambient, 
     glm::vec3 diffuse, 
     glm::vec3 specular, 
@@ -9,6 +10,7 @@ scene::lights::DirectionalLight::DirectionalLight(
 )
     : LightBase(ambient, diffuse, specular, rgb_color)
     , direction_(glm::normalize(direction))
+    , name_(name)
     , type_(LightType::DIRECTIONAL_LIGHT)
 {
 }

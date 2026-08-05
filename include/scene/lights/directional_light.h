@@ -10,7 +10,7 @@ namespace scene::lights
         LightType type_;
 
     public:
-        DirectionalLight(glm::vec3 ambient, glm::vec3 diffuse, 
+        DirectionalLight(const std::string& name, glm::vec3 ambient, glm::vec3 diffuse, 
             glm::vec3 specular, glm::vec3 rgb_color, glm::vec3 direction);
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;

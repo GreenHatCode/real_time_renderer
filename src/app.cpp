@@ -186,6 +186,7 @@ void App::load_sources_debug()
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
 
     std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
+        "direction1",
         glm::vec3(0.2f, 0.2f, 0.2f),
         glm::vec3(0.8f, 0.8f, 0.8f),
         glm::vec3(1.0f, 1.0f, 1.0f),
