@@ -12,27 +12,27 @@
 
 namespace scene
 {
-    // all objects on the scene ought to have unique names
+    // TODO: consider using buffers to avoid allocation for every call of get_objects, get_lights, get_shaders
 
     class Scene {
         std::unordered_map<std::string, std::shared_ptr<scene::physical_objects::PhysicalObject>> renderable_objects_map_;
-        std::unordered_map<std::string, std::shared_ptr<scene::lights::ILight>> lights_map_;
+        std::unordered_map<std::string, std::shared_ptr<scene::lights::LightBase>> lights_map_;
         std::unordered_map<std::string, std::shared_ptr<Shader>> shaders_map_;
         uint32_t total_vertices_count;
         uint32_t total_faces_count;
 
     public:
         void add_object(const std::string& name, const std::shared_ptr<scene::physical_objects::PhysicalObject>& ptr);
-        void add_light(const std::string& name, const std::shared_ptr<scene::lights::ILight>& ptr);
+        void add_light(const std::string& name, const std::shared_ptr<scene::lights::LightBase>& ptr);
         void add_shader(const std::string& name, const std::shared_ptr<Shader>& ptr);
         bool delete_scene_object(const std::string& name);
         bool delete_shader(const std::string &name);
 
         std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> get_objects() const;
-        std::vector<std::shared_ptr<scene::lights::ILight>> get_lights() const;
+        std::vector<std::shared_ptr<scene::lights::LightBase>> get_lights() const;
         std::vector<std::shared_ptr<Shader>> get_shaders() const;
         std::shared_ptr<scene::physical_objects::PhysicalObject> get_object(const std::string &name) const;
-        std::shared_ptr<scene::lights::ILight> get_light(const std::string &name) const;
+        std::shared_ptr<scene::lights::LightBase> get_light(const std::string &name) const;
         std::shared_ptr<Shader> get_shader(const std::string& name) const;
 
         uint32_t get_total_vertices_count() const;

@@ -10,7 +10,7 @@ void scene::Scene::add_object(const std::string &name, const std::shared_ptr<sce
     total_faces_count += ptr->get_faces_count();
 }
 
-void scene::Scene::add_light(const std::string &name, const std::shared_ptr<scene::lights::ILight> &ptr)
+void scene::Scene::add_light(const std::string &name, const std::shared_ptr<scene::lights::LightBase> &ptr)
 {
     lights_map_.emplace(name, ptr);
 }
@@ -63,9 +63,9 @@ std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> scene::Sce
     return objects;
 }
 
-std::vector<std::shared_ptr<scene::lights::ILight>> scene::Scene::get_lights() const
+std::vector<std::shared_ptr<scene::lights::LightBase>> scene::Scene::get_lights() const
 {
-    std::vector<std::shared_ptr<scene::lights::ILight>> lights;
+    std::vector<std::shared_ptr<scene::lights::LightBase>> lights;
     for (const auto& l : lights_map_) {
         lights.push_back(l.second);
     }
@@ -90,7 +90,7 @@ std::shared_ptr<scene::physical_objects::PhysicalObject> scene::Scene::get_objec
     return nullptr;
 }
 
-std::shared_ptr<scene::lights::ILight> scene::Scene::get_light(const std::string &name) const
+std::shared_ptr<scene::lights::LightBase> scene::Scene::get_light(const std::string &name) const
 {
     auto it = lights_map_.find(name);
     if (it != lights_map_.end()) return it->second;
