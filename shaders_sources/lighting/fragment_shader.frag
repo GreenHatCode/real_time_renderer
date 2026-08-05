@@ -8,6 +8,18 @@ struct DirectionalLight {
     vec3 direction;
 };
 
+struct PointLight {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 color;
+    vec3 position;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 const uint MAX_DIRECTION_LIGHTS = 10;
 
 in vec3 v_normal;
@@ -18,18 +30,21 @@ out vec4 FragColor;
 uniform vec3 u_object_color;
 
 uniform DirectionalLight directional_lights[MAX_DIRECTION_LIGHTS];
+uniform PointLight point_lights[MAX_DIRECTION_LIGHTS];
 
 uniform int u_directional_lights_count;
-
+uniform int u_point_lights_count;
 
 
 vec3 process_directional_lights();
+vec3 process_point_lights();
 
 void main() {
 
     vec3 direction_lights_color = process_directional_lights();
+    vec3 point_lights_color = process_point_lights();
 
-    vec3 result = (direction_lights_color) * u_object_color;
+    vec3 result = (direction_lights_color + point_lights_color) * u_object_color;
     FragColor = vec4(result, 1.0);
 }
 
@@ -52,5 +67,22 @@ vec3 process_directional_lights() {
         specular += spec * directional_lights[i].color;
     }
     
+    return ambient + diffuse + specular;
+}
+
+vec3 process_point_lights() {
+    vec3 ambient = vec3(0.0);
+    vec3 diffuse = vec3(0.0);
+    vec3 specular = vec3(0.0);
+
+    for (int i = 0; i < u_point_lights_count; ++i) {
+        float distance = length(point_lights[i].position - v_frag_pos);
+        float attenuation = 1.0 / (point_lights[i].constant  + point_lights[i].linear * distance + point_lights[i].quadratic * pow(distance, 2));
+
+        ambient += point_lights[i].ambient * attenuation;
+        diffuse += point_lights[i].diffuse * attenuation;
+        specular += point_lights[i].specular * attenuation;
+    }
+
     return ambient + diffuse + specular;
 }

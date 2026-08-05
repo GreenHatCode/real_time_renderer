@@ -4,7 +4,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "camera/camera_implementation/orbit_camera.h"
 #include "camera/camera_implementation/free_camera.h"
-
+#include "scene/lights/point_light.h"
 
 void App::initialize_opengl()
 {
@@ -202,6 +202,7 @@ void App::load_sources_debug()
     imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");    
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
 
+#if 0
     std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
         "direction1",
         glm::vec3(0.2f, 0.2f, 0.2f),
@@ -211,6 +212,22 @@ void App::load_sources_debug()
         glm::vec3(-0.2f, -1.0f, -0.3f)
     );
     scene_->add_light("direction1", dl);
+#endif
+
+#if 1
+    std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
+        "point1",
+        glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
+        glm::vec3(0.8f, 0.8f, 0.8f),   // Diffuse
+        glm::vec3(1.0f, 1.0f, 1.0f),   // Specular
+        glm::vec3(1.0f, 1.0f, 1.0f),   // RGB Color
+        glm::vec3(1.2f, 1.0f, 2.0f),   // Position
+        1.0f,                           // Constant (Kc)
+        0.09f,                          // Linear (Kl)
+        0.032f                          // Quadratic (Kq) for a ~50 distance radius
+    );
+    scene_->add_light("point1", pl);
+#endif
 
 }
 

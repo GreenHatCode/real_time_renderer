@@ -9,6 +9,9 @@ namespace scene::lights {
         inline constexpr float MAX_COLOR = 1.0f;
         inline constexpr float MIN_LIGHTING_COMPONENT_VALUE = 0.0f;
         inline constexpr float MAX_LIGHTING_COMPONENT_VALUE = 1.0f;
+        inline constexpr float POINT_LIGHT_MIN_CONSTANT = 1.0f;
+        inline constexpr float POINT_LIGHT_MIN_LINEAR = 0.0f;
+        inline constexpr float POINT_LIGHT_MIN_QUADRATIC = 0.0f;
     }
 
     class LightBase: public ILight {
