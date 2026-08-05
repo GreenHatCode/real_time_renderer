@@ -40,8 +40,11 @@ class App {
     void enter_viewport_mode();
     void enter_ui_mode();
 
+
+
 public:
     App(uint32_t screen_width = 800, uint32_t screen_height = 600);
     int32_t run();
     void load_sources_debug();
+    ~App();
 };

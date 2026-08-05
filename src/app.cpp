@@ -121,6 +121,23 @@ void App::enter_ui_mode()
     spdlog::info("Enter ui mode");
 }
 
+App::~App()
+{
+    renderer_.reset();
+    imgui_window_.reset();
+    scene_.reset();
+    camera_.reset();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    if (window_) {
+        glfwDestroyWindow(window_);
+    }
+    glfwTerminate();
+}
+
 void App::mouse_callback_impl(double xpos_in, double ypos_in)
 {
     if (input_mode_ != InputMode::Viewport) return;
@@ -219,11 +236,6 @@ int32_t App::run()
         glfwSwapBuffers(window_);
         glfwPollEvents();
     }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    glfwTerminate();
 
     return 0;
 }
