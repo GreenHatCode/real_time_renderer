@@ -1,6 +1,7 @@
 #pragma once 
 #include "scene/lights/light_base.h"
 #include <string>
+#include "scene/physical_objects/light_sphere.h"
 
 namespace scene::lights
 {
@@ -8,6 +9,7 @@ namespace scene::lights
         glm::vec3 position_;
         std::string name_;
         LightType type_;
+        std::weak_ptr<scene::physical_objects::LightModelObject> light_sphere_;
 
         // attenuation parameters
         float constant_;
@@ -15,8 +17,9 @@ namespace scene::lights
         float quadratic_;
 
     public:
-        PointLight(const std::string& name, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, 
-            glm::vec3 rgb_color, glm::vec3 position, float constant, float linear, float quadratic);
+        PointLight(const std::string& name, const std::weak_ptr<scene::physical_objects::LightModelObject>& sphere_model, 
+            glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 rgb_color, glm::vec3 position, 
+            float constant, float linear, float quadratic);
         std::string get_name() const override;
         LightType get_type() const override;
         void upload_components(Shader &obj_shader, size_t light_idx) const override;
@@ -28,8 +31,9 @@ namespace scene::lights
         void set_linear(float value);
         float get_linear() const;
         void set_quadratic(float value);
-        float get_quadratic() const;        
-    };
+        float get_quadratic() const;
 
+        std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
+    };
 
 } // namespace scene::lights

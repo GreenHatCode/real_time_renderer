@@ -5,6 +5,7 @@ using namespace scene::lights::lighting_constants;
 
 scene::lights::PointLight::PointLight(
     const std::string &name, 
+    const std::weak_ptr<scene::physical_objects::LightModelObject>& sphere_model,
     glm::vec3 ambient, 
     glm::vec3 diffuse, 
     glm::vec3 specular, 
@@ -18,6 +19,7 @@ scene::lights::PointLight::PointLight(
     , position_(position)
     , name_(name)
     , type_(LightType::POINT_LIGHT)
+    , light_sphere_(sphere_model)
     , constant_(constant)
     , linear_(linear)
     , quadratic_(quadratic)
@@ -82,6 +84,10 @@ float scene::lights::PointLight::get_quadratic() const
     return quadratic_;
 }
 
+std::weak_ptr<scene::physical_objects::LightModelObject> scene::lights::PointLight::get_model_ptr() const
+{
+    return light_sphere_;
+}
 std::string scene::lights::PointLight::get_name() const
 {
     return name_;

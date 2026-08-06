@@ -215,8 +215,11 @@ void App::load_sources_debug()
 #endif
 
 #if 1
+    std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
+        std::make_shared<scene::physical_objects::LightModelObject>("point1_obj");
     std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
         "point1",
+        light_model,
         glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
         glm::vec3(0.8f, 0.8f, 0.8f),   // Diffuse
         glm::vec3(1.0f, 1.0f, 1.0f),   // Specular
@@ -227,6 +230,7 @@ void App::load_sources_debug()
         0.032f                          // Quadratic (Kq) for a ~50 distance radius
     );
     scene_->add_light("point1", pl);
+    scene_->add_object("point1_obj", light_model)
 #endif
 
 }

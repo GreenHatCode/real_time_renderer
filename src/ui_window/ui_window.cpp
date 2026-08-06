@@ -1,5 +1,6 @@
 #include "ui_window/ui_window.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "scene/physical_objects/physical_light_object.h"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -412,11 +413,11 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
         try {
             std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
                 name,
-                glm::vec3(0.2f, 0.2f, 0.2f), // Ambient
-                glm::vec3(0.8f, 0.8f, 0.8f), // Diffuse
-                glm::vec3(1.0f, 1.0f, 1.0f), // Specular
+                glm::vec3(0.2f, 0.2f, 0.2f),  // Ambient
+                glm::vec3(0.8f, 0.8f, 0.8f),  // Diffuse
+                glm::vec3(1.0f, 1.0f, 1.0f),  // Specular
                 glm::vec3(1.0f, 0.98f, 0.9f), // RGB Color
-                glm::vec3(1.0f, 0.0f, 0.0f) // Direction
+                glm::vec3(1.0f, 0.0f, 0.0f)   // Direction
             );
             scene_->add_light(name, dl);
 
@@ -426,19 +427,23 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
         break;
     case scene::lights::LightType::POINT_LIGHT:
         try {
+            std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
+                std::make_shared<scene::physical_objects::LightModelObject>(name + "_obj");
+
             std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
                 name,
+                light_model,
                 glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
-                glm::vec3(0.8f, 0.8f, 0.8f), // Diffuse
-                glm::vec3(1.0f, 1.0f, 1.0f), // Specular
-                glm::vec3(1.0f, 1.0f, 1.0f), // RGB Color
-                glm::vec3(1.2f, 1.0f, 2.0f), // Position
-                1.0f, // Constant (Kc)
-                0.09f, // Linear (Kl)
-                0.032f // Quadratic (Kq) for a ~50 distance radius
+                glm::vec3(0.8f, 0.8f, 0.8f),    // Diffuse
+                glm::vec3(1.0f, 1.0f, 1.0f),    // Specular
+                glm::vec3(1.0f, 1.0f, 1.0f),    // RGB Color
+                glm::vec3(1.2f, 1.0f, 2.0f),    // Position
+                1.0f,                           // Constant (Kc)
+                0.09f,                          // Linear (Kl)
+                0.032f                          // Quadratic (Kq) for a ~50 distance radius
             );
             scene_->add_light(name, pl);
-
+            scene_->add_object(light_model->get_name(), light_model);
         } catch (const std::exception& e) {
             spdlog::error("Failed to add PointLight: {}", e.what());
         }

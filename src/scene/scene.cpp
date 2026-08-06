@@ -5,7 +5,14 @@ using namespace scene;
 
 void scene::Scene::add_object(const std::string &name, const std::shared_ptr<scene::physical_objects::PhysicalObject> &ptr)
 {
-    renderable_objects_map_.emplace(name, ptr);
+    physical_objects_map_.emplace(name, ptr);
+    total_vertices_count += ptr->get_vertices_count();
+    total_faces_count += ptr->get_faces_count();
+}
+
+void scene::Scene::add_object(const std::string &name, const std::shared_ptr<scene::physical_objects::PhysicalLightObject> &ptr)
+{
+    physical_light_objects_map_.emplace(name, ptr);
     total_vertices_count += ptr->get_vertices_count();
     total_faces_count += ptr->get_faces_count();
 }
@@ -22,11 +29,17 @@ void scene::Scene::add_shader(const std::string &name, const std::shared_ptr<Sha
 
 bool scene::Scene::delete_scene_object(const std::string &name)
 {
-    if (renderable_objects_map_.find(name) != renderable_objects_map_.end()) {
-        renderable_objects_map_.erase(name);
+    // add decreasing faces and vertices count
+    if (physical_objects_map_.find(name) != physical_objects_map_.end()) {
+        physical_objects_map_.erase(name);
         return true;
     }
     
+    if (physical_light_objects_map_.find(name) != physical_light_objects_map_.end()) {
+        physical_light_objects_map_.erase(name);
+        return true;
+    }
+
     if (lights_map_.find(name) != lights_map_.end()) {
         lights_map_.erase(name);
         return true;
@@ -54,10 +67,10 @@ bool scene::Scene::delete_shader(const std::string &name)
     return true;
 }
 
-std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> scene::Scene::get_objects() const
+std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> scene::Scene::get_objects(bool lights_models = false) const
 {
     std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> objects;
-    for (const auto& m : renderable_objects_map_) {
+    for (const auto& m : physical_objects_map_) {
         objects.push_back(m.second);
     }
     return objects;
@@ -84,8 +97,8 @@ std::vector<std::shared_ptr<Shader>> scene::Scene::get_shaders() const
 
 std::shared_ptr<scene::physical_objects::PhysicalObject> scene::Scene::get_object(const std::string &name) const
 {
-    auto it = renderable_objects_map_.find(name);
-    if (it != renderable_objects_map_.end()) return it->second;
+    auto it = physical_objects_map_.find(name);
+    if (it != physical_objects_map_.end()) return it->second;
         
     return nullptr;
 }
