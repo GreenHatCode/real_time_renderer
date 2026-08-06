@@ -21,4 +21,4 @@ namespace scene::physical_objects
 
     };
 
-} // namespace scene
+} // namespace scene::physical_objects

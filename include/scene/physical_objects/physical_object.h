@@ -27,5 +27,5 @@ namespace scene::physical_objects
 
         virtual ~PhysicalObject() = default;
     };
-} // namespace scene
+} // namespace scene::physical_objects
 
