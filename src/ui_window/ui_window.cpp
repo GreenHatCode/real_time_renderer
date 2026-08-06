@@ -330,15 +330,15 @@ void UIWindow::render_common_lights_editor(scene::lights::LightBase &light)
     auto specular = light.get_specular();
     if (ImGui::DragFloat3("Specular", glm::value_ptr(specular)))
         light.set_specular(specular);
-
-    auto color = light.get_color();
-    if (ImGui::ColorEdit3("Color", glm::value_ptr(color)))
-        light.set_color(color);
 }
 
 void UIWindow::render_directional_light_editor(scene::lights::DirectionalLight &light)
 {
     render_common_lights_editor(light);
+    
+    auto color = light.get_color();
+    if (ImGui::ColorEdit3("Color", glm::value_ptr(color)))
+        light.set_color(color);
 
     auto dir = light.get_direction();
     if (ImGui::DragFloat3("Direction", glm::value_ptr(dir), 0.05f))
@@ -349,9 +349,23 @@ void UIWindow::render_point_light_editor(scene::lights::PointLight &light)
 {
     render_common_lights_editor(light);
 
+    auto color = light.get_color();
+    if (ImGui::ColorEdit3("Color", glm::value_ptr(color))) {
+        light.set_color(color);
+        if (auto model_ptr = light.get_model_ptr().lock())
+            model_ptr->set_color(color);
+        else 
+            spdlog::warn("Failed to edit point light model color, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
+    }
+        
     auto pos = light.get_position();
-    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f))
+    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f)) {
         light.set_position(pos);
+        if (auto model_ptr = light.get_model_ptr().lock())
+            model_ptr->move(pos);
+        else 
+            spdlog::warn("Failed to edit point light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
+    }
 
     auto constant = light.get_constant();
     if (ImGui::DragFloat("Constant", &constant, 0.05f))
@@ -427,9 +441,22 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
         break;
     case scene::lights::LightType::POINT_LIGHT:
         try {
-            std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
-                std::make_shared<scene::physical_objects::LightModelObject>(name + "_obj");
+            std::shared_ptr<Shader> model_shader = scene_->get_shader(std::string(scene::physical_objects::physical_light_object_constants::ShaderName));
+            if (model_shader == nullptr) {
+                spdlog::error("Failed to load point light model {}. Required shader with name={}", 
+                    scene::physical_objects::physical_light_object_constants::LightSphereModel.data(), 
+                    scene::physical_objects::physical_light_object_constants::ShaderName.data());
+                return;
+            }
 
+            std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
+                std::make_shared<scene::physical_objects::LightModelObject>(
+                    name + "_obj",
+                    scene::physical_objects::physical_light_object_constants::LightSphereModel,
+                    glm::vec3(1.0f, 1.0f, 1.0f),
+                    model_shader
+            );
+            
             std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
                 name,
                 light_model,
@@ -442,6 +469,9 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
                 0.09f,                          // Linear (Kl)
                 0.032f                          // Quadratic (Kq) for a ~50 distance radius
             );
+
+            light_model->set_color(pl->get_color());
+            
             scene_->add_light(name, pl);
             scene_->add_object(light_model->get_name(), light_model);
         } catch (const std::exception& e) {

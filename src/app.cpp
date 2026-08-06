@@ -191,6 +191,16 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     renderer_ = std::make_unique<Renderer>(scene_);
 
     spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);
+
+
+    imgui_window_->load_shader(
+        std::string(scene::physical_objects::physical_light_object_constants::ShaderName), 
+        std::string(scene::physical_objects::physical_light_object_constants::LightVertexShader), 
+        std::string(scene::physical_objects::physical_light_object_constants::LightFragmentShader)
+    );
+
+
+    spdlog::info("Loaded default models and shaders, please do not delete them");
 }
 
 void App::load_sources_debug() 
@@ -201,37 +211,6 @@ void App::load_sources_debug()
 
     imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");    
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
-
-#if 0
-    std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
-        "direction1",
-        glm::vec3(0.2f, 0.2f, 0.2f),
-        glm::vec3(0.8f, 0.8f, 0.8f),
-        glm::vec3(1.0f, 1.0f, 1.0f),
-        glm::vec3(1.0f, 0.98f, 0.9f),
-        glm::vec3(-0.2f, -1.0f, -0.3f)
-    );
-    scene_->add_light("direction1", dl);
-#endif
-
-#if 1
-    std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
-        std::make_shared<scene::physical_objects::LightModelObject>("point1_obj");
-    std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
-        "point1",
-        light_model,
-        glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
-        glm::vec3(0.8f, 0.8f, 0.8f),   // Diffuse
-        glm::vec3(1.0f, 1.0f, 1.0f),   // Specular
-        glm::vec3(1.0f, 1.0f, 1.0f),   // RGB Color
-        glm::vec3(1.2f, 1.0f, 2.0f),   // Position
-        1.0f,                           // Constant (Kc)
-        0.09f,                          // Linear (Kl)
-        0.032f                          // Quadratic (Kq) for a ~50 distance radius
-    );
-    scene_->add_light("point1", pl);
-    scene_->add_object("point1_obj", light_model)
-#endif
 
 }
 
