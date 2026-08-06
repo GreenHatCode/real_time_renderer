@@ -10,13 +10,6 @@ void scene::Scene::add_object(const std::string &name, const std::shared_ptr<sce
     total_faces_count += ptr->get_faces_count();
 }
 
-void scene::Scene::add_object(const std::string &name, const std::shared_ptr<scene::physical_objects::PhysicalLightObject> &ptr)
-{
-    physical_light_objects_map_.emplace(name, ptr);
-    total_vertices_count += ptr->get_vertices_count();
-    total_faces_count += ptr->get_faces_count();
-}
-
 void scene::Scene::add_light(const std::string &name, const std::shared_ptr<scene::lights::LightBase> &ptr)
 {
     lights_map_.emplace(name, ptr);
@@ -32,11 +25,6 @@ bool scene::Scene::delete_scene_object(const std::string &name)
     // add decreasing faces and vertices count
     if (physical_objects_map_.find(name) != physical_objects_map_.end()) {
         physical_objects_map_.erase(name);
-        return true;
-    }
-    
-    if (physical_light_objects_map_.find(name) != physical_light_objects_map_.end()) {
-        physical_light_objects_map_.erase(name);
         return true;
     }
 
@@ -67,7 +55,7 @@ bool scene::Scene::delete_shader(const std::string &name)
     return true;
 }
 
-std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> scene::Scene::get_objects(bool lights_models = false) const
+std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> scene::Scene::get_objects() const
 {
     std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> objects;
     for (const auto& m : physical_objects_map_) {

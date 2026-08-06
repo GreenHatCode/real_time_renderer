@@ -25,13 +25,12 @@ namespace scene
 
     public:
         void add_object(const std::string& name, const std::shared_ptr<scene::physical_objects::PhysicalObject>& ptr);
-        void add_object(const std::string& name, const std::shared_ptr<scene::physical_objects::PhysicalLightObject>& ptr);
         void add_light(const std::string& name, const std::shared_ptr<scene::lights::LightBase>& ptr);
         void add_shader(const std::string& name, const std::shared_ptr<Shader>& ptr);
         bool delete_scene_object(const std::string& name);
         bool delete_shader(const std::string &name);
 
-        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> get_objects(bool lights_models = false) const;
+        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> get_objects() const;
         std::vector<std::shared_ptr<scene::lights::LightBase>> get_lights() const;
         std::vector<std::shared_ptr<Shader>> get_shaders() const;
         std::shared_ptr<scene::physical_objects::PhysicalObject> get_object(const std::string &name) const;
