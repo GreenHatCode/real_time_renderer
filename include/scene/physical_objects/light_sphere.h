@@ -5,6 +5,7 @@
 
 namespace scene::physical_objects
 {
+
     class LightModelObject final: public PhysicalLightObject {
         assimp_wrapper::Model model_;
         std::shared_ptr<Shader> shader_;
@@ -12,7 +13,7 @@ namespace scene::physical_objects
         glm::vec3 color_;
 
     public:
-        LightModelObject(const std::string& object_name);
+        LightModelObject(const std::string& object_name, const std::filesystem::path& file_path, glm::vec3 color, const std::shared_ptr<Shader>& shader = nullptr);
         uint32_t get_vertices_count() const override;
         uint32_t get_faces_count() const override;
         void set_shader(const std::shared_ptr<Shader>& shader) override;
@@ -21,7 +22,6 @@ namespace scene::physical_objects
         void render() const override;
 
         void set_color(glm::vec3 color) override;
-        void move_to(glm::vec3 target) override;
     };
 
 } // namespace scene::physical_objects

@@ -1,22 +1,19 @@
 #include "scene/physical_objects/light_sphere.h"
 #include "scene/lights/light_base.h"
 
-namespace
-{
-    constexpr std::string_view kLightSphereModel = "resources/sphere.obj";
-    constexpr std::string_view kLightVertexShader = "shaders_sources/light_object/light.vert";
-    constexpr std::string_view kLightFragmentShader = "shaders_sources/light_object/light.frag";
-}
+using namespace scene::physical_objects::physical_light_object_constants;
 
-scene::physical_objects::LightModelObject::LightModelObject(const std::string &object_name)
-    : model_(assimp_wrapper::Model(kLightSphereModel,
+scene::physical_objects::LightModelObject::LightModelObject(const std::string &object_name, const std::filesystem::path& file_path, glm::vec3 color, const std::shared_ptr<Shader>& shader)
+    : model_(assimp_wrapper::Model(file_path,
         aiProcess_Triangulate |
         aiProcess_JoinIdenticalVertices |
         aiProcess_ImproveCacheLocality |
         aiProcess_ValidateDataStructure))
     , name_(object_name)
-    , shader_(std::make_shared<Shader>("light_object_shader", kLightVertexShader.data(), kLightFragmentShader.data()))
+    , shader_(shader)
+    , color_(1.0f, 1.0f, 1.0f)
 {
+    set_color(color);
 }
 
 uint32_t scene::physical_objects::LightModelObject::get_vertices_count() const
@@ -60,10 +57,4 @@ void scene::physical_objects::LightModelObject::render() const
 void scene::physical_objects::LightModelObject::set_color(glm::vec3 color)
 {
     color_ = glm::clamp(color, scene::lights::lighting_constants::MIN_LIGHTING_COMPONENT_VALUE, scene::lights::lighting_constants::MAX_LIGHTING_COMPONENT_VALUE);
-}
-
-void scene::physical_objects::LightModelObject::move_to(glm::vec3 target)
-{
-    glm::vec3 move_vec = target - get_move_vector();
-    move(move_vec);
 }
