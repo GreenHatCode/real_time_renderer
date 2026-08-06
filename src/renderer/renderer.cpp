@@ -43,6 +43,11 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
 void Renderer::render_scene_object(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
+    if (shader_ptr == nullptr) {
+        spdlog::warn("Model {} hasn't shader, skipping rendering this model", obj->get_name());
+        return;
+    }
+
     if (shader_ptr.get() != curr_shader_ptr_) 
     {
         curr_shader_ptr_ = shader_ptr.get();
