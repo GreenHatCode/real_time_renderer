@@ -1,6 +1,6 @@
 #include "scene/physical_objects/model_object.h"
 
-scene::physical_objects::ModelObject::ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, std::shared_ptr<Shader> shader)
+scene::physical_objects::ModelObject::ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader)
     : PhysicalObject()
     , model_(std::move(loaded_model))
     , name_(object_name)

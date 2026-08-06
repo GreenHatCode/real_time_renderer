@@ -11,7 +11,7 @@ namespace scene::physical_objects
         std::string name_;
         
     public:
-        ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, std::shared_ptr<Shader> shader = nullptr);
+        ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader = nullptr);
         uint32_t get_vertices_count() const override;
         uint32_t get_faces_count() const override;
         void set_shader(const std::shared_ptr<Shader>& shader) override;
