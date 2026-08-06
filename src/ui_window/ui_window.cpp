@@ -412,11 +412,11 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
         try {
             std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
                 name,
-                glm::vec3(0.2f, 0.2f, 0.2f),
-                glm::vec3(0.8f, 0.8f, 0.8f),
-                glm::vec3(1.0f, 1.0f, 1.0f),
-                glm::vec3(1.0f, 0.98f, 0.9f),
-                glm::vec3(1.0f, 0.0f, 0.0f)
+                glm::vec3(0.2f, 0.2f, 0.2f), // Ambient
+                glm::vec3(0.8f, 0.8f, 0.8f), // Diffuse
+                glm::vec3(1.0f, 1.0f, 1.0f), // Specular
+                glm::vec3(1.0f, 0.98f, 0.9f), // RGB Color
+                glm::vec3(1.0f, 0.0f, 0.0f) // Direction
             );
             scene_->add_light(name, dl);
 
@@ -424,8 +424,29 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             spdlog::error("Failed to add DirectionalLight: {}", e.what());
         }
         break;
-    
+    case scene::lights::LightType::POINT_LIGHT:
+        try {
+            std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
+                name,
+                glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
+                glm::vec3(0.8f, 0.8f, 0.8f), // Diffuse
+                glm::vec3(1.0f, 1.0f, 1.0f), // Specular
+                glm::vec3(1.0f, 1.0f, 1.0f), // RGB Color
+                glm::vec3(1.2f, 1.0f, 2.0f), // Position
+                1.0f, // Constant (Kc)
+                0.09f, // Linear (Kl)
+                0.032f // Quadratic (Kq) for a ~50 distance radius
+            );
+            scene_->add_light(name, pl);
+
+        } catch (const std::exception& e) {
+            spdlog::error("Failed to add PointLight: {}", e.what());
+        }
+        break;
+        
     default:
+        spdlog::error("Can't add light to scene, unknow light type: {}", static_cast<int>(type));
+        assert(false);
         break;
     }
 }
