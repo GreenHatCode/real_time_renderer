@@ -12,6 +12,8 @@ namespace scene::lights {
         inline constexpr float POINT_LIGHT_MIN_CONSTANT = 1.0f;
         inline constexpr float POINT_LIGHT_MIN_LINEAR = 0.0f;
         inline constexpr float POINT_LIGHT_MIN_QUADRATIC = 0.0f;
+        inline constexpr float SPOT_MIN_CUTOFF = 1.0f;
+        inline constexpr float SPOT_MAX_CUTOFF = 89.0f;
     }
 
     class LightBase: public ILight {
