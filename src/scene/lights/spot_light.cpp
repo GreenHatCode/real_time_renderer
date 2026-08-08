@@ -26,8 +26,8 @@ scene::lights::SpotLight::SpotLight(
     , constant_(constant)
     , linear_(linear)
     , quadratic_(quadratic)
-    , cut_off_rad_(cut_off_rad)
-    , outer_cut_off_rad_(outer_cut_off_rad)
+    , cosine_cut_off_rad_(glm::cos(cut_off_rad))
+    , cosine_outer_cut_off_rad_(glm::cos(outer_cut_off_rad))
 {
 }
 
@@ -81,24 +81,24 @@ float scene::lights::SpotLight::get_quadratic() const
     return quadratic_;
 }
 
-void scene::lights::SpotLight::set_cut_off(float value)
+void scene::lights::SpotLight::set_cut_off(float degrees)
 {
-    cut_off_rad_ = std::clamp(value, SPOT_MIN_CUTOFF, SPOT_MAX_CUTOFF);
+    cosine_cut_off_rad_ = glm::cos(glm::radians(std::clamp(degrees, SPOT_MIN_CUTOFF, SPOT_MAX_CUTOFF)));
 }
 
 float scene::lights::SpotLight::get_cut_off() const
 {
-    return cut_off_rad_;
+    return glm::degrees(glm::acos(cosine_cut_off_rad_));
 }
 
-void scene::lights::SpotLight::set_outer_cut_off(float value)
+void scene::lights::SpotLight::set_outer_cut_off(float degrees)
 {
-    outer_cut_off_rad_ = std::clamp(value, SPOT_MIN_CUTOFF, SPOT_MAX_CUTOFF);
+    cosine_outer_cut_off_rad_ = glm::cos(glm::radians(std::clamp(degrees, SPOT_MIN_CUTOFF, SPOT_MAX_CUTOFF)));
 }
 
 float scene::lights::SpotLight::get_outer_cut_off() const
 {
-    return outer_cut_off_rad_;
+    return glm::degrees(glm::acos(cosine_outer_cut_off_rad_));
 }
 
 std::weak_ptr<scene::physical_objects::LightModelObject> scene::lights::SpotLight::get_model_ptr() const
@@ -127,7 +127,7 @@ void scene::lights::SpotLight::upload_components(Shader &obj_shader, size_t ligh
     obj_shader.set_uniform(uniform_name + ".constant", constant_);
     obj_shader.set_uniform(uniform_name + ".linear", linear_);
     obj_shader.set_uniform(uniform_name + ".quadratic", quadratic_);
-    obj_shader.set_uniform(uniform_name + ".cut_off", cut_off_rad_);
-    obj_shader.set_uniform(uniform_name + ".outer_cut_off", outer_cut_off_rad_);
+    obj_shader.set_uniform(uniform_name + ".cut_off", cosine_cut_off_rad_);
+    obj_shader.set_uniform(uniform_name + ".outer_cut_off", cosine_outer_cut_off_rad_);
 }
 

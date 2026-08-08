@@ -16,8 +16,8 @@ namespace scene::lights
         float constant_;
         float linear_;
         float quadratic_;
-        float cut_off_rad_;
-        float outer_cut_off_rad_;
+        float cosine_cut_off_rad_;
+        float cosine_outer_cut_off_rad_;
 
     public:
         SpotLight(const std::string& name, const std::weak_ptr<scene::physical_objects::LightModelObject>& cone_model, 
@@ -37,9 +37,9 @@ namespace scene::lights
         float get_linear() const;
         void set_quadratic(float value);
         float get_quadratic() const;
-        void set_cut_off(float value);
+        void set_cut_off(float degrees);
         float get_cut_off() const;
-        void set_outer_cut_off(float value);
+        void set_outer_cut_off(float degrees);
         float get_outer_cut_off() const;
 
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
