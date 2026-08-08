@@ -212,6 +212,8 @@ void App::load_sources_debug()
     imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");    
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
 
+    imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
+
 }
 
 int32_t App::run()
@@ -225,7 +227,7 @@ int32_t App::run()
         imgui_window_->render_window();
         ImGui::Render();
         
-        renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_)); 
+        renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_), camera_->get_position()); 
 
 
         imgui_window_->set_gpu_time_to_display(renderer_->get_gpu_time());

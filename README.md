@@ -55,3 +55,7 @@ Features:
 		- main axes (rgb - xyz)
 		- xz face in wireframe style (net)
 		- faces' normals (short red lines)
+
+
+RUSEL
+	- all direction vectors passed to shaders are already normalized

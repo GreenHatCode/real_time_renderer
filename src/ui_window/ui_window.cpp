@@ -1,6 +1,7 @@
 #include "ui_window/ui_window.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "scene/physical_objects/physical_light_object.h"
+#include "glm/gtx/quaternion.hpp"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -11,7 +12,7 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , light_inspector_state_{.selected_light_ptr=nullptr}
     , gpu_time_to_display_(0.0)
     , cpu_time_to_display_(0.0)
-    , clear_color_(0.0f, 0.0f, 0.0f, 1.0f)
+    , clear_color_(0.2f, 0.1f, 0.1f, 1.0f)
     , delta_time_(0.0)
 {
 
@@ -239,13 +240,9 @@ void UIWindow::render_model_inspector()
         if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f))
             model_inspector_state_.selected_model_ptr->move(pos);
 
-        float angle = model_inspector_state_.selected_model_ptr->get_rotation_angle_cw();
-        if (ImGui::DragFloat("Rotation", &angle, 0.01f))
-            model_inspector_state_.selected_model_ptr->rotate(angle, model_inspector_state_.selected_model_ptr->get_rotation_axes());
-
-        glm::vec3 axis = model_inspector_state_.selected_model_ptr->get_rotation_axes();
-        if (ImGui::DragFloat3("Axis", glm::value_ptr(axis), 0.01f))
-            model_inspector_state_.selected_model_ptr->rotate(model_inspector_state_.selected_model_ptr->get_rotation_angle_cw(), axis);
+        glm::vec3 angles = glm::degrees(glm::eulerAngles(model_inspector_state_.selected_model_ptr->get_rotation()));
+        if (ImGui::DragFloat3("Rotation angle (degrees)", glm::value_ptr(angles), 0.01f))
+            model_inspector_state_.selected_model_ptr->set_rotation(glm::quat(glm::radians(angles)));
 
         glm::vec3 scale = model_inspector_state_.selected_model_ptr->get_scaling_vector();
         if (ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.01f))
@@ -409,7 +406,12 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
     if (ImGui::DragFloat3("Direction", glm::value_ptr(dir), 0.05f)) {
         light.set_direction(dir);
 
-        // TODO: add rotation of the model
+        if (auto model_ptr = light.get_model_ptr().lock()) {
+            dir = glm::normalize(dir);
+            model_ptr->set_rotation(glm::rotation(scene::physical_objects::physical_light_object_constants::SPOT_LIGHT_MODEL_DEFAULT_FORWARD, dir));
+        } else { 
+            spdlog::warn("Failed to edit spot light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
+        }
     }
 
     auto constant = light.get_constant();
@@ -424,12 +426,12 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
     if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
         light.set_constant(quadratic);
 
-    auto cut_off = light.get_linear();
-    if (ImGui::DragFloat("Cut off angle", &cut_off, 0.05f))
+    auto cut_off = light.get_cut_off();
+    if (ImGui::DragFloat("Cut off angle (degrees)", &cut_off, 0.05f))
         light.set_cut_off(cut_off);
 
-    auto outer_cut_off = light.get_quadratic();
-    if (ImGui::DragFloat("Outer cut off angle", &outer_cut_off, 0.05f))
+    auto outer_cut_off = light.get_outer_cut_off();
+    if (ImGui::DragFloat("Outer cut off angle (degrees)", &outer_cut_off, 0.05f))
         light.set_outer_cut_off(outer_cut_off);
 }
 
@@ -478,6 +480,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
     {
     case scene::lights::LightType::DIRECTIONAL_LIGHT:
         try {
+            // example/default values for directional light properties
             std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
                 name,
                 glm::vec3(0.2f, 0.2f, 0.2f),  // Ambient
@@ -510,6 +513,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
                     model_shader
             );
             
+            // example/default values for point light properties
             std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
                 name,
                 light_model,
@@ -536,7 +540,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             std::shared_ptr<Shader> model_shader = scene_->get_shader(std::string(scene::physical_objects::physical_light_object_constants::ShaderName));
             if (model_shader == nullptr) {
                 spdlog::error("Failed to load spot light model {}. Required shader with name={}", 
-                    scene::physical_objects::physical_light_object_constants::LightSphereModel.data(), 
+                    scene::physical_objects::physical_light_object_constants::LightConeModel.data(), 
                     scene::physical_objects::physical_light_object_constants::ShaderName.data());
                 return;
             }
@@ -544,11 +548,12 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
                 std::make_shared<scene::physical_objects::LightModelObject>(
                     name + "_obj",
-                    scene::physical_objects::physical_light_object_constants::LightSphereModel,
+                    scene::physical_objects::physical_light_object_constants::LightConeModel,
                     glm::vec3(1.0f, 1.0f, 1.0f),
                     model_shader
             );
             
+            // example/default values for spot light properties
             std::shared_ptr<scene::lights::SpotLight> pl = std::make_shared<scene::lights::SpotLight>(
                 name,
                 light_model,
@@ -556,16 +561,17 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
                 glm::vec3(0.8f, 0.8f, 0.8f),    // Diffuse
                 glm::vec3(1.0f, 1.0f, 1.0f),    // Specular
                 glm::vec3(1.0f, 1.0f, 1.0f),    // RGB Color
-                glm::vec3(1.2f, 1.0f, 2.0f),    // Position
-                glm::vec3(1.0f, 1.0f, 0.0f),    // Direction
+                glm::vec3(0.0f, 10.0f, 0.0f),    // Position
+                glm::vec3(0.0f, -1.0f, 0.0f),    // Direction
                 1.0f,                           // Constant (Kc)
                 0.09f,                          // Linear (Kl)
                 0.032f,                         // Quadratic (Kq) for a ~50 distance radius
-                0.91,                           // Cut off in radians
-                0.82                            // Outer cut off in radians
+                glm::radians(25.0f),                           // Cut off in radians
+                glm::radians(30.0f)                            // Outer cut off in radians
             );
 
             light_model->set_color(pl->get_color());
+            light_model->scale(glm::vec3(0.15f)); // TODO: use normal model
             
             scene_->add_light(name, pl);
             scene_->add_object(light_model->get_name(), light_model);
