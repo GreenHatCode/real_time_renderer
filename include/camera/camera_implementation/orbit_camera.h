@@ -66,6 +66,8 @@ public:
 
 public: // setters and modifiers
     
+    glm::vec3 get_position() const override { return position_; }
+
     void set_projection_type(Projection::ProjectionType type) override
     {
         projection_.set_type(type);

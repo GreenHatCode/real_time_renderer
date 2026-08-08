@@ -4,11 +4,11 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
 {
     shader_ptr->set_uniform("u_view_mat", view_mat_);
     shader_ptr->set_uniform("u_projection_mat", projection_mat_);
+    shader_ptr->set_uniform("u_camera_pos", camera_position_);
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
-    // add setting lights uniforms (preferably using structs or glbuffers)
     shader_ptr->set_uniform("u_object_color", glm::vec3(1.0f, 0.5f, 0.31f));
 
     uint32_t directional_light_idx = 0;
@@ -69,12 +69,13 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 
 }
 
-void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat)
+void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position)
 {
     profiler_.begin_cpu_profiling_query();
 
     view_mat_ = view_mat;
     projection_mat_ = projection_mat;
+    camera_position_ = camera_position;
 
     profiler_.begin_gpu_profiling_query();
     glClearColor(clear_color_rgba.r, clear_color_rgba.g, clear_color_rgba.b, clear_color_rgba.a);

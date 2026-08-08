@@ -17,6 +17,7 @@ class Renderer final {
 
     glm::mat4 view_mat_;
     glm::mat4 projection_mat_;
+    glm::vec3 camera_position_;
 
     double profile_gpu_time_;
     double profile_cpu_time_;
@@ -29,7 +30,7 @@ class Renderer final {
 
 public:
     Renderer(std::shared_ptr<const scene::Scene> scene);
-    void render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat);
+    void render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position);
     double get_gpu_time() const;
     double get_cpu_time() const;
 };

@@ -14,7 +14,8 @@ public:
     virtual glm::mat4 projection_matrix(float scr_width, float scr_height) const = 0;
     virtual void move(CameraMovement direction, float deltaTime) = 0;
     virtual void rotate(float xoffset, float yoffset) = 0;
-    virtual void zoom(float delta) = 0;    
+    virtual void zoom(float delta) = 0; 
+    virtual glm::vec3 get_position() const = 0;   
     
     virtual ~ICamera() = default;
 };
