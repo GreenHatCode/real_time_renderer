@@ -6,7 +6,8 @@ namespace scene::physical_objects
 {
     namespace physical_light_object_constants
     {
-        constexpr std::string_view LightSphereModel = "resources/Sphere_with_Grid_v1_L1.123c4428b35e-a400-4b6c-8930-ddff4fb80cc1/15977_Sphere_with_Grid_v1.obj";
+        constexpr std::string_view LightSphereModel = "resources/light_sphere.obj";
+        constexpr std::string_view LightConeModel = "resources/light_cone.obj";
         constexpr std::string_view ShaderName = "physical_light_object_shader";
         constexpr std::string_view LightVertexShader = "shaders_sources/light_object/light.vert";
         constexpr std::string_view LightFragmentShader = "shaders_sources/light_object/light.frag";
