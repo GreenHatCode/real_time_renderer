@@ -84,6 +84,11 @@ float scene::lights::PointLight::get_quadratic() const
     return quadratic_;
 }
 
+void scene::lights::PointLight::set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject> &value)
+{
+    light_sphere_ = value;
+}
+
 std::weak_ptr<scene::physical_objects::LightModelObject> scene::lights::PointLight::get_model_ptr() const
 {
     return light_sphere_;

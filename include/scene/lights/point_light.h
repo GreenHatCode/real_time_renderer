@@ -17,9 +17,18 @@ namespace scene::lights
         float quadratic_;
 
     public:
-        PointLight(const std::string& name, const std::weak_ptr<scene::physical_objects::LightModelObject>& sphere_model, 
-            glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 rgb_color, glm::vec3 position, 
-            float constant, float linear, float quadratic);
+        PointLight(
+            const std::string& name, 
+            const std::weak_ptr<scene::physical_objects::LightModelObject>& sphere_model = {}, 
+            glm::vec3 ambient = glm::vec3(0.05f, 0.05f, 0.05f), 
+            glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
+            glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
+            glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
+            glm::vec3 position = glm::vec3(1.2f, 1.0f, 2.0f), 
+            float constant = 1.0f, 
+            float linear = 0.09f, 
+            float quadratic = 0.032f
+        );
         std::string get_name() const override;
         LightType get_type() const override;
         void upload_components(Shader &obj_shader, size_t light_idx) const override;
@@ -33,6 +42,7 @@ namespace scene::lights
         void set_quadratic(float value);
         float get_quadratic() const;
 
+        void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };
 

@@ -194,9 +194,9 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
 
     imgui_window_->load_shader(
-        std::string(scene::physical_objects::physical_light_object_constants::ShaderName), 
-        std::string(scene::physical_objects::physical_light_object_constants::LightVertexShader), 
-        std::string(scene::physical_objects::physical_light_object_constants::LightFragmentShader)
+        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME), 
+        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_VERTEX_SHADER), 
+        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_FRAGMENT_SHADER)
     );
 
 

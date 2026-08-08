@@ -20,9 +20,21 @@ namespace scene::lights
         float cosine_outer_cut_off_rad_;
 
     public:
-        SpotLight(const std::string& name, const std::weak_ptr<scene::physical_objects::LightModelObject>& cone_model, 
-            glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 rgb_color, glm::vec3 position, glm::vec3 direction_,
-            float constant, float linear, float quadratic, float cut_off_rad, float outer_cut_off_rad);
+        SpotLight(
+            const std::string& name, 
+            const std::weak_ptr<scene::physical_objects::LightModelObject>& cone_model = {}, 
+            glm::vec3 ambient = glm::vec3(0.05f, 0.05f, 0.05f), 
+            glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
+            glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
+            glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
+            glm::vec3 position = glm::vec3(0.0f, 10.0f, 0.0f), 
+            glm::vec3 direction_ = glm::vec3(0.0f, -1.0f, 0.0f),
+            float constant = 1.0f, 
+            float linear = 0.09f, 
+            float quadratic = 0.032f, 
+            float cut_off_rad = glm::radians(25.0f), 
+            float outer_cut_off_rad = glm::radians(30.0f)
+        );
         std::string get_name() const override;
         LightType get_type() const override;
         void upload_components(Shader &obj_shader, size_t light_idx) const override;
@@ -42,6 +54,7 @@ namespace scene::lights
         void set_outer_cut_off(float degrees);
         float get_outer_cut_off() const;
 
+        void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };
 

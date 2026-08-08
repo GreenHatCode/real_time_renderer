@@ -480,15 +480,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
     {
     case scene::lights::LightType::DIRECTIONAL_LIGHT:
         try {
-            // example/default values for directional light properties
-            std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(
-                name,
-                glm::vec3(0.2f, 0.2f, 0.2f),  // Ambient
-                glm::vec3(0.8f, 0.8f, 0.8f),  // Diffuse
-                glm::vec3(1.0f, 1.0f, 1.0f),  // Specular
-                glm::vec3(1.0f, 0.98f, 0.9f), // RGB Color
-                glm::vec3(1.0f, 0.0f, 0.0f)   // Direction
-            );
+            std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(name);
             scene_->add_light(name, dl);
 
         } catch (const std::exception& e) {
@@ -497,38 +489,24 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
         break;
     case scene::lights::LightType::POINT_LIGHT:
         try {
-            std::shared_ptr<Shader> model_shader = scene_->get_shader(std::string(scene::physical_objects::physical_light_object_constants::ShaderName));
+            std::shared_ptr<Shader> model_shader = scene_->get_shader(std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME));
             if (model_shader == nullptr) {
                 spdlog::error("Failed to load point light model {}. Required shader with name={}", 
-                    scene::physical_objects::physical_light_object_constants::LightSphereModel.data(), 
-                    scene::physical_objects::physical_light_object_constants::ShaderName.data());
+                    scene::physical_objects::physical_light_object_constants::LIGHT_SPHERE_MODEL_FILE.data(), 
+                    scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME.data());
                 return;
             }
 
+            std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(name);
             std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
                 std::make_shared<scene::physical_objects::LightModelObject>(
-                    name + "_obj",
-                    scene::physical_objects::physical_light_object_constants::LightSphereModel,
-                    glm::vec3(1.0f, 1.0f, 1.0f),
+                    name + std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_NAME_SUFFIX),
+                    scene::physical_objects::physical_light_object_constants::LIGHT_SPHERE_MODEL_FILE,
+                    pl->get_color(),
                     model_shader
             );
             
-            // example/default values for point light properties
-            std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(
-                name,
-                light_model,
-                glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
-                glm::vec3(0.8f, 0.8f, 0.8f),    // Diffuse
-                glm::vec3(1.0f, 1.0f, 1.0f),    // Specular
-                glm::vec3(1.0f, 1.0f, 1.0f),    // RGB Color
-                glm::vec3(1.2f, 1.0f, 2.0f),    // Position
-                1.0f,                           // Constant (Kc)
-                0.09f,                          // Linear (Kl)
-                0.032f                          // Quadratic (Kq) for a ~50 distance radius
-            );
-
-            light_model->set_color(pl->get_color());
-            
+            pl->set_model_ptr(light_model);
             scene_->add_light(name, pl);
             scene_->add_object(light_model->get_name(), light_model);
         } catch (const std::exception& e) {
@@ -537,43 +515,28 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
         break;
     case scene::lights::LightType::SPOT_LIGHT:
         try {
-            std::shared_ptr<Shader> model_shader = scene_->get_shader(std::string(scene::physical_objects::physical_light_object_constants::ShaderName));
+            std::shared_ptr<Shader> model_shader = scene_->get_shader(std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME));
             if (model_shader == nullptr) {
                 spdlog::error("Failed to load spot light model {}. Required shader with name={}", 
-                    scene::physical_objects::physical_light_object_constants::LightConeModel.data(), 
-                    scene::physical_objects::physical_light_object_constants::ShaderName.data());
+                    scene::physical_objects::physical_light_object_constants::LIGHT_CONE_MODEL_FILE.data(), 
+                    scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME.data());
                 return;
             }
 
+            std::shared_ptr<scene::lights::SpotLight> spl = std::make_shared<scene::lights::SpotLight>(name);
             std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
                 std::make_shared<scene::physical_objects::LightModelObject>(
-                    name + "_obj",
-                    scene::physical_objects::physical_light_object_constants::LightConeModel,
-                    glm::vec3(1.0f, 1.0f, 1.0f),
+                    name + std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_NAME_SUFFIX),
+                    scene::physical_objects::physical_light_object_constants::LIGHT_CONE_MODEL_FILE,
+                    spl->get_color(),
                     model_shader
             );
             
-            // example/default values for spot light properties
-            std::shared_ptr<scene::lights::SpotLight> pl = std::make_shared<scene::lights::SpotLight>(
-                name,
-                light_model,
-                glm::vec3(0.05f, 0.05f, 0.05f), // Ambient
-                glm::vec3(0.8f, 0.8f, 0.8f),    // Diffuse
-                glm::vec3(1.0f, 1.0f, 1.0f),    // Specular
-                glm::vec3(1.0f, 1.0f, 1.0f),    // RGB Color
-                glm::vec3(0.0f, 10.0f, 0.0f),    // Position
-                glm::vec3(0.0f, -1.0f, 0.0f),    // Direction
-                1.0f,                           // Constant (Kc)
-                0.09f,                          // Linear (Kl)
-                0.032f,                         // Quadratic (Kq) for a ~50 distance radius
-                glm::radians(25.0f),                           // Cut off in radians
-                glm::radians(30.0f)                            // Outer cut off in radians
-            );
 
-            light_model->set_color(pl->get_color());
+            spl->set_model_ptr(light_model);
             light_model->scale(glm::vec3(0.15f)); // TODO: use normal model
             
-            scene_->add_light(name, pl);
+            scene_->add_light(name, spl);
             scene_->add_object(light_model->get_name(), light_model);
         } catch (const std::exception& e) {
             spdlog::error("Failed to add PointLight: {}", e.what());

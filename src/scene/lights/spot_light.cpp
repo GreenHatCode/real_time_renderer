@@ -101,6 +101,11 @@ float scene::lights::SpotLight::get_outer_cut_off() const
     return glm::degrees(glm::acos(cosine_outer_cut_off_rad_));
 }
 
+void scene::lights::SpotLight::set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject> &value)
+{
+    light_cone_ = value;
+}
+
 std::weak_ptr<scene::physical_objects::LightModelObject> scene::lights::SpotLight::get_model_ptr() const
 {
     return light_cone_;
