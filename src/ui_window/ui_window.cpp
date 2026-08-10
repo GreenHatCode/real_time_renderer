@@ -420,11 +420,11 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
 
     auto linear = light.get_linear();
     if (ImGui::DragFloat("Linear", &linear, 0.05f))
-        light.set_constant(linear);
+        light.set_linear(linear);
 
     auto quadratic = light.get_quadratic();
     if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
-        light.set_constant(quadratic);
+        light.set_quadratic(quadratic);
 
     auto cut_off = light.get_cut_off();
     if (ImGui::DragFloat("Cut off angle (degrees)", &cut_off, 0.05f))
