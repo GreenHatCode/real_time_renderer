@@ -14,7 +14,7 @@ class App {
 
     std::unique_ptr<ICamera> camera_;
     std::shared_ptr<scene::Scene> scene_;
-    std::unique_ptr<Renderer> renderer_;
+    std::unique_ptr<renderer::Renderer> renderer_;
     std::unique_ptr<UIWindow> imgui_window_;
 
     GLFWwindow *window_;
@@ -25,6 +25,7 @@ class App {
 
     // initial configuration
     void initialize_opengl();
+    void load_default_content();
 
     // wrappers for C OpenGL api
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);

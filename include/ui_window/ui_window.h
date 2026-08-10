@@ -79,6 +79,8 @@ private:
     void render_point_light_editor(scene::lights::PointLight& light);
     void render_spot_light_editor(scene::lights::SpotLight& light);
 
+    void set_light_model_selected(const std::shared_ptr<scene::lights::LightBase>& light_ptr, bool selected);
+
 public: // dev methods to add models and shader by hand from code
     void load_model(const std::string& shader_name, const std::string& name, const std::filesystem::path& file_path);
     void load_shader(const std::string& name, const std::filesystem::path& vertex_shader_file, const std::filesystem::path& fragment_shader_file);

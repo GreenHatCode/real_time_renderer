@@ -49,6 +49,24 @@ void App::initialize_opengl()
     spdlog::info("GPU maximum fragment samplers: {}", maxTextureUnits);
 }
 
+void App::load_default_content()
+{
+    imgui_window_->load_shader(
+        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME), 
+        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_VERTEX_SHADER), 
+        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_FRAGMENT_SHADER)
+    );
+
+    imgui_window_->load_shader(
+        std::string(renderer::defaults::OUTLINE_SHADER_NAME), 
+        std::string(renderer::defaults::OUTLINE_VERTEX_SHADER), 
+        std::string(renderer::defaults::OUTLINE_FRAGMENT_SHADER)
+    );
+
+
+    spdlog::info("Loaded default content, please do not delete it");
+}
+
 void App::framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     App* app_ptr = static_cast<App*>(glfwGetWindowUserPointer(window));
@@ -188,19 +206,11 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
     scene_ = std::make_shared<scene::Scene>();
     imgui_window_ = std::make_unique<UIWindow>(scene_);
-    renderer_ = std::make_unique<Renderer>(scene_);
+    renderer_ = std::make_unique<renderer::Renderer>(scene_);
 
     spdlog::info("Created app with screen size: width={}, height={}", screen_width, screen_height);
 
-
-    imgui_window_->load_shader(
-        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_SHADER_NAME), 
-        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_VERTEX_SHADER), 
-        std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_FRAGMENT_SHADER)
-    );
-
-
-    spdlog::info("Loaded default models and shaders, please do not delete them");
+    load_default_content();
 }
 
 void App::load_sources_debug() 
@@ -213,7 +223,6 @@ void App::load_sources_debug()
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
 
     imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
-
 }
 
 int32_t App::run()
