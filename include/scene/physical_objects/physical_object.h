@@ -12,6 +12,8 @@ namespace scene::physical_objects
         glm::quat rotation_quat_;
         glm::vec3 scaling_vec_;
 
+        bool selected_;
+
     public:
         PhysicalObject();
         void move(glm::vec3 move_vector);
@@ -23,6 +25,10 @@ namespace scene::physical_objects
         glm::vec3 get_scaling_vector() const;
 
         glm::mat4 model_matrix() const;
+        glm::mat4 normal_matrix() const;
+
+        bool is_selected() const;
+        void set_selected(bool selected);
 
         virtual ~PhysicalObject() = default;
     };

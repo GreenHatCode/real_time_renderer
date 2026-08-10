@@ -5,6 +5,7 @@ scene::physical_objects::PhysicalObject::PhysicalObject()
     : move_vector_(0.0f, 0.0f, 0.0f)
     , rotation_quat_(1.0f, 0.0f, 0.0f, 0.0f)
     , scaling_vec_(1.0f, 1.0f, 1.0f)
+    , selected_(false)
 {
 }
 
@@ -46,4 +47,19 @@ glm::mat4 scene::physical_objects::PhysicalObject::model_matrix() const
     model = glm::scale(model, scaling_vec_);
 
     return model;
+}
+
+glm::mat4 scene::physical_objects::PhysicalObject::normal_matrix() const
+{
+    return glm::transpose(glm::inverse(model_matrix()));
+}
+
+bool scene::physical_objects::PhysicalObject::is_selected() const
+{
+    return selected_;
+}
+
+void scene::physical_objects::PhysicalObject::set_selected(bool selected)
+{
+    selected_ = selected;
 }

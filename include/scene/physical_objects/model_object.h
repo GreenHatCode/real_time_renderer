@@ -17,7 +17,7 @@ namespace scene::physical_objects
         void set_shader(const std::shared_ptr<Shader>& shader) override;
         std::shared_ptr<Shader> get_shader() const override;
         std::string get_name() const override;
-        void render() const override;
+        void render(const std::shared_ptr<Shader>& specific_shader = nullptr) const override;
 
     };
 

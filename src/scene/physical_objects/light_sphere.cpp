@@ -41,17 +41,23 @@ std::string scene::physical_objects::LightModelObject::get_name() const
     return name_;
 }
 
-void scene::physical_objects::LightModelObject::render() const
+void scene::physical_objects::LightModelObject::render(const std::shared_ptr<Shader>& specific_shader) const
 {
     glm::mat4 model = model_matrix();
-    shader_->set_uniform("u_model_mat", model);
+    glm::mat3 normal_mat = glm::mat3(normal_matrix());    
 
-    model = glm::inverse(model);
-    model = glm::transpose(model);
-    shader_->set_uniform("u_normal_mat", glm::mat3(model));
+    if (specific_shader == nullptr) { // render using model's shader
+        shader_->set_uniform("u_model_mat", model);
+        shader_->set_uniform("u_normal_mat", normal_mat);
+        shader_->set_uniform("u_light_object_color", color_);
+        model_.draw(*shader_);
+    } else {
+        specific_shader->set_uniform("u_model_mat", model);
+        specific_shader->set_uniform("u_normal_mat", normal_mat);
+        specific_shader->set_uniform("u_light_object_color", color_);
+        model_.draw(*specific_shader);
+    }
 
-    shader_->set_uniform("u_light_object_color", color_);
-    model_.draw(*shader_);
 }
 
 void scene::physical_objects::LightModelObject::set_color(glm::vec3 color)
