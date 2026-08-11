@@ -17,7 +17,6 @@ namespace scene
 
     class Scene {
         std::unordered_map<std::string, std::shared_ptr<scene::physical_objects::PhysicalObject>> physical_objects_map_;
-        std::unordered_map<std::string, std::shared_ptr<scene::physical_objects::PhysicalLightObject>> physical_light_objects_map_;
         std::unordered_map<std::string, std::shared_ptr<scene::lights::LightBase>> lights_map_;
         std::unordered_map<std::string, std::shared_ptr<Shader>> shaders_map_;
         uint32_t total_vertices_count;

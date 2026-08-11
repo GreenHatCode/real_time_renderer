@@ -197,6 +197,10 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
     initialize_opengl();
 
+    //configure logging
+    spdlog::set_level(spdlog::level::debug);
+    
+
     // camera_ = std::make_unique<FreeCamera>(
     //     Projection::Perspective(45.0f, 0.1f, 300.0f), 
     //     glm::vec3(0.0f, 0.0f, -10.0f),

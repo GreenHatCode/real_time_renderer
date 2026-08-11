@@ -283,9 +283,12 @@ void UIWindow::render_lights_inspector()
 
             if (ImGui::Selectable(m->get_name().c_str(), selected)) {
                 if (selected) {
+                    set_light_model_selected(light_inspector_state_.selected_light_ptr, false);
                     light_inspector_state_.selected_light_ptr = nullptr;
                 } else {
+                    set_light_model_selected(light_inspector_state_.selected_light_ptr, false);
                     light_inspector_state_.selected_light_ptr = m;
+                    set_light_model_selected(light_inspector_state_.selected_light_ptr, true);
                 }
             }
 
@@ -464,9 +467,12 @@ void UIWindow::set_light_model_selected(const std::shared_ptr<scene::lights::Lig
             scene::lights::PointLight light = static_cast<scene::lights::PointLight &>(*light_ptr);
             if (auto model_ptr = light.get_model_ptr().lock()) {
                 model_ptr->set_selected(selected);
-            } else { 
+                spdlog::debug("Selected model {} to {}", model_ptr->get_name(), selected ? "true" : "false");
+            }
+            else
+            {
                 spdlog::warn("Failed to select point light model. Light name={}", light.get_name().c_str());
-            }  
+            }
         }
         break;
     case scene::lights::LightType::SPOT_LIGHT:
@@ -474,9 +480,12 @@ void UIWindow::set_light_model_selected(const std::shared_ptr<scene::lights::Lig
             scene::lights::SpotLight light = static_cast<scene::lights::SpotLight &>(*light_ptr);
             if (auto model_ptr = light.get_model_ptr().lock()) {
                 model_ptr->set_selected(selected);
-            } else { 
+                spdlog::debug("Selected model {} to {}", model_ptr->get_name(), selected ? "true" : "false");
+            }
+            else
+            {
                 spdlog::warn("Failed to select spot light model. Light name={}", light.get_name().c_str());
-            }  
+            }
         }
         break;
 
