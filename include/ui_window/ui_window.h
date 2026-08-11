@@ -79,6 +79,7 @@ private:
     void render_point_light_editor(scene::lights::PointLight& light);
     void render_spot_light_editor(scene::lights::SpotLight& light);
 
+    void set_model_selected(const std::shared_ptr<scene::physical_objects::PhysicalObject> &model_ptr, bool selected);
     void set_light_model_selected(const std::shared_ptr<scene::lights::LightBase>& light_ptr, bool selected);
 
 public: // dev methods to add models and shader by hand from code

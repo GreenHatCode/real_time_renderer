@@ -220,12 +220,12 @@ void UIWindow::render_model_inspector()
 
             if (ImGui::Selectable(m->get_name().c_str(), selected)) {
                 if (selected) {
-                    model_inspector_state_.selected_model_ptr->set_selected(false);
+                    set_model_selected(model_inspector_state_.selected_model_ptr, false);
                     model_inspector_state_.selected_model_ptr = nullptr;
                 } else {
-                    // if (model_inspector_state_.selected_model_ptr != nullptr) model_inspector_state_.selected_model_ptr->set_selected(false); // causes segfault
+                    set_model_selected(model_inspector_state_.selected_model_ptr, false);
                     model_inspector_state_.selected_model_ptr = m;
-                    model_inspector_state_.selected_model_ptr->set_selected(true);
+                    set_model_selected(model_inspector_state_.selected_model_ptr, true);
                 }
             }
 
@@ -283,12 +283,9 @@ void UIWindow::render_lights_inspector()
 
             if (ImGui::Selectable(m->get_name().c_str(), selected)) {
                 if (selected) {
-                    set_light_model_selected(light_inspector_state_.selected_light_ptr, false);
                     light_inspector_state_.selected_light_ptr = nullptr;
                 } else {
-                    // set_light_model_selected(light_inspector_state_.selected_light_ptr, false); // causes segfault
                     light_inspector_state_.selected_light_ptr = m;
-                    set_light_model_selected(light_inspector_state_.selected_light_ptr, true);
                 }
             }
 
@@ -441,8 +438,23 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
         light.set_outer_cut_off(outer_cut_off);
 }
 
+void UIWindow::set_model_selected(const std::shared_ptr<scene::physical_objects::PhysicalObject>& model_ptr, bool selected)
+{
+    if (model_ptr == nullptr) {
+        spdlog::debug("Attemp to select model by nullptr, selected: {}", selected ? "true" : "false");
+        return;
+    }
+
+    model_ptr->set_selected(selected);
+}
+
 void UIWindow::set_light_model_selected(const std::shared_ptr<scene::lights::LightBase> &light_ptr, bool selected)
 {
+    if (light_ptr == nullptr) {
+        spdlog::debug("Attemp to select light model by nullptr, selected: {}", selected ? "true" : "false");
+        return;
+    }
+
     switch (light_ptr->get_type())
     {
     case scene::lights::LightType::DIRECTIONAL_LIGHT: // no model, skip
