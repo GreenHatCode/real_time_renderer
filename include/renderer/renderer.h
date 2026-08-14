@@ -13,7 +13,7 @@ namespace renderer {
         inline constexpr std::string_view OUTLINE_SHADER_NAME = "stencil_outline";
         inline constexpr std::string_view OUTLINE_VERTEX_SHADER = "shaders_sources/stencil_outline/vertex_shader.vert";
         inline constexpr std::string_view OUTLINE_FRAGMENT_SHADER = "shaders_sources/stencil_outline/fragment_shader.frag";
-        inline constexpr float OUTLINE_WIDTH = 0.06f;
+        inline constexpr float OUTLINE_WIDTH = 0.1f;
         inline constexpr glm::vec3 OUTLINE_COLOR = glm::vec3(0.0f, 0.8f, 1.0f);
     } // namespace defaults
 

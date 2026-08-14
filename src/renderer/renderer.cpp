@@ -93,17 +93,21 @@ void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scen
 
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // discards all fragments whose stencil value is equeal to 1 (we have already drawn a normal model there)
     glStencilMask(0x00); // prevent writing to stencil buffer
-    glDisable(GL_DEPTH_TEST);
 
+#ifdef MERGED_OUTLINES
+    glDisable(GL_DEPTH_TEST);
+#endif
     // render object outline
     obj->render(shader_ptr);
 
     // return stencil settings to default
     glStencilMask(0xFF); // allow writing to stencil buffer
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
-    glEnable(GL_DEPTH_TEST);
 
-}
+#ifdef MERGED_OUTLINES
+    glEnable(GL_DEPTH_TEST);
+#endif
+}   
 
 Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     : scene_(scene)
