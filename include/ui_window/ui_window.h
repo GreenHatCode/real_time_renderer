@@ -83,7 +83,7 @@ private:
     void set_light_model_selected(const std::shared_ptr<scene::lights::LightBase>& light_ptr, bool selected);
 
 public: // dev methods to add models and shader by hand from code
-    void load_model(const std::string& shader_name, const std::string& name, const std::filesystem::path& file_path);
+    void load_model(const std::string& shader_name, const std::string& name, const std::filesystem::path& file_path, const glm::vec3& scale_vec = glm::vec3(1.0f, 1.0f, 1.0f));
     void load_shader(const std::string& name, const std::filesystem::path& vertex_shader_file, const std::filesystem::path& fragment_shader_file);
     void add_light(const std::string &name, scene::lights::LightType type);
 };

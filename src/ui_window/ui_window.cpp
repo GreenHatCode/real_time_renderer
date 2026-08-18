@@ -496,7 +496,7 @@ void UIWindow::set_light_model_selected(const std::shared_ptr<scene::lights::Lig
     }
 }
 
-void UIWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path)
+void UIWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path, const glm::vec3& scale_vec)
 {
     std::shared_ptr<Shader> model_shader = scene_->get_shader(shader_name);
     if (model_shader == nullptr) {
@@ -509,6 +509,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
             assimp_wrapper::Model(
                 file_path,
                 aiProcess_Triangulate |
+                aiProcess_GenNormals |
                 aiProcess_JoinIdenticalVertices |
                 aiProcess_ImproveCacheLocality |
                 aiProcess_ValidateDataStructure
@@ -517,6 +518,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
         );
 
         loaded_model->set_shader(model_shader);
+        loaded_model->scale(scale_vec);
         scene_->add_object(name, loaded_model);
     } catch (const std::exception &e) {
         spdlog::error("Caught exception during loading model {}, what: {}", file_path.c_str(), e.what());
