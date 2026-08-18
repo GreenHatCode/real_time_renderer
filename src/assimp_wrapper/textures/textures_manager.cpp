@@ -120,7 +120,6 @@ textures_vector assimp_wrapper::TexturesManager::load_file_textures(aiMaterial *
             uint8_t *data = stbi_load(texture_file_path.c_str(), &width, &height, &components_number, 0);
             if (!data) {
                 spdlog::error("Failed to load texture form file: texture_file_path={}", texture_file_path.c_str());
-                stbi_image_free(data);
                 throw std::runtime_error("Failed to load texture form file");
             }
 

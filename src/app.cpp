@@ -223,8 +223,9 @@ void App::load_sources_debug()
     imgui_window_->load_shader("lighting", "shaders_sources/lighting/vertex_shader.vert", "shaders_sources/lighting/fragment_shader.frag");
     imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
 
-    imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");    
+    // imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");   
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
+    imgui_window_->load_model("lighting", "glass", "resources/multi_cube/tinker.obj");
 
     imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
 }

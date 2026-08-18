@@ -11,8 +11,6 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
-    shader_ptr->set_uniform("u_object_color", glm::vec3(1.0f, 0.5f, 0.31f)); // TODO:: debug, remove in release
-
     uint32_t directional_light_idx = 0;
     uint32_t point_light_idx = 0;
     uint32_t spot_light_idx = 0;

@@ -3,8 +3,8 @@
 
 using namespace assimp_wrapper;
 
-Material::Material(const std::vector<std::shared_ptr<Texture2D>>& textures) 
-    : textures_(textures)
+Material::Material(const glm::vec4& color, float opacity, const std::vector<std::shared_ptr<Texture2D>>& textures) 
+    : color_(color), opacity_(opacity), textures_(textures)
 { }
 
 void Material::bind(Shader& shader) const{
@@ -47,6 +47,9 @@ void Material::bind(Shader& shader) const{
     shader.set_uniform("specular_count", specular_sampler_idx+1);
     shader.set_uniform("height_count", normal_sampler_idx+1);
     shader.set_uniform("ambient_count", height_sampler_idx+1);
+
+    shader.set_uniform("u_base_color", color_);
+    shader.set_uniform("u_opacity", opacity_);
 }
 
 
