@@ -95,7 +95,7 @@ void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scen
     glStencilMask(0x00); // prevent writing to stencil buffer
 
 #ifdef MERGED_OUTLINES
-    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 #endif
     // render object outline
     obj->render(shader_ptr);
@@ -105,7 +105,7 @@ void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scen
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
 
 #ifdef MERGED_OUTLINES
-    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 #endif
 }   
 
@@ -114,6 +114,7 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glEnable(GL_STENCIL_TEST);
