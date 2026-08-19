@@ -24,6 +24,9 @@ namespace renderer {
         Shader* curr_shader_ptr_; // can be a dangling pointer
         std::vector<std::shared_ptr<scene::lights::LightBase>> scene_lights_buffer_;
 
+        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> opaque_objects_;
+        std::map<float, std::shared_ptr<scene::physical_objects::PhysicalObject>> transparent_objects_;
+
         glm::mat4 view_mat_;
         glm::mat4 projection_mat_;
         glm::vec3 camera_position_;

@@ -1,4 +1,5 @@
 #include "renderer/renderer.h"
+#include "glm/gtx/norm.hpp"
 
 using namespace renderer;
 
@@ -63,8 +64,6 @@ void Renderer::render_scene_object(const std::shared_ptr<const scene::physical_o
     } else { // normal render
         obj->render();
     }
-
-
 }
 
 void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender> &obj)
@@ -134,8 +133,24 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     scene_lights_buffer_ = scene_->get_lights();
+
+    // rewrite into render queue to hide this
     for (const auto &obj : scene_->get_objects())
     {
+        if (obj->is_transparent()) {
+            float distance = glm::length2(camera_position - obj->get_move_vector());
+
+            transparent_objects_.emplace(distance, obj);
+        }
+        else {
+            opaque_objects_.push_back(obj);
+        }
+    }
+
+    for (const auto& obj: opaque_objects_) {
+        render_scene_object(obj);
+    }
+    for (const auto& [dist, obj]: transparent_objects_) {
         render_scene_object(obj);
     }
 

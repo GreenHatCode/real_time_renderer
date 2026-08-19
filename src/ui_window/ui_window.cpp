@@ -512,7 +512,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
 
         loaded_model->set_shader(model_shader);
         loaded_model->scale(scale_vec);
-        scene_->add_object(name, loaded_model);
+        scene_->add_object(loaded_model);
     } catch (const std::exception &e) {
         spdlog::error("Caught exception during loading model {}, what: {}", file_path.c_str(), e.what());
     }
@@ -522,7 +522,7 @@ void UIWindow::load_shader(const std::string &name, const std::filesystem::path 
 {
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(name, vertex_shader_file.c_str(), fragment_shader_file.c_str());
-        scene_->add_shader(name, shader);
+        scene_->add_shader(shader);
 
     } catch (const std::exception& e) {
         spdlog::error("Failed to load shader: {}", e.what());
@@ -537,7 +537,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
     case scene::lights::LightType::DIRECTIONAL_LIGHT:
         try {
             std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(name);
-            scene_->add_light(name, dl);
+            scene_->add_light(dl);
 
         } catch (const std::exception& e) {
             spdlog::error("Failed to add DirectionalLight: {}", e.what());
@@ -563,8 +563,8 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             );
             
             pl->set_model_ptr(light_model);
-            scene_->add_light(name, pl);
-            scene_->add_object(light_model->get_name(), light_model);
+            scene_->add_light(pl);
+            scene_->add_object(light_model);
         } catch (const std::exception& e) {
             spdlog::error("Failed to add PointLight: {}", e.what());
         }
@@ -592,8 +592,8 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             spl->set_model_ptr(light_model);
             light_model->scale(glm::vec3(0.15f)); // TODO: use normal model
             
-            scene_->add_light(name, spl);
-            scene_->add_object(light_model->get_name(), light_model);
+            scene_->add_light(spl);
+            scene_->add_object(light_model);
         } catch (const std::exception& e) {
             spdlog::error("Failed to add PointLight: {}", e.what());
         }
