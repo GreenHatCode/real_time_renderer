@@ -22,7 +22,6 @@ void scene::Scene::add_shader(const std::string &name, const std::shared_ptr<Sha
 
 bool scene::Scene::delete_scene_object(const std::string &name)
 {
-    // add decreasing faces and vertices count
     if (physical_objects_map_.find(name) != physical_objects_map_.end()) {
         physical_objects_map_.erase(name);
         return true;

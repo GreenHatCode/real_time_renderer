@@ -118,6 +118,7 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilMask(0x00);
 }
 
 void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position)
