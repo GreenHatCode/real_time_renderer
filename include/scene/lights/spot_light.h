@@ -1,7 +1,7 @@
 #pragma once 
 #include "scene/lights/light_base.h"
 #include <string>
-#include "scene/physical_objects/light_sphere.h"
+#include "scene/physical_objects/light_model_object.h"
 
 namespace scene::lights
 {

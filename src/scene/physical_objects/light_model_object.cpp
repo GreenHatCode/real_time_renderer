@@ -1,4 +1,4 @@
-#include "scene/physical_objects/light_sphere.h"
+#include "scene/physical_objects/light_model_object.h"
 #include "scene/lights/light_base.h"
 
 using namespace scene::physical_objects::physical_light_object_constants;
@@ -58,6 +58,11 @@ void scene::physical_objects::LightModelObject::render(const std::shared_ptr<Sha
         model_.draw(*specific_shader);
     }
 
+}
+
+bool scene::physical_objects::LightModelObject::is_transparent() const
+{
+    return model_.is_transparent();
 }
 
 void scene::physical_objects::LightModelObject::set_color(glm::vec3 color)
