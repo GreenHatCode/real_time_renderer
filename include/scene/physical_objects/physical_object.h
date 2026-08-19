@@ -29,7 +29,8 @@ namespace scene::physical_objects
 
         bool is_selected() const;
         void set_selected(bool selected);
-
+        
+        virtual bool is_transparent() const = 0;
         virtual ~PhysicalObject() = default;
     };
 } // namespace scene::physical_objects

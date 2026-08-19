@@ -17,12 +17,15 @@ namespace assimp_wrapper
         TexturesManager textures_manager_;
         uint32_t vertices_count_;
         uint32_t faces_count_;
+
+        bool transparent_;
         
     public:
         Model(const std::filesystem::path &path, uint32_t postprocess_flags);
         void draw(Shader &shader_program) const;
         uint32_t get_vertices_count() const;
         uint32_t get_faces_count() const;
+        bool is_transparent() const;
 
     private:
         void load_model(const std::filesystem::path &path, uint32_t postprocess_flags);

@@ -5,6 +5,15 @@
 
 using namespace assimp_wrapper;
 
+assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
+    : textures_manager_(path.parent_path()), 
+    vertices_count_(0), 
+    faces_count_(0),
+    transparent_(false)
+{
+    load_model(path, postprocess_flags);
+}
+
 void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32_t postprocess_flags)
 {
     Assimp::Importer importer;
@@ -95,18 +104,11 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
         aiColor4D color{1.0f};
         material_ptr->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 
-        float opacity = 1.0f;
-        material_ptr->Get(AI_MATKEY_OPACITY, opacity);
+        if (color.a < 1.0f) transparent_ = true;
 
-        Material material(glm::vec4(color.r, color.g, color.g, color.a), opacity, textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
+        Material material(glm::vec4(color.r, color.g, color.g, color.a), color.a, textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
         materials_.push_back(material);
     }
-}
-
-assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
-    : textures_manager_(path.parent_path()), vertices_count_(0), faces_count_(0)
-{
-    load_model(path, postprocess_flags);
 }
 
 void assimp_wrapper::Model::draw(Shader &shader_program) const
@@ -125,4 +127,9 @@ uint32_t assimp_wrapper::Model::get_vertices_count() const
 uint32_t assimp_wrapper::Model::get_faces_count() const
 {
     return faces_count_;
+}
+
+bool assimp_wrapper::Model::is_transparent() const
+{
+    return transparent_;
 }

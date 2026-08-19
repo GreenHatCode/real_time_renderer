@@ -50,4 +50,7 @@ void scene::physical_objects::ModelObject::render(const std::shared_ptr<Shader>&
     
 }
 
-
+bool scene::physical_objects::ModelObject::is_transparent() const
+{
+    return model_.is_transparent();
+}
