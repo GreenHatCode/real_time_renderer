@@ -12,7 +12,8 @@ namespace assimp_wrapper
 {
 
     class Model final {
-        std::vector<Mesh> meshes_;
+        std::vector<Mesh> opaque_meshes_;
+        std::vector<Mesh> transparent_meshes_;
         std::vector<Material> materials_;
         TexturesManager textures_manager_;
         uint32_t vertices_count_;
@@ -22,7 +23,7 @@ namespace assimp_wrapper
         
     public:
         Model(const std::filesystem::path &path, uint32_t postprocess_flags);
-        void draw(Shader &shader_program) const;
+        void draw(bool draw_transparent, Shader &shader_program) const;
         uint32_t get_vertices_count() const;
         uint32_t get_faces_count() const;
         bool is_transparent() const;

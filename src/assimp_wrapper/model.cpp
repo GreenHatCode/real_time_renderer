@@ -30,19 +30,28 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
     spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", path.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
 
     materials_.reserve(scene->mNumMaterials);
-    meshes_.reserve(scene->mNumMeshes);
+    opaque_meshes_.reserve(scene->mNumMeshes); // count how many transparent and opaque materials during materials loading
+    transparent_meshes_.reserve(scene->mNumMeshes);
 
     load_materials(scene); // load all meterial once
     process_node(scene->mRootNode, scene);
 }
 
+// todo: recursion
 void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
 {
     // processing all meshes in selected node
     for (size_t i = 0; i < node->mNumMeshes; ++i)
     {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes_.push_back(process_mesh(mesh, scene));
+        bool transparent = materials_[mesh->mMaterialIndex].get_opacity() < 1.0f;
+        
+        if (transparent) {
+            transparent_meshes_.push_back(process_mesh(mesh, scene));
+        }
+        else {
+            opaque_meshes_.push_back(process_mesh(mesh, scene));
+        }
     }
 
     // do the same for all child items
@@ -104,18 +113,27 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
         aiColor4D color{1.0f};
         material_ptr->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 
-        if (color.a < 1.0f) transparent_ = true;
+        float opacity = 1.0f;
+        material_ptr->Get(AI_MATKEY_OPACITY, opacity);
 
-        Material material(glm::vec4(color.r, color.g, color.g, color.a), color.a, textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
+        Material material(glm::vec4(color.r, color.g, color.b, color.a), opacity, textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
         materials_.push_back(material);
     }
 }
 
-void assimp_wrapper::Model::draw(Shader &shader_program) const
+void assimp_wrapper::Model::draw(bool draw_transparent, Shader &shader_program) const
 {
-    for (auto& mesh : meshes_) {
-        materials_[mesh.get_material_index()].bind(shader_program);
-        mesh.render();
+    if (draw_transparent) {
+        for (auto& mesh : transparent_meshes_) {
+            materials_[mesh.get_material_index()].bind(shader_program);
+            mesh.render();
+        }
+    }
+    else {
+        for (auto& mesh : opaque_meshes_) {
+            materials_[mesh.get_material_index()].bind(shader_program);
+            mesh.render();
+        }
     }
 }
 
@@ -131,5 +149,5 @@ uint32_t assimp_wrapper::Model::get_faces_count() const
 
 bool assimp_wrapper::Model::is_transparent() const
 {
-    return transparent_;
+    return !transparent_meshes_.empty();
 }

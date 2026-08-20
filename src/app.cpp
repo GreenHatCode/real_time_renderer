@@ -227,7 +227,7 @@ void App::load_sources_debug()
 
     // imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");   
     // imgui_window_->load_model("lighting", "wuson", "resources/assimp-mdb/model-db/Obj/Wuson/WusonOBJ.obj");
-    imgui_window_->load_model("lighting", "glass", "resources/multi_cube/tinker.obj");
+    imgui_window_->load_model("blending", "multi_cube", "resources/multi_cube/tinker.obj");
 
     imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
 }

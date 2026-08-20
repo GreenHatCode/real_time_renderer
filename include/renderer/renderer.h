@@ -38,8 +38,8 @@ namespace renderer {
         void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
         void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
-        void render_scene_object(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
-        void render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void render_scene_object(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void render_scene_object_with_outline(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender>& obj);
 
     public:
         Renderer(std::shared_ptr<const scene::Scene> scene);

@@ -41,7 +41,7 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
 
 }
 
-void Renderer::render_scene_object(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
+void Renderer::render_scene_object(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender>& obj)
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
     if (shader_ptr == nullptr) {
@@ -60,19 +60,19 @@ void Renderer::render_scene_object(const std::shared_ptr<const scene::physical_o
 
 
     if (obj->is_selected()) { // render with outline
-        render_scene_object_with_outline(obj);
+        render_scene_object_with_outline(transparent, obj);
     } else { // normal render
-        obj->render();
+        obj->render(transparent);
     }
 }
 
-void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender> &obj)
+void Renderer::render_scene_object_with_outline(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender> &obj)
 {
     // render normal object with writing to stencil buffer
     // to mark pixels that we have painted 
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
     glStencilMask(0xFF); // allow writing to stencil buffer
-    obj->render();
+    obj->render(transparent);
 
     // select outline shader
     std::shared_ptr<Shader> shader_ptr = scene_->get_shader(std::string(defaults::OUTLINE_SHADER_NAME.data()));
@@ -95,7 +95,7 @@ void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scen
     glDepthMask(GL_FALSE);
 #endif
     // render object outline
-    obj->render(shader_ptr);
+    obj->render(transparent, shader_ptr);
 
     // return stencil settings to default
     glStencilMask(0xFF); // allow writing to stencil buffer
@@ -118,6 +118,10 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glStencilMask(0x00);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 }
 
 void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position)
@@ -135,11 +139,12 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
     scene_lights_buffer_ = scene_->get_lights();
 
     // rewrite into render queue to hide this
+    transparent_objects_.clear();
+    opaque_objects_.clear();
     for (const auto &obj : scene_->get_objects())
     {
         if (obj->is_transparent()) {
             float distance = glm::length2(camera_position - obj->get_move_vector());
-
             transparent_objects_.emplace(distance, obj);
         }
         else {
@@ -148,10 +153,13 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
     }
 
     for (const auto& obj: opaque_objects_) {
-        render_scene_object(obj);
+        render_scene_object(false, obj);
     }
     for (const auto& [dist, obj]: transparent_objects_) {
-        render_scene_object(obj);
+        render_scene_object(false, obj);
+    }
+    for (const auto& [dist, obj]: transparent_objects_) {
+        render_scene_object(true, obj);
     }
 
     profiler_.end_gpu_profiling_query();

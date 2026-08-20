@@ -7,6 +7,11 @@ Material::Material(const glm::vec4& color, float opacity, const std::vector<std:
     : color_(color), opacity_(opacity), textures_(textures)
 { }
 
+float assimp_wrapper::Material::get_opacity() const
+{
+    return opacity_;
+}
+
 void Material::bind(Shader& shader) const{
 
     uint32_t diffuse_sampler_idx = 0;
