@@ -114,7 +114,15 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
         material_ptr->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 
         float opacity = 1.0f;
-        material_ptr->Get(AI_MATKEY_OPACITY, opacity);
+        if (material_ptr->Get(AI_MATKEY_OPACITY, opacity) != AI_SUCCESS) {
+            opacity = color.a; 
+        } else {
+            color.a = opacity;
+        }
+
+        aiString mat_name;
+        material_ptr->Get(AI_MATKEY_NAME, mat_name);
+        spdlog::info("Loaded Material: {} | Opacity: {}", mat_name.C_Str(), opacity);
 
         Material material(glm::vec4(color.r, color.g, color.b, color.a), opacity, textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
         materials_.push_back(material);
