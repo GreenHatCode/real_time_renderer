@@ -3,6 +3,23 @@
 
 using namespace renderer;
 
+Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
+    : scene_(scene)
+{
+    // OpenGL configuration
+    glEnable(GL_DEPTH_TEST);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glStencilMask(0x00);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+}
+
 void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
     shader_ptr->set_uniform("u_view_mat", view_mat_);
@@ -41,7 +58,32 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
 
 }
 
-void Renderer::render_scene_object(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender>& obj)
+void renderer::Renderer::build_rendering_queues()
+{
+    opaque_objects_.clear();
+    transparent_objects_.clear();
+    for (const auto &obj : scene_->get_objects())
+    {
+        if (obj->is_transparent()) {
+            float distance = glm::length2(camera_position_ - obj->get_move_vector());
+            transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance});
+        }
+        else {
+            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f});
+        }
+    }
+
+    std::sort(
+        transparent_objects_.begin(), 
+        transparent_objects_.end(), 
+        [](const RenderQueueObject& lhs, const RenderQueueObject& rhs) 
+        { 
+            return lhs.distance_to_viewer > rhs.distance_to_viewer; 
+        }
+    );
+}
+
+void renderer::Renderer::use_object_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
     if (shader_ptr == nullptr) {
@@ -57,22 +99,53 @@ void Renderer::render_scene_object(bool transparent, const std::shared_ptr<const
 
     set_general_shader_uniforms(shader_ptr);
     set_lighting_shader_uniforms(shader_ptr);
+}
 
-
-    if (obj->is_selected()) { // render with outline
-        render_scene_object_with_outline(transparent, obj);
-    } else { // normal render
-        obj->render(transparent);
+void Renderer::render_opaque_scene_objects()
+{
+    for (const auto& obj: opaque_objects_) {
+        use_object_shader(obj.obj_ptr);
+        if (obj.obj_ptr->is_selected()) {
+            render_scene_object_with_outline(false, obj.obj_ptr); 
+        }
+        else {
+            obj.obj_ptr->render(false);
+        }
+        
     }
 }
 
-void Renderer::render_scene_object_with_outline(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender> &obj)
+void renderer::Renderer::render_transparent_scene_objects()
 {
+    // render all opaque meshes first, then transparent
+    // the model can contain only transparent meshes,
+    // but can contain a mix of opaque and transparent
+    for (const auto& obj: transparent_objects_) {
+        use_object_shader(obj.obj_ptr);
+        if (obj.obj_ptr->is_selected()) {
+            render_scene_object_with_outline(false, obj.obj_ptr); 
+        }
+        else {
+            obj.obj_ptr->render(false); 
+        }
+    }
+
+    for (const auto& obj: transparent_objects_) {
+        glDepthMask(GL_FALSE);
+        obj.obj_ptr->render(true);
+        glDepthMask(GL_TRUE);
+    }
+}
+
+void Renderer::render_scene_object_with_outline(bool render_transparent_meshes, const std::shared_ptr<const scene::physical_objects::IRender>& obj)
+{
+    use_object_shader(obj);
+
     // render normal object with writing to stencil buffer
     // to mark pixels that we have painted 
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
     glStencilMask(0xFF); // allow writing to stencil buffer
-    obj->render(transparent);
+    obj->render(render_transparent_meshes);
 
     // select outline shader
     std::shared_ptr<Shader> shader_ptr = scene_->get_shader(std::string(defaults::OUTLINE_SHADER_NAME.data()));
@@ -95,7 +168,7 @@ void Renderer::render_scene_object_with_outline(bool transparent, const std::sha
     glDepthMask(GL_FALSE);
 #endif
     // render object outline
-    obj->render(transparent, shader_ptr);
+    obj->render(render_transparent_meshes, shader_ptr);
 
     // return stencil settings to default
     glStencilMask(0xFF); // allow writing to stencil buffer
@@ -138,29 +211,9 @@ void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& 
 
     scene_lights_buffer_ = scene_->get_lights();
 
-    // rewrite into render queue to hide this
-    transparent_objects_.clear();
-    opaque_objects_.clear();
-    for (const auto &obj : scene_->get_objects())
-    {
-        if (obj->is_transparent()) {
-            float distance = glm::length2(camera_position - obj->get_move_vector());
-            transparent_objects_.emplace(distance, obj);
-        }
-        else {
-            opaque_objects_.push_back(obj);
-        }
-    }
-
-    for (const auto& obj: opaque_objects_) {
-        render_scene_object(false, obj);
-    }
-    for (const auto& [dist, obj]: transparent_objects_) {
-        render_scene_object(false, obj);
-    }
-    for (const auto& [dist, obj]: transparent_objects_) {
-        render_scene_object(true, obj);
-    }
+    build_rendering_queues();
+    render_opaque_scene_objects();
+    render_transparent_scene_objects();
 
     profiler_.end_gpu_profiling_query();
     profiler_.end_cpu_profiling_query();

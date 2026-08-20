@@ -19,13 +19,19 @@ namespace renderer {
 
     class Renderer final {
 
+        struct RenderQueueObject {
+            std::shared_ptr<const scene::physical_objects::IRender> obj_ptr;
+            float distance_to_viewer;
+        };
+
+    private:
         profiling::SimpleProfiler profiler_;
         const std::shared_ptr<const scene::Scene> scene_;
         Shader* curr_shader_ptr_; // can be a dangling pointer
         std::vector<std::shared_ptr<scene::lights::LightBase>> scene_lights_buffer_;
 
-        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> opaque_objects_;
-        std::map<float, std::shared_ptr<scene::physical_objects::PhysicalObject>> transparent_objects_;
+        std::vector<RenderQueueObject> opaque_objects_;
+        std::vector<RenderQueueObject> transparent_objects_;
 
         glm::mat4 view_mat_;
         glm::mat4 projection_mat_;
@@ -38,8 +44,12 @@ namespace renderer {
         void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
         void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
-        void render_scene_object(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender>& obj);
-        void render_scene_object_with_outline(bool transparent, const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void build_rendering_queues();
+        void use_object_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void render_opaque_scene_objects();
+        void render_transparent_scene_objects();
+        
+        void render_scene_object_with_outline(bool render_transparent_meshes, const std::shared_ptr<const scene::physical_objects::IRender>& obj);
 
     public:
         Renderer(std::shared_ptr<const scene::Scene> scene);
