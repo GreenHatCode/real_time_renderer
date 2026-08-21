@@ -179,24 +179,6 @@ void Renderer::render_scene_object_with_outline(bool render_transparent_meshes, 
 #endif
 }   
 
-Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
-    : scene_(scene)
-{
-    // OpenGL configuration
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    glStencilMask(0x00);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-}
-
 void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position)
 {
     profiler_.begin_cpu_profiling_query();
