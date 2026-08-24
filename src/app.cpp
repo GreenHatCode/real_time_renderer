@@ -13,7 +13,7 @@ void App::initialize_opengl()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window_ = glfwCreateWindow(screen_width_, screen_height_, "Read-Time Renderer", NULL, NULL);
+    window_ = glfwCreateWindow(framebuffer_width_, framebuffer_height_, "Read-Time Renderer", NULL, NULL);
     if (window_ == NULL)
     {
         glfwTerminate();
@@ -31,6 +31,9 @@ void App::initialize_opengl()
     {
         throw std::runtime_error("Failed to initialize GLAD");
     }
+
+    glfwGetFramebufferSize(window_, &framebuffer_width_, &framebuffer_height_);
+
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -90,6 +93,8 @@ void App::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void App::framebuffer_size_callback_impl(int width, int height)
 {
+    framebuffer_width_ = width;
+    framebuffer_height_ = height;
     glViewport(0, 0, width, height);
 }
 
@@ -190,8 +195,8 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     , first_mouse_(true)
     , last_x_(screen_width/2.0f)
     , last_y_(screen_height/2.0f)
-    , screen_width_(screen_width)
-    , screen_height_(screen_height)
+    , framebuffer_width_(screen_width)
+    , framebuffer_height_(screen_height)
     , input_mode_(InputMode::UI)
 {
 
@@ -246,7 +251,12 @@ int32_t App::run()
         imgui_window_->render_window();
         ImGui::Render();
         
-        renderer_->render_scene(imgui_window_->get_clear_color(), camera_->view_matrix(), camera_->projection_matrix(screen_width_, screen_height_), camera_->get_position()); 
+
+        renderer_->set_clear_color(imgui_window_->get_clear_color());
+        renderer_->set_view_mat(camera_->view_matrix());
+        renderer_->set_projection_mat(camera_->projection_matrix(framebuffer_width_, framebuffer_height_));
+        renderer_->set_camera_position(camera_->get_position());
+        renderer_->render_scene(framebuffer_width_, framebuffer_height_); 
 
 
         imgui_window_->set_gpu_time_to_display(renderer_->get_gpu_time());
