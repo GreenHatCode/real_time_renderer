@@ -1,6 +1,7 @@
 #include "renderer/frame_buffer.h"
 #include "spdlog/spdlog.h"
 #include <exception>
+#include <sstream>
 
 FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	: width_(width), height_(height)
