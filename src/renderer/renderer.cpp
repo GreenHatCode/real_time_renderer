@@ -204,8 +204,10 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     render_opaque_scene_objects();
     render_transparent_scene_objects();
 
-    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING)
+    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.do_post_process(post_processing_type_);
+        curr_shader_ptr_->use(); // restore renderer's shader
+    }
 
     profiler_.end_gpu_profiling_query();
     profiler_.end_cpu_profiling_query();

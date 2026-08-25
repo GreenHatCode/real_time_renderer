@@ -23,12 +23,15 @@ renderer::PostProcessor::PostProcessor(GLsizei width, GLsizei height)
 
     glCreateVertexArrays(1, &vao_);
     glCreateBuffers(1, &vbo_);
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quat_vertices), quat_vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+    glBindVertexArray(0);
 }
 
 renderer::PostProcessor::~PostProcessor()
@@ -41,6 +44,7 @@ void renderer::PostProcessor::enable_off_sceen_rendering(GLsizei scr_width, GLsi
 {
     framebuffer_.rescale(scr_width, scr_height);
     framebuffer_.bind();
+    glEnable(GL_DEPTH_TEST);
 }
 
 void renderer::PostProcessor::do_post_process(PostProcessingTypes type)
@@ -48,11 +52,15 @@ void renderer::PostProcessor::do_post_process(PostProcessingTypes type)
     framebuffer_.unbind();
     glDisable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
-
+    
     post_processing_shaders_.at(type).use();
-    glBindVertexArray(vao_);
+
+    glActiveTexture(GL_TEXTURE0);
+    post_processing_shaders_.at(type).set_uniform("screen_texture", 0);
     glBindTexture(GL_TEXTURE_2D, framebuffer_.get_frame_texture());
+    glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
     // restore to defaults
     glEnable(GL_DEPTH_TEST);
