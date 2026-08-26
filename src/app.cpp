@@ -231,13 +231,13 @@ void App::load_sources_debug()
 
 
     // imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");   
-    imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj");
-    imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
-    imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
+    // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj");
+    // imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
+    // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
 
-    // imgui_window_->load_model("blending", "multi_cube", "resources/multi_cube/tinker.obj");
+    imgui_window_->load_model("blending", "multi_cube", "resources/multi_cube/tinker.obj");
 
-    imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
+    // imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
 }
 
 int32_t App::run()

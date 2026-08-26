@@ -5,7 +5,9 @@ renderer::PostProcessor::PostProcessor(GLsizei width, GLsizei height)
 {
     // fill map with shaders
     post_processing_shaders_.try_emplace(PostProcessingTypes::INVERSION, "inversion_shader", INVERSION_VERTEX_SHADER.data(), INVERSION_FRAGMENT_SHADER.data());
-
+    post_processing_shaders_.try_emplace(PostProcessingTypes::GRAYSCALE, "grayscale_shader", GRAYSCALE_VERTEX_SHADER.data(), GRAYSCALE_FRAGMENT_SHADER.data());
+    post_processing_shaders_.try_emplace(PostProcessingTypes::BLUR, "blur_shader", BLUR_VERTEX_SHADER.data(), BLUR_FRAGMENT_SHADER.data());
+    post_processing_shaders_.try_emplace(PostProcessingTypes::EDGE_DETECTION, "edge_detection_shader", EDGE_DETECTION_VERTEX_SHADER.data(), EDGE_DETECTION_FRAGMENT_SHADER.data());
 
     // allocate memory for quad that will be used
     // to render framebuffer on the final window

@@ -29,6 +29,12 @@ namespace renderer {
     class PostProcessor final {
         static constexpr std::string_view INVERSION_VERTEX_SHADER = "shaders_sources/post_processing/inversion/vertex_shader.vert";
         static constexpr std::string_view INVERSION_FRAGMENT_SHADER = "shaders_sources/post_processing/inversion/fragment_shader.frag";
+        static constexpr std::string_view GRAYSCALE_VERTEX_SHADER = "shaders_sources/post_processing/grayscale/vertex_shader.vert";
+        static constexpr std::string_view GRAYSCALE_FRAGMENT_SHADER = "shaders_sources/post_processing/grayscale/fragment_shader.frag";
+        static constexpr std::string_view BLUR_VERTEX_SHADER = "shaders_sources/post_processing/blur/vertex_shader.vert";
+        static constexpr std::string_view BLUR_FRAGMENT_SHADER = "shaders_sources/post_processing/blur/fragment_shader.frag";
+        static constexpr std::string_view EDGE_DETECTION_VERTEX_SHADER = "shaders_sources/post_processing/edge_detection/vertex_shader.vert";
+        static constexpr std::string_view EDGE_DETECTION_FRAGMENT_SHADER = "shaders_sources/post_processing/edge_detection/fragment_shader.frag";
 
         FrameBuffer framebuffer_;
         std::map<PostProcessingTypes, Shader> post_processing_shaders_;
