@@ -256,7 +256,7 @@ int32_t App::run()
         renderer_->set_view_mat(camera_->view_matrix());
         renderer_->set_projection_mat(camera_->projection_matrix(framebuffer_width_, framebuffer_height_));
         renderer_->set_camera_position(camera_->get_position());
-        renderer_->set_post_processing(renderer::PostProcessingTypes::INVERSION);
+        renderer_->set_post_processing(imgui_window_->get_post_processing_type());
         renderer_->render_scene(framebuffer_width_, framebuffer_height_);
 
         imgui_window_->set_gpu_time_to_display(renderer_->get_gpu_time());

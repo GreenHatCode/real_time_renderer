@@ -14,6 +14,7 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , cpu_time_to_display_(0.0)
     , clear_color_(0.2f, 0.1f, 0.1f, 1.0f)
     , delta_time_(0.0)
+    , selected_post_processing_type_(static_cast<int32_t>(renderer::PostProcessingTypes::NO_POST_PROCESSING))
 {
 
 }
@@ -24,7 +25,8 @@ void UIWindow::render_window()
 
     // rendering options
     ImGui::Text("Read-Timer Renderer");
-    ImGui::ColorEdit4("clear color", glm::value_ptr(clear_color_));
+    ImGui::ColorEdit4("Clear color", glm::value_ptr(clear_color_));
+    ImGui::Combo("Post processing", &selected_post_processing_type_, renderer::post_processing_types_names(), static_cast<int>(renderer::PostProcessingTypes::COUNT));    
     ImGui::Separator();
 
     
@@ -64,6 +66,11 @@ void UIWindow::render_window()
 glm::vec4 UIWindow::get_clear_color() const
 {
     return clear_color_;
+}
+
+renderer::PostProcessingTypes UIWindow::get_post_processing_type() const
+{
+    return static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_);
 }
 
 float UIWindow::get_delta_time() const

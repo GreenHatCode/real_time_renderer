@@ -10,8 +10,21 @@ namespace renderer {
         INVERSION,
         GRAYSCALE, 
         BLUR, 
-        EDGE_DETECTION
+        EDGE_DETECTION, 
+        COUNT
     };
+
+    inline const char* const* post_processing_types_names() 
+    {
+        static const char* names[] = {
+            "No post processing",
+            "Inversion",
+            "Grayscale",
+            "Blur",
+            "Edge detection"
+        };
+        return names;
+    }
 
     class PostProcessor final {
         static constexpr std::string_view INVERSION_VERTEX_SHADER = "shaders_sources/post_processing/inversion/vertex_shader.vert";
