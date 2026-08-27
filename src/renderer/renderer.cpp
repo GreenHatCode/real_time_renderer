@@ -5,6 +5,12 @@ using namespace renderer;
 
 Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     : scene_(scene)
+    , clear_color_rgba_(0.0)
+    , view_mat_(1.0)
+    , projection_mat_(1.0)
+    , camera_position_(1.0) 
+    , post_processor_(1, 1)
+    , post_processing_type_(PostProcessingTypes::NO_POST_PROCESSING)   
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -179,23 +185,29 @@ void Renderer::render_scene_object_with_outline(bool render_transparent_meshes, 
 #endif
 }   
 
-void Renderer::render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position)
+void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height)
 {
     profiler_.begin_cpu_profiling_query();
-
-    view_mat_ = view_mat;
-    projection_mat_ = projection_mat;
-    camera_position_ = camera_position;
-
     profiler_.begin_gpu_profiling_query();
-    glClearColor(clear_color_rgba.r, clear_color_rgba.g, clear_color_rgba.b, clear_color_rgba.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     scene_lights_buffer_ = scene_->get_lights();
+
+    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING)
+        post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);
+
+    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    
 
     build_rendering_queues();
     render_opaque_scene_objects();
     render_transparent_scene_objects();
+
+    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
+        post_processor_.do_post_process(post_processing_type_);
+        curr_shader_ptr_->use(); // restore renderer's shader
+    }
 
     profiler_.end_gpu_profiling_query();
     profiler_.end_cpu_profiling_query();
@@ -209,4 +221,29 @@ double Renderer::get_gpu_time() const
 double Renderer::get_cpu_time() const
 {
     return profiler_.cpu_elapsed_time();
+}
+
+void renderer::Renderer::set_clear_color(const glm::vec4 &clear_color_rgba)
+{
+    clear_color_rgba_ = clear_color_rgba;
+}
+
+void renderer::Renderer::set_view_mat(const glm::mat4 &view_mat)
+{
+    view_mat_ = view_mat;
+}
+
+void renderer::Renderer::set_projection_mat(const glm::mat4 &projection_mat)
+{
+    projection_mat_ = projection_mat;
+}
+
+void renderer::Renderer::set_camera_position(const glm::vec3 &camera_position)
+{
+    camera_position_ = camera_position;
+}
+
+void renderer::Renderer::set_post_processing(PostProcessingTypes type)
+{
+    post_processing_type_ = type;
 }

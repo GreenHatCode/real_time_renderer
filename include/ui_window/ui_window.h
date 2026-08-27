@@ -8,6 +8,7 @@
 #include "scene/lights/directional_light.h"
 #include "scene/lights/point_light.h"
 #include "scene/lights/spot_light.h"
+#include "renderer/post_processing/post_processor.h"
 #include <filesystem>
 
 class UIWindow final {
@@ -49,6 +50,7 @@ private: // do not expose outside
     AddLightDialog_t light_dialog_state_;
     ModelInspectorState_t model_inspector_state_;
     LightInspectorState_t light_inspector_state_;
+    int32_t selected_post_processing_type_;
 
     double gpu_time_to_display_;
     double cpu_time_to_display_;
@@ -61,6 +63,7 @@ public:
     UIWindow(const std::shared_ptr<scene::Scene>& scene);
     void render_window();
     glm::vec4 get_clear_color() const;
+    renderer::PostProcessingTypes get_post_processing_type() const;
     float get_delta_time() const;
 
     void set_gpu_time_to_display(double value);

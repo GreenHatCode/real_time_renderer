@@ -7,6 +7,7 @@
 #include "shader/shader.h"
 #include "scene/physical_objects/i_render.h"
 #include "renderer/simple_profiler.h"
+#include "renderer/post_processing/post_processor.h"
 
 namespace renderer {
     namespace defaults {
@@ -30,9 +31,13 @@ namespace renderer {
         Shader* curr_shader_ptr_; // can be a dangling pointer
         std::vector<std::shared_ptr<scene::lights::LightBase>> scene_lights_buffer_;
 
+        PostProcessor post_processor_;
+        PostProcessingTypes post_processing_type_;
+
         std::vector<RenderQueueObject> opaque_objects_;
         std::vector<RenderQueueObject> transparent_objects_;
 
+        glm::vec4 clear_color_rgba_;
         glm::mat4 view_mat_;
         glm::mat4 projection_mat_;
         glm::vec3 camera_position_;
@@ -53,9 +58,17 @@ namespace renderer {
 
     public:
         Renderer(std::shared_ptr<const scene::Scene> scene);
-        void render_scene(const glm::vec4& clear_color_rgba, const glm::mat4& view_mat, const glm::mat4& projection_mat, const glm::vec3& camera_position);
+        void render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height);
         double get_gpu_time() const;
         double get_cpu_time() const;
+
+        void set_clear_color(const glm::vec4& clear_color_rgba);
+        void set_view_mat(const glm::mat4& view_mat);
+        void set_projection_mat(const glm::mat4& projection_mat);
+        void set_camera_position(const glm::vec3& camera_position);
+
+        void set_post_processing(PostProcessingTypes type = PostProcessingTypes::NO_POST_PROCESSING);
+
     };
 
 } // namespace renderer

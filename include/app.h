@@ -20,7 +20,7 @@ class App {
     GLFWwindow *window_;
     bool first_mouse_;
     float last_x_, last_y_;
-    float screen_width_, screen_height_;
+    GLsizei framebuffer_width_, framebuffer_height_;
     InputMode input_mode_;
 
     // initial configuration
