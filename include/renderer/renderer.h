@@ -54,7 +54,7 @@ namespace renderer {
         void render_opaque_scene_objects();
         void render_transparent_scene_objects();
         
-        void render_scene_object_with_outline(bool render_transparent_meshes, const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
 
     public:
         Renderer(std::shared_ptr<const scene::Scene> scene);

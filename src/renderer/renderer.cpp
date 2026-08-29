@@ -112,7 +112,7 @@ void Renderer::render_opaque_scene_objects()
     for (const auto& obj: opaque_objects_) {
         use_object_shader(obj.obj_ptr);
         if (obj.obj_ptr->is_selected()) {
-            render_scene_object_with_outline(false, obj.obj_ptr); 
+            render_scene_object_with_outline(obj.obj_ptr); 
         }
         else {
             obj.obj_ptr->render(false);
@@ -129,7 +129,7 @@ void renderer::Renderer::render_transparent_scene_objects()
     for (const auto& obj: transparent_objects_) {
         use_object_shader(obj.obj_ptr);
         if (obj.obj_ptr->is_selected()) {
-            render_scene_object_with_outline(false, obj.obj_ptr); 
+            render_scene_object_with_outline(obj.obj_ptr); 
         }
         else {
             obj.obj_ptr->render(false); 
@@ -139,17 +139,12 @@ void renderer::Renderer::render_transparent_scene_objects()
     for (const auto& obj: transparent_objects_) {
         use_object_shader(obj.obj_ptr);
         glDepthMask(GL_FALSE);
-        if (obj.obj_ptr->is_selected()) {
-            render_scene_object_with_outline(true, obj.obj_ptr); 
-        }
-        else {
-            obj.obj_ptr->render(true); 
-        }
+        obj.obj_ptr->render(true); 
         glDepthMask(GL_TRUE);
     }
 }
 
-void Renderer::render_scene_object_with_outline(bool render_transparent_meshes, const std::shared_ptr<const scene::physical_objects::IRender>& obj)
+void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
 {
     use_object_shader(obj);
 
@@ -157,7 +152,13 @@ void Renderer::render_scene_object_with_outline(bool render_transparent_meshes, 
     // to mark pixels that we have painted 
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
     glStencilMask(0xFF); // allow writing to stencil buffer
-    obj->render(render_transparent_meshes);
+    obj->render(false);
+
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glDepthMask(GL_FALSE);
+    obj->render(true);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glDepthMask(GL_TRUE);
 
     // select outline shader
     std::shared_ptr<Shader> shader_ptr = scene_->get_shader(std::string(defaults::OUTLINE_SHADER_NAME.data()));
@@ -180,7 +181,8 @@ void Renderer::render_scene_object_with_outline(bool render_transparent_meshes, 
     glDepthMask(GL_FALSE);
 #endif
     // render object outline
-    obj->render(render_transparent_meshes, shader_ptr);
+    obj->render(false, shader_ptr);
+    obj->render(true, shader_ptr);
 
     // return stencil settings to default
     glStencilMask(0xFF); // allow writing to stencil buffer
