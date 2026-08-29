@@ -139,7 +139,12 @@ void renderer::Renderer::render_transparent_scene_objects()
     for (const auto& obj: transparent_objects_) {
         use_object_shader(obj.obj_ptr);
         glDepthMask(GL_FALSE);
-        obj.obj_ptr->render(true);
+        if (obj.obj_ptr->is_selected()) {
+            render_scene_object_with_outline(true, obj.obj_ptr); 
+        }
+        else {
+            obj.obj_ptr->render(true); 
+        }
         glDepthMask(GL_TRUE);
     }
 }
