@@ -228,14 +228,17 @@ void App::load_sources_debug()
     imgui_window_->load_shader("lighting", "shaders_sources/lighting/vertex_shader.vert", "shaders_sources/lighting/fragment_shader.frag");
     imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
     imgui_window_->load_shader("blending", "shaders_sources/blending/vertex_shader.vert", "shaders_sources/blending/fragment_shader.frag");
-
+    imgui_window_->load_shader("display_normals", "shaders_sources/geometry/vertex_shader.vs", "shaders_sources/geometry/fragment_shader.fs", "shaders_sources/geometry/display_faces_normals.gs");
 
     // imgui_window_->load_model("lighting", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");   
     // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj");
     // imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
     // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
 
-    imgui_window_->load_model("blending", "multi_cube", "resources/multi_cube/tinker.obj");
+    imgui_window_->load_model("display_normals", "multi_cube", "resources/multi_cube/tinker.obj");
+
+    // todo: implement separate geometry shader processing
+    // requires double rendering, first run - normal shader, second - with geometry
 
     // imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
 }

@@ -6,7 +6,7 @@
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
     , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
-    , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .name=""}
+    , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .geom_shader_file_path="", .name=""}
     , light_dialog_state_{.light_name="", .type=static_cast<int32_t>(scene::lights::LightType::DIRECTIONAL_LIGHT)}
     , model_inspector_state_{.selected_model_ptr=nullptr}
     , light_inspector_state_{.selected_light_ptr=nullptr}
@@ -146,11 +146,12 @@ void UIWindow::render_shader_dialog()
         ImGui::Separator();
         ImGui::InputText("Vertex shader", &shader_dialog_state_.vert_shader_file_path);
         ImGui::InputText("Fragmet shader", &shader_dialog_state_.frag_shader_file_path);
+        ImGui::InputText("Geometry shader (optional)", &shader_dialog_state_.geom_shader_file_path);
         ImGui::InputText("Shader name", &shader_dialog_state_.name);
         ImGui::Spacing();
 
         if (ImGui::Button("Load")) {
-            load_shader(shader_dialog_state_.name, shader_dialog_state_.vert_shader_file_path, shader_dialog_state_.frag_shader_file_path);
+            load_shader(shader_dialog_state_.name, shader_dialog_state_.vert_shader_file_path, shader_dialog_state_.frag_shader_file_path, shader_dialog_state_.geom_shader_file_path);
             shader_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }
@@ -525,10 +526,10 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
     }
 }
 
-void UIWindow::load_shader(const std::string &name, const std::filesystem::path &vertex_shader_file, const std::filesystem::path &fragment_shader_file)
+void UIWindow::load_shader(const std::string &name, const std::filesystem::path &vertex_shader_file, const std::filesystem::path &fragment_shader_file, const std::filesystem::path &geometry_shader_file)
 {
     try {
-        std::shared_ptr<Shader> shader = std::make_shared<Shader>(name, vertex_shader_file.c_str(), fragment_shader_file.c_str());
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(name, vertex_shader_file.c_str(), fragment_shader_file.c_str(), geometry_shader_file.c_str());
         scene_->add_shader(shader);
 
     } catch (const std::exception& e) {
