@@ -1,0 +1,37 @@
+#pragma once 
+#include "shader/shader.h"
+#include <map>
+
+namespace renderer {
+
+    // for now every geometry shader requires 2 steps in redering
+    // 1) render normal model
+    // 2) render model using geometry shader
+    
+    enum class GeometryProcessingTypes {
+        NO_GEOMETRY_PROCESSING,
+        NORMALS_VISUALIZATIONS,
+        // WIREFRAME_VISUALIZATION, 
+        // SILHOUETTE, 
+        COUNT
+    };
+
+    inline const char* const* geometry_processing_types_names() 
+    {
+        static const char* names[] = {
+            "No geometry processing",
+            "Visualize normals",
+            "Visualize wireframe",
+            "Silhouette"
+        };
+        return names;
+    }
+
+    class GeometryProcessor final {
+        std::map<GeometryProcessingTypes, Shader> geometry_processing_shaders_;
+
+    public:
+        GeometryProcessor();
+        void use_geometry_shader(GeometryProcessingTypes type);
+    };
+} // namespace renderer
