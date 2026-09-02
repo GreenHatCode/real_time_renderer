@@ -27,6 +27,7 @@ void UIWindow::render_window()
     ImGui::Text("Read-Timer Renderer");
     ImGui::ColorEdit4("Clear color", glm::value_ptr(clear_color_));
     ImGui::Combo("Post processing", &selected_post_processing_type_, renderer::post_processing_types_names(), static_cast<int>(renderer::PostProcessingTypes::COUNT));    
+    ImGui::Combo("Geometry processing", &selected_geometry_processing_type_, renderer::geometry_processing_types_names(), static_cast<int>(renderer::GeometryProcessingTypes::COUNT));    
     ImGui::Separator();
 
     
@@ -71,6 +72,11 @@ glm::vec4 UIWindow::get_clear_color() const
 renderer::PostProcessingTypes UIWindow::get_post_processing_type() const
 {
     return static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_);
+}
+
+renderer::GeometryProcessingTypes UIWindow::get_geometry_processing_type() const
+{
+    return static_cast<renderer::GeometryProcessingTypes>(selected_geometry_processing_type_);
 }
 
 float UIWindow::get_delta_time() const

@@ -12,8 +12,8 @@ namespace renderer {
     enum class GeometryProcessingTypes {
         NO_GEOMETRY_PROCESSING,
         NORMALS_VISUALIZATIONS,
-        // WIREFRAME_VISUALIZATION, 
-        // SILHOUETTE, 
+        WIREFRAME_VISUALIZATION, 
+        SILHOUETTE, 
         COUNT
     };
 
