@@ -1,6 +1,6 @@
 #version 460 core
 
-const float NORMAL_VEC_MAGNITUDE = 4;
+const float NORMAL_VEC_MAGNITUDE = 10;
 
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
@@ -13,7 +13,7 @@ uniform mat4 u_projection_mat;
 
 void main() {
 
-    vec3 face_normal = normalize(cross(v_vs_data[0].view_position - v_vs_data[1].view_position, v_vs_data[2].view_position - v_vs_data[1].view_position));
+    vec3 face_normal = normalize(cross(v_vs_data[2].view_position - v_vs_data[1].view_position, v_vs_data[0].view_position - v_vs_data[1].view_position));
     vec3 center = (v_vs_data[0].view_position + v_vs_data[1].view_position + v_vs_data[2].view_position) / 3.0;
     
     vec4 begin = u_projection_mat * vec4(center, 1.0);
