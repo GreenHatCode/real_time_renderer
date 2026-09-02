@@ -1,6 +1,7 @@
 #pragma once 
 #include "shader/shader.h"
 #include <map>
+#include <memory>
 
 namespace renderer {
 
@@ -28,10 +29,12 @@ namespace renderer {
     }
 
     class GeometryProcessor final {
-        std::map<GeometryProcessingTypes, Shader> geometry_processing_shaders_;
 
+        std::map<GeometryProcessingTypes, std::shared_ptr<Shader>> geometry_processing_shaders_;
+   
     public:
         GeometryProcessor();
-        void use_geometry_shader(GeometryProcessingTypes type);
+        std::shared_ptr<Shader> get_geometry_shader(GeometryProcessingTypes type);
+
     };
 } // namespace renderer

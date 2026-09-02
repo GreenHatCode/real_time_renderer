@@ -8,6 +8,7 @@
 #include "scene/physical_objects/i_render.h"
 #include "renderer/simple_profiler.h"
 #include "renderer/post_processing/post_processor.h"
+#include "renderer/post_processing/geometry_processor.h"
 
 namespace renderer {
     namespace defaults {
@@ -33,6 +34,8 @@ namespace renderer {
 
         PostProcessor post_processor_;
         PostProcessingTypes post_processing_type_;
+        GeometryProcessor geometry_processor_;
+        GeometryProcessingTypes geometry_processing_type_;
 
         std::vector<RenderQueueObject> opaque_objects_;
         std::vector<RenderQueueObject> transparent_objects_;
@@ -50,7 +53,8 @@ namespace renderer {
         void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
         void build_rendering_queues();
-        void use_object_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void use_shader(const std::shared_ptr<Shader> &shader_ptr);
         void render_opaque_scene_objects();
         void render_transparent_scene_objects();
         
@@ -68,7 +72,8 @@ namespace renderer {
         void set_camera_position(const glm::vec3& camera_position);
 
         void set_post_processing(PostProcessingTypes type = PostProcessingTypes::NO_POST_PROCESSING);
-
+        void set_geometry_post_processing(GeometryProcessingTypes type = GeometryProcessingTypes::NO_GEOMETRY_PROCESSING);
+        
     };
 
 } // namespace renderer

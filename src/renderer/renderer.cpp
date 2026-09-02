@@ -11,6 +11,8 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , camera_position_(1.0) 
     , post_processor_(1, 1)
     , post_processing_type_(PostProcessingTypes::NO_POST_PROCESSING)   
+    , geometry_processor_()
+    , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -89,7 +91,7 @@ void renderer::Renderer::build_rendering_queues()
     );
 }
 
-void renderer::Renderer::use_object_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
+void renderer::Renderer::use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
     if (shader_ptr == nullptr) {
@@ -107,14 +109,32 @@ void renderer::Renderer::use_object_shader(const std::shared_ptr<const scene::ph
     set_lighting_shader_uniforms(shader_ptr);
 }
 
+void renderer::Renderer::use_shader(const std::shared_ptr<Shader> &shader_ptr)
+{
+    if (shader_ptr.get() != curr_shader_ptr_) 
+    {
+        curr_shader_ptr_ = shader_ptr.get();
+        shader_ptr->use();
+    }
+
+    set_general_shader_uniforms(shader_ptr);
+    set_lighting_shader_uniforms(shader_ptr);
+}
+
 void Renderer::render_opaque_scene_objects()
 {
     for (const auto& obj: opaque_objects_) {
-        use_object_shader(obj.obj_ptr);
+        use_shader(obj.obj_ptr);
         if (obj.obj_ptr->is_selected()) {
             render_scene_object_with_outline(obj.obj_ptr); 
         }
         else {
+            obj.obj_ptr->render(false);
+        }
+
+        if (geometry_processing_type_ != GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
+            const auto shader_ptr = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+            use_shader(shader_ptr);
             obj.obj_ptr->render(false);
         }
         
@@ -127,26 +147,38 @@ void renderer::Renderer::render_transparent_scene_objects()
     // the model can contain only transparent meshes,
     // but can contain a mix of opaque and transparent
     for (const auto& obj: transparent_objects_) {
-        use_object_shader(obj.obj_ptr);
+        use_shader(obj.obj_ptr);
         if (obj.obj_ptr->is_selected()) {
             render_scene_object_with_outline(obj.obj_ptr); 
         }
         else {
             obj.obj_ptr->render(false); 
         }
+
+        if (geometry_processing_type_ != GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
+            const auto shader_ptr = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+            use_shader(shader_ptr);
+            obj.obj_ptr->render(false);
+        }        
     }
 
     for (const auto& obj: transparent_objects_) {
-        use_object_shader(obj.obj_ptr);
+        use_shader(obj.obj_ptr);
         glDepthMask(GL_FALSE);
         obj.obj_ptr->render(true); 
         glDepthMask(GL_TRUE);
+
+        if (geometry_processing_type_ != GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
+            const auto shader_ptr = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+            use_shader(shader_ptr);
+            obj.obj_ptr->render(true);
+        }
     }
 }
 
 void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
 {
-    use_object_shader(obj);
+    use_shader(obj);
 
     // render normal object with writing to stencil buffer
     // to mark pixels that we have painted 
@@ -254,4 +286,9 @@ void renderer::Renderer::set_camera_position(const glm::vec3 &camera_position)
 void renderer::Renderer::set_post_processing(PostProcessingTypes type)
 {
     post_processing_type_ = type;
+}
+
+void renderer::Renderer::set_geometry_post_processing(GeometryProcessingTypes type)
+{
+    geometry_processing_type_ = type;
 }
