@@ -520,7 +520,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
 
     try {
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model(file_path, aiProcessPreset_TargetRealtime_Quality),
+            assimp_wrapper::Model(file_path, aiProcessPreset_TargetRealtime_Quality | aiProcess_ForceGenNormals),
             name
         );
 

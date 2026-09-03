@@ -62,6 +62,10 @@ void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
 
 Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
 {
+    if (!mesh->HasNormals()) {
+        throw std::runtime_error("Assimp returned a mesh without normals");
+    }
+
     std::vector<vertex> vertices;
     std::vector<uint32_t> indices;
 
