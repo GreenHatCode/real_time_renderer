@@ -224,6 +224,9 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 
 void App::load_sources_debug() 
 {
+    // mostly incorrect load 
+    // normal work only from ui
+
     imgui_window_->load_shader("simple", "shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
     imgui_window_->load_shader("lighting", "shaders_sources/lighting/vertex_shader.vert", "shaders_sources/lighting/fragment_shader.frag");
     imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");

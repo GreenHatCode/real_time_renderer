@@ -29,7 +29,6 @@ namespace renderer {
     }
 
     class GeometryProcessor final {
-
         std::map<GeometryProcessingTypes, std::shared_ptr<Shader>> geometry_processing_shaders_;
    
     public:
