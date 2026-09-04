@@ -15,6 +15,7 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , clear_color_(0.2f, 0.1f, 0.1f, 1.0f)
     , delta_time_(0.0)
     , selected_post_processing_type_(static_cast<int32_t>(renderer::PostProcessingTypes::NO_POST_PROCESSING))
+    , selected_geometry_processing_type_(static_cast<int32_t>(renderer::GeometryProcessingTypes::NO_GEOMETRY_PROCESSING))
 {
 
 }
