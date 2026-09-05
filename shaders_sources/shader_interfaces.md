@@ -52,6 +52,8 @@ uniform int u_spot_lights_count;
 uniform vec3 u_light_pos;
 uniform vec3 u_light_color;
 uniform vec4 u_base_color;
+uniform float u_opacity;
+uniform vec3 u_camera_pos;
 
 
 // textures

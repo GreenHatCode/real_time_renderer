@@ -95,18 +95,11 @@ void renderer::Renderer::use_shader(const std::shared_ptr<const scene::physical_
 {
     std::shared_ptr<Shader> shader_ptr = obj->get_shader();
     if (shader_ptr == nullptr) {
-        spdlog::warn("Model {} hasn't shader, skipping rendering this model", obj->get_name());
+        spdlog::warn("Failed to use model's shader, {} hasn't shader", obj->get_name());
         return;
     }
 
-    if (shader_ptr.get() != curr_shader_ptr_) 
-    {
-        curr_shader_ptr_ = shader_ptr.get();
-        shader_ptr->use();
-    }
-
-    set_general_shader_uniforms(shader_ptr);
-    set_lighting_shader_uniforms(shader_ptr);
+    use_shader(shader_ptr);
 }
 
 void renderer::Renderer::use_shader(const std::shared_ptr<Shader> &shader_ptr)
@@ -123,8 +116,8 @@ void renderer::Renderer::use_shader(const std::shared_ptr<Shader> &shader_ptr)
 
 void Renderer::render_opaque_scene_objects()
 {
-    for (const auto& obj: opaque_objects_) {
-        if (geometry_processing_type_ != GeometryProcessingTypes::WIREFRAME_VISUALIZATION) {
+    if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
+        for (const auto& obj: opaque_objects_) {
             use_shader(obj.obj_ptr);
             if (obj.obj_ptr->is_selected()) {
                 render_scene_object_with_outline(obj.obj_ptr); 
@@ -133,12 +126,20 @@ void Renderer::render_opaque_scene_objects()
                 obj.obj_ptr->render(false); 
             }
         }
-
-        if (geometry_processing_type_ != GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
-            const auto shader_ptr = geometry_processor_.get_geometry_shader(geometry_processing_type_);
-            use_shader(shader_ptr);
-            obj.obj_ptr->render(false);
+    } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
+        auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+        for (const auto& obj: opaque_objects_) {
+            use_shader(obj.obj_ptr);
+            obj.obj_ptr->render(false, processing_shader); 
+            use_shader(processing_shader);
+            obj.obj_ptr->render(false, processing_shader); 
         }
+    } else {
+        auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+        use_shader(processing_shader);
+        for (const auto& obj: opaque_objects_) {
+            obj.obj_ptr->render(false, processing_shader);
+        } 
     }
 }
 
@@ -147,36 +148,52 @@ void renderer::Renderer::render_transparent_scene_objects()
     // render all opaque meshes first, then transparent
     // the model can contain only transparent meshes,
     // but can contain a mix of opaque and transparent
-    for (const auto& obj: transparent_objects_) {
-        if (geometry_processing_type_ != GeometryProcessingTypes::WIREFRAME_VISUALIZATION) {
+    if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
+        for (const auto& obj: transparent_objects_) {
             use_shader(obj.obj_ptr);
             if (obj.obj_ptr->is_selected()) {
                 render_scene_object_with_outline(obj.obj_ptr); 
             }
             else {
                 obj.obj_ptr->render(false); 
-            }
+            }      
         }
 
-        if (geometry_processing_type_ != GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
-            const auto shader_ptr = geometry_processor_.get_geometry_shader(geometry_processing_type_);
-            use_shader(shader_ptr);
-            obj.obj_ptr->render(false);
-        }        
-    }
-
-    for (const auto& obj: transparent_objects_) {
-        if (geometry_processing_type_ != GeometryProcessingTypes::WIREFRAME_VISUALIZATION) {
+        for (const auto& obj: transparent_objects_) {
             use_shader(obj.obj_ptr);
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(true); 
             glDepthMask(GL_TRUE);
         }
+    } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
+        auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+        for (const auto& obj: transparent_objects_) {
+            use_shader(obj.obj_ptr);
+            obj.obj_ptr->render(false); 
+            use_shader(processing_shader);
+            obj.obj_ptr->render(false, processing_shader); 
+        }
 
-        if (geometry_processing_type_ != GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
-            const auto shader_ptr = geometry_processor_.get_geometry_shader(geometry_processing_type_);
-            use_shader(shader_ptr);
-            obj.obj_ptr->render(true);
+        for (const auto& obj: transparent_objects_) {
+            glDepthMask(GL_FALSE);
+            use_shader(obj.obj_ptr);
+            obj.obj_ptr->render(true); 
+            use_shader(processing_shader);
+            obj.obj_ptr->render(true, processing_shader); 
+            glDepthMask(GL_TRUE);
+        }
+
+    } else {
+        auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
+        use_shader(processing_shader);
+        for (const auto& obj: transparent_objects_) {
+            obj.obj_ptr->render(false, processing_shader);     
+        }
+
+        for (const auto& obj: transparent_objects_) {
+            glDepthMask(GL_FALSE);
+            obj.obj_ptr->render(true, processing_shader); 
+            glDepthMask(GL_TRUE);
         }
     }
 }
