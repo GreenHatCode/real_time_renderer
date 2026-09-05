@@ -16,19 +16,11 @@ renderer::GeometryProcessor::GeometryProcessor()
         GeometryProcessingTypes::WIREFRAME_VISUALIZATION,
         std::make_shared<Shader>(
             "wireframe_visualization_gs",
-                "shaders_sources/geometry/wireframe_visualization/vertex_shader.vs",
-                "shaders_sources/geometry/wireframe_visualization/fragment_shader.fs",
-                "shaders_sources/geometry/wireframe_visualization/geometry_shader.gs"
+            "shaders_sources/geometry/wireframe_visualization/vertex_shader.vs",
+            "shaders_sources/geometry/wireframe_visualization/fragment_shader.fs",
+            "shaders_sources/geometry/wireframe_visualization/geometry_shader.gs"
         )
     );
-
-    // geometry_processing_shaders_.try_emplace(
-    //     GeometryProcessingTypes::SILHOUETTE,
-    //     "silhouette_gs",
-    //     "shaders_sources/post_processing/inversion/vertex_shader.vs",
-    //     "shaders_sources/post_processing/inversion/vertex_shader.fs",
-    //     "shaders_sources/post_processing/inversion/vertex_shader.gs"
-    // );
 
 }
 

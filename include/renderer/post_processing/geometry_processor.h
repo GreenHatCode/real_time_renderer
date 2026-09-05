@@ -13,7 +13,6 @@ namespace renderer {
         NO_GEOMETRY_PROCESSING,
         NORMALS_VISUALIZATIONS,
         WIREFRAME_VISUALIZATION, 
-        SILHOUETTE, 
         COUNT
     };
 
@@ -22,8 +21,7 @@ namespace renderer {
         static const char* names[] = {
             "No geometry processing",
             "Visualize normals",
-            "Visualize wireframe",
-            "Silhouette"
+            "Visualize wireframe"
         };
         return names;
     }
