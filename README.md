@@ -48,8 +48,8 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/GreenHatCode/GraphApp.git
-    cd GraphApp
+    git@github.com:GreenHatCode/real_time_renderer.git
+    cd real_time_renderer
     ```
 2.  Change git remote url to avoid accidental pushes to base project
     ```bash
@@ -64,4 +64,32 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 
 ## Usage examples
 
+### Blending transparent objects with lighting
+![Failed to load file "./pics/blending_transparent_objects_with_lighting.png"](./pics/blending_transparent_objects_with_lighting.png)
 
+### Blur post processing
+![Failed to load file "./pics/blur_post_processing_via_framebuffer.png"](./pics/blur_post_processing_via_framebuffer.png)
+
+### Edge detection post processing
+![Failed to load file "./pics/edge_detection_post_processing_via_framebuffer.png"](./pics/edge_detection_post_processing_via_framebuffer.png)
+
+### Grayscale post processing
+![Failed to load file "./pics/greyscale_post_processing_via_framebuffers.png"](./pics/greyscale_post_processing_via_framebuffers.png)
+
+### Rendering different models
+![Failed to load file "./pics/different_models_example.png"](./pics/different_models_example.png)
+
+### Wireframe geometry post processing
+![Failed to load file "./pics/drawing_in_wireframe_mode_using_geometry_shader.png"](./pics/drawing_in_wireframe_mode_using_geometry_shader.png)
+
+### Drawing normals geometry post processing
+![Failed to load file "./pics/diplaying_normals.png"](./pics/diplaying_normals.png)
+
+### Lighting many objects
+![Failed to load file "./pics/multiple_light_objects.png"](./pics/multiple_light_objects.png)
+
+### Multiple lights
+![Failed to load file "./pics/multiple_lights_example.png"](./pics/multiple_lights_example.png)
+
+### Stencil outline
+![Failed to load file "./pics/stencil_outline.png"](./pics/stencil_outline.png)
