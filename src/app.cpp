@@ -127,6 +127,10 @@ void App::process_input(GLFWwindow *window)
         camera_->move(CameraMovement::LEFT, imgui_window_->get_delta_time());
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera_->move(CameraMovement::RIGHT, imgui_window_->get_delta_time());
+    if ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS )) {
+        if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS) scroll_callback_impl(0, KEYBOARD_SCROLL_DIFF);
+        else if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS) scroll_callback_impl(0, -KEYBOARD_SCROLL_DIFF);
+    }
 }
 
 void App::enter_viewport_mode()

@@ -6,6 +6,8 @@
 
 class App {
 
+    inline static constexpr uint8_t KEYBOARD_SCROLL_DIFF = 2;
+
     enum class InputMode
     {
         Viewport,
