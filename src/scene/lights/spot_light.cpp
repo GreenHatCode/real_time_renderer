@@ -4,7 +4,7 @@ using namespace scene::lights::lighting_constants;
 
 scene::lights::SpotLight::SpotLight(
     const std::string &name, 
-    const std::weak_ptr<scene::physical_objects::LightModelObject> &cone_model, 
+    const std::shared_ptr<scene::physical_objects::LightModelObject> &cone_model, 
     glm::vec3 ambient, 
     glm::vec3 diffuse, 
     glm::vec3 specular, 
@@ -101,7 +101,7 @@ float scene::lights::SpotLight::get_outer_cut_off() const
     return glm::degrees(glm::acos(cosine_outer_cut_off_rad_));
 }
 
-void scene::lights::SpotLight::set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject> &value)
+void scene::lights::SpotLight::set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject> &value)
 {
     light_cone_ = value;
 }

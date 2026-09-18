@@ -10,7 +10,7 @@ namespace scene::lights
         glm::vec3 direction_;
         std::string name_;
         LightType type_;
-        std::weak_ptr<scene::physical_objects::LightModelObject> light_cone_;
+        std::shared_ptr<scene::physical_objects::LightModelObject> light_cone_;
 
         // attenuation parameters
         float constant_;
@@ -22,12 +22,12 @@ namespace scene::lights
     public:
         SpotLight(
             const std::string& name, 
-            const std::weak_ptr<scene::physical_objects::LightModelObject>& cone_model = {}, 
+            const std::shared_ptr<scene::physical_objects::LightModelObject>& cone_model = {}, 
             glm::vec3 ambient = glm::vec3(0.05f, 0.05f, 0.05f), 
             glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
-            glm::vec3 position = glm::vec3(0.0f, 10.0f, 0.0f), 
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
             glm::vec3 direction_ = glm::vec3(0.0f, -1.0f, 0.0f),
             float constant = 1.0f, 
             float linear = 0.09f, 
@@ -54,7 +54,7 @@ namespace scene::lights
         void set_outer_cut_off(float degrees);
         float get_outer_cut_off() const;
 
-        void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
+        void set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };
 
