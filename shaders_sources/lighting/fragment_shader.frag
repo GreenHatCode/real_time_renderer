@@ -55,27 +55,27 @@ uniform int u_directional_lights_count;
 uniform int u_point_lights_count;
 uniform int u_spot_lights_count;
 
-vec3 process_directional_lights();
-vec3 process_point_lights();
-vec3 process_spot_lights();
+vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
+vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
+vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir);
 
 void main() {
 
-    vec3 direction_lights_color = process_directional_lights();
-    vec3 point_lights_color = process_point_lights();
-    vec3 spot_lights_color = process_spot_lights();
+    vec3 unit_normal = normalize(v_normal);
+    vec3 view_dir = normalize(u_camera_pos - v_frag_pos);
+
+    vec3 direction_lights_color = process_directional_lights(unit_normal, view_dir);
+    vec3 point_lights_color = process_point_lights(unit_normal, view_dir);
+    vec3 spot_lights_color = process_spot_lights(unit_normal, view_dir);
 
     vec3 result = (direction_lights_color + point_lights_color + spot_lights_color) * vec3(u_base_color);
     FragColor = vec4(result, u_opacity);
 }
 
-vec3 process_directional_lights() {
+vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 ambient = vec3(0.0);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
-
-    vec3 unit_normal = normalize(v_normal);
-    vec3 view_dir = normalize(u_camera_pos - v_frag_pos);
 
     for (int i = 0; i < u_directional_lights_count; ++i) {
         ambient += directional_lights[i].ambient * directional_lights[i].color;
@@ -83,21 +83,18 @@ vec3 process_directional_lights() {
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
         diffuse += diff * directional_lights[i].color;
 
-        vec3 reflect_dir = reflect(-directional_lights[i].direction, unit_normal);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
+        vec3 halfway_dir = normalize(directional_lights[i].direction + view_dir);
+        float spec = pow(max(dot(unit_normal, halfway_dir), 0.0), 64);
         specular += spec * directional_lights[i].color;
     }
     
     return ambient + diffuse + specular;
 }
 
-vec3 process_point_lights() {
+vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 ambient = vec3(0.0);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
-
-    vec3 unit_normal = normalize(v_normal);
-    vec3 view_dir = normalize(u_camera_pos - v_frag_pos);
 
     for (int i = 0; i < u_point_lights_count; ++i) {
 
@@ -105,7 +102,8 @@ vec3 process_point_lights() {
         float diff = max(dot(unit_normal, light_dir), 0.0);
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
+        vec3 halfway_dir = normalize(light_dir + view_dir);
+        float spec = pow(max(dot(unit_normal, halfway_dir), 0.0), 64);
 
         float distance = length(point_lights[i].position - v_frag_pos);
         float attenuation = 1.0 / (point_lights[i].constant  + point_lights[i].linear * distance + point_lights[i].quadratic * pow(distance, 2));
@@ -118,13 +116,10 @@ vec3 process_point_lights() {
     return ambient + diffuse + specular;
 }
 
-vec3 process_spot_lights() {
+vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 ambient = vec3(0.0);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
-
-    vec3 unit_normal = normalize(v_normal);
-    vec3 view_dir = normalize(u_camera_pos - v_frag_pos);
 
     for (int i = 0; i < u_spot_lights_count; ++i) {
 
@@ -132,7 +127,8 @@ vec3 process_spot_lights() {
         float diff = max(dot(unit_normal, light_dir), 0.0); 
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
+        vec3 halfway_dir = normalize(light_dir + view_dir);
+        float spec = pow(max(dot(unit_normal, halfway_dir), 0.0), 64);
 
         // problem
         float theta = dot(light_dir, -spot_lights[i].direction);
