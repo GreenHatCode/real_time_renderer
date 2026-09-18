@@ -3,6 +3,7 @@
 set -e
 
 CLEAN=0
+OFFLINE=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -10,9 +11,13 @@ while [[ $# -gt 0 ]]; do
             CLEAN=1
             shift
             ;;
+        -o|--offline)
+            OFFLINE=1
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [-c|--clean]"
+            echo "Usage: $0 [-c|--clean] [-o|--offline]"
             exit 1
             ;;
     esac
@@ -22,7 +27,13 @@ if [[ $CLEAN -eq 1 ]]; then
     rm -rf build
 fi
 
-cmake -DCMAKE_BUILD_TYPE=Debug -B build -S .
+CMAKE_ARGS=("-DCMAKE_BUILD_TYPE=Debug")
+
+if [[ $OFFLINE -eq 1 ]]; then
+    CMAKE_ARGS+=("-DOFFLINE_BUILD=ON")
+fi
+
+cmake "${CMAKE_ARGS[@]}" -B build -S .
 cmake --build build -j"$(nproc)"
 
 echo "Run app"

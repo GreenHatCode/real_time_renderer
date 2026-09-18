@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.20)
 
 project(real_time_renderer LANGUAGES C CXX)
 
+option(OFFLINE_BUILD "Disable network calls for FetchContent" OFF)
+if(OFFLINE_BUILD)
+    # Tells FetchContent to skip git fetch/pull entirely
+    set(FETCHCONTENT_FULLY_DISCONNECTED ON CACHE BOOL "" FORCE)
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
