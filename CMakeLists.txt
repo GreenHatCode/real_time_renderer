@@ -148,6 +148,7 @@ endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     GLM_ENABLE_EXPERIMENTAL
     # MERGED_OUTLINES
+    # FREE_CAMERA
 )
 
 # copy shader sources

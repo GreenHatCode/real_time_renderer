@@ -209,13 +209,15 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     //configure logging
     spdlog::set_level(spdlog::level::debug);
     
-
-    // camera_ = std::make_unique<FreeCamera>(
-    //     Projection::Perspective(45.0f, 0.1f, 300.0f), 
-    //     glm::vec3(0.0f, 0.0f, -10.0f),
-    //     glm::vec3(0.0f, 0.0f, -1.0f)
-    // );
+#ifdef FREE_CAMERA
+    camera_ = std::make_unique<FreeCamera>(
+        Projection::Perspective(45.0f, 0.1f, 300.0f), 
+        glm::vec3(0.0f, 0.0f, -10.0f),
+        glm::vec3(0.0f, 0.0f, -1.0f)
+    );
+#else
     camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
+#endif
 
     scene_ = std::make_shared<scene::Scene>();
     imgui_window_ = std::make_unique<UIWindow>(scene_);
