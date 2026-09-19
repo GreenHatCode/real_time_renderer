@@ -49,9 +49,9 @@ glm::mat4 scene::physical_objects::PhysicalObject::model_matrix() const
     return model;
 }
 
-glm::mat4 scene::physical_objects::PhysicalObject::normal_matrix() const
+glm::mat3 scene::physical_objects::PhysicalObject::normal_matrix() const
 {
-    return glm::transpose(glm::inverse(model_matrix()));
+    return glm::mat3(glm::transpose(glm::inverse(glm::mat3(model_matrix()))));
 }
 
 bool scene::physical_objects::PhysicalObject::is_selected() const

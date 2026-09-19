@@ -28,7 +28,7 @@ namespace scene::lights
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
-            glm::vec3 direction_ = glm::vec3(0.0f, -1.0f, 0.0f),
+            glm::vec3 direction_ = physical_objects::physical_light_object_constants::SPOT_LIGHT_MODEL_DEFAULT_FORWARD,
             float constant = 1.0f, 
             float linear = 0.09f, 
             float quadratic = 0.032f, 
