@@ -269,7 +269,7 @@ int32_t App::run()
         renderer_->set_camera_position(camera_->get_position());
         renderer_->set_post_processing(imgui_window_->get_post_processing_type());
         renderer_->set_geometry_post_processing(imgui_window_->get_geometry_processing_type());
-        renderer_->set_internal_objects_id_mask(0x01 | 0x02);
+        renderer_->set_internal_objects_id_mask(imgui_window_->get_selected_internal_objects_id_mask());
 
         renderer_->render_scene(framebuffer_width_, framebuffer_height_);
 

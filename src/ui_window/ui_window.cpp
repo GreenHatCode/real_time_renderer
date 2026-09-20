@@ -3,6 +3,7 @@
 #include "scene/physical_objects/physical_light_object.h"
 #include "glm/gtx/quaternion.hpp"
 #include "assimp_wrapper/mesh.h"
+#include "renderer/renderer.h"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -17,6 +18,8 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , delta_time_(0.0)
     , selected_post_processing_type_(static_cast<int32_t>(renderer::PostProcessingTypes::NO_POST_PROCESSING))
     , selected_geometry_processing_type_(static_cast<int32_t>(renderer::GeometryProcessingTypes::NO_GEOMETRY_PROCESSING))
+    , render_axes_(false)
+    , render_xz_grid_(false)
 {
 
 }
@@ -32,7 +35,12 @@ void UIWindow::render_window()
     ImGui::Combo("Geometry processing", &selected_geometry_processing_type_, renderer::geometry_processing_types_names(), static_cast<int>(renderer::GeometryProcessingTypes::COUNT));    
     ImGui::Separator();
 
-    
+
+    ImGui::Checkbox("Render axes", &render_axes_);
+    ImGui::Checkbox("Render XZ grid", &render_xz_grid_);
+
+
+    ImGui::Separator();
     if (ImGui::Button("manage model")) {
         ImGui::OpenPopup("manage model");
     }
@@ -84,6 +92,16 @@ renderer::GeometryProcessingTypes UIWindow::get_geometry_processing_type() const
 float UIWindow::get_delta_time() const
 {
     return static_cast<float>(delta_time_);
+}
+
+uint8_t UIWindow::get_selected_internal_objects_id_mask() const
+{
+    uint8_t mask = 0;
+
+    if (render_axes_) mask |= renderer::defaults::AXES_LINES_ID;
+    if (render_xz_grid_) mask |= renderer::defaults::XZ_FACE_GRID_ID;
+
+    return mask;
 }
 
 void UIWindow::set_gpu_time_to_display(double value)

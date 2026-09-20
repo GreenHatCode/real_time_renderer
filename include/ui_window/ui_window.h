@@ -59,6 +59,9 @@ private: // do not expose outside
     double gpu_time_to_display_;
     double cpu_time_to_display_;
 
+    bool render_axes_;
+    bool render_xz_grid_;
+
 private: // should be accessible 
     glm::vec4 clear_color_;
     double delta_time_;
@@ -70,6 +73,7 @@ public:
     renderer::PostProcessingTypes get_post_processing_type() const;
     renderer::GeometryProcessingTypes get_geometry_processing_type() const;
     float get_delta_time() const;
+    uint8_t get_selected_internal_objects_id_mask() const;
 
     void set_gpu_time_to_display(double value);
     void set_cpu_time_to_display(double value);
