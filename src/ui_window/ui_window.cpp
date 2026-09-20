@@ -2,6 +2,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "scene/physical_objects/physical_light_object.h"
 #include "glm/gtx/quaternion.hpp"
+#include "assimp_wrapper/mesh.h"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -521,7 +522,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
 
     try {
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model(file_path, POST_PROCESSING_FLAGS),
+            assimp_wrapper::Model(file_path, assimp_wrapper::POST_PROCESSING_FLAGS),
             name
         );
 

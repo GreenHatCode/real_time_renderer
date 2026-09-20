@@ -14,21 +14,34 @@
 namespace scene
 {
     class Scene {
+
+    public:
+        struct internal_physical_object {
+            std::shared_ptr<scene::physical_objects::PhysicalObject> ptr;
+            uint8_t id;
+            GLenum draw_mode;
+        };
+        
+    private:
+
         std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> physical_objects_;
+        std::vector<internal_physical_object> internal_physical_objects_;
         std::vector<std::shared_ptr<scene::lights::LightBase>> lights_;
         std::vector<std::shared_ptr<Shader>> shaders_;
     
-        uint32_t total_vertices_count;
-        uint32_t total_faces_count;
+        uint32_t total_vertices_count_;
+        uint32_t total_faces_count_;
 
     public:
+        Scene();
         void add_object(const std::shared_ptr<scene::physical_objects::PhysicalObject>& ptr);
         void add_light(const std::shared_ptr<scene::lights::LightBase>& ptr);
         void add_shader(const std::shared_ptr<Shader>& ptr);
         bool delete_scene_object(const std::string& name);
         bool delete_shader(const std::string &name);
 
-        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> get_objects() const;
+        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> get_objects() const; // returns scene physical objects that the user can edit
+        std::vector<internal_physical_object> get_internal_objects() const;
         std::vector<std::shared_ptr<scene::lights::LightBase>> get_lights() const;
         std::vector<std::shared_ptr<Shader>> get_shaders() const;
         std::shared_ptr<scene::physical_objects::PhysicalObject> get_object(const std::string &name) const;

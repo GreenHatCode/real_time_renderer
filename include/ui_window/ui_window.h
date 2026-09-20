@@ -13,9 +13,7 @@
 #include <filesystem>
 
 class UIWindow final {
-
-    inline static constexpr uint32_t POST_PROCESSING_FLAGS = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices;
-
+    
     struct AddModelDialog_t {
         std::string model_file_path;
         std::string shader_name;

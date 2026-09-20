@@ -13,6 +13,7 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , post_processing_type_(PostProcessingTypes::NO_POST_PROCESSING)   
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
+    , internal_objects_id_mask_(0)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -70,14 +71,23 @@ void renderer::Renderer::build_rendering_queues()
 {
     opaque_objects_.clear();
     transparent_objects_.clear();
+
+    for (const auto &obj : scene_->get_internal_objects()) {
+        if (internal_objects_id_mask_ & obj.id) {
+            obj.ptr->move(camera_position_);
+            
+            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj.ptr, .distance_to_viewer=0.0f, .draw_mode=obj.draw_mode});
+        }
+    }
+
     for (const auto &obj : scene_->get_objects())
     {
         if (obj->is_transparent()) {
             float distance = glm::length2(camera_position_ - obj->get_move_vector());
-            transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance});
+            transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
         }
         else {
-            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f});
+            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
         }
     }
 
@@ -120,25 +130,25 @@ void Renderer::render_opaque_scene_objects()
         for (const auto& obj: opaque_objects_) {
             use_shader(obj.obj_ptr);
             if (obj.obj_ptr->is_selected()) {
-                render_scene_object_with_outline(obj.obj_ptr); 
+                render_scene_object_with_outline(obj); 
             }
             else {
-                obj.obj_ptr->render(false); 
+                obj.obj_ptr->render(obj.draw_mode, false); 
             }
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         for (const auto& obj: opaque_objects_) {
             use_shader(obj.obj_ptr);
-            obj.obj_ptr->render(false, processing_shader); 
+            obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
             use_shader(processing_shader);
-            obj.obj_ptr->render(false, processing_shader); 
+            obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
         }
     } else {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         use_shader(processing_shader);
         for (const auto& obj: opaque_objects_) {
-            obj.obj_ptr->render(false, processing_shader);
+            obj.obj_ptr->render(obj.draw_mode, false, processing_shader);
         } 
     }
 }
@@ -152,34 +162,34 @@ void renderer::Renderer::render_transparent_scene_objects()
         for (const auto& obj: transparent_objects_) {
             use_shader(obj.obj_ptr);
             if (obj.obj_ptr->is_selected()) {
-                render_scene_object_with_outline(obj.obj_ptr); 
+                render_scene_object_with_outline(obj); 
             }
             else {
-                obj.obj_ptr->render(false); 
+                obj.obj_ptr->render(obj.draw_mode, false); 
             }      
         }
 
         for (const auto& obj: transparent_objects_) {
             use_shader(obj.obj_ptr);
             glDepthMask(GL_FALSE);
-            obj.obj_ptr->render(true); 
+            obj.obj_ptr->render(obj.draw_mode, true); 
             glDepthMask(GL_TRUE);
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         for (const auto& obj: transparent_objects_) {
             use_shader(obj.obj_ptr);
-            obj.obj_ptr->render(false); 
+            obj.obj_ptr->render(obj.draw_mode, false); 
             use_shader(processing_shader);
-            obj.obj_ptr->render(false, processing_shader); 
+            obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
         }
 
         for (const auto& obj: transparent_objects_) {
             glDepthMask(GL_FALSE);
             use_shader(obj.obj_ptr);
-            obj.obj_ptr->render(true); 
+            obj.obj_ptr->render(obj.draw_mode, true); 
             use_shader(processing_shader);
-            obj.obj_ptr->render(true, processing_shader); 
+            obj.obj_ptr->render(obj.draw_mode, true, processing_shader); 
             glDepthMask(GL_TRUE);
         }
 
@@ -187,37 +197,37 @@ void renderer::Renderer::render_transparent_scene_objects()
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         use_shader(processing_shader);
         for (const auto& obj: transparent_objects_) {
-            obj.obj_ptr->render(false, processing_shader);     
+            obj.obj_ptr->render(obj.draw_mode, false, processing_shader);     
         }
 
         for (const auto& obj: transparent_objects_) {
             glDepthMask(GL_FALSE);
-            obj.obj_ptr->render(true, processing_shader); 
+            obj.obj_ptr->render(obj.draw_mode, true, processing_shader); 
             glDepthMask(GL_TRUE);
         }
     }
 }
 
-void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
+void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 {
-    use_shader(obj);
+    use_shader(obj.obj_ptr);
 
     // render normal object with writing to stencil buffer
     // to mark pixels that we have painted 
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
     glStencilMask(0xFF); // allow writing to stencil buffer
-    obj->render(false);
+    obj.obj_ptr->render(obj.draw_mode, false);
 
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
     glDepthMask(GL_FALSE);
-    obj->render(true);
+    obj.obj_ptr->render(obj.draw_mode, true);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glDepthMask(GL_TRUE);
 
     // select outline shader
     std::shared_ptr<Shader> shader_ptr = scene_->get_shader(std::string(defaults::OUTLINE_SHADER_NAME.data()));
     if (shader_ptr == nullptr) {
-        spdlog::warn("Scene hasn't shader {} to draw outline, skipping rendering model {}", defaults::OUTLINE_SHADER_NAME.data(), obj->get_name());
+        spdlog::warn("Scene hasn't shader {} to draw outline, skipping rendering model {}", defaults::OUTLINE_SHADER_NAME.data(), obj.obj_ptr->get_name());
         return;
     }
     curr_shader_ptr_ = shader_ptr.get();
@@ -235,8 +245,8 @@ void Renderer::render_scene_object_with_outline(const std::shared_ptr<const scen
     glDepthMask(GL_FALSE);
 #endif
     // render object outline
-    obj->render(false, shader_ptr);
-    obj->render(true, shader_ptr);
+    obj.obj_ptr->render(obj.draw_mode, false, shader_ptr);
+    obj.obj_ptr->render(obj.draw_mode, true, shader_ptr);
 
     // return stencil settings to default
     glStencilMask(0xFF); // allow writing to stencil buffer
@@ -303,6 +313,11 @@ void renderer::Renderer::set_projection_mat(const glm::mat4 &projection_mat)
 void renderer::Renderer::set_camera_position(const glm::vec3 &camera_position)
 {
     camera_position_ = camera_position;
+}
+
+void renderer::Renderer::set_internal_objects_id_mask(uint8_t internal_objects_id_mask)
+{
+    internal_objects_id_mask_ = internal_objects_id_mask;
 }
 
 void renderer::Renderer::set_post_processing(PostProcessingTypes type)

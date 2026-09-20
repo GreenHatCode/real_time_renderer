@@ -1,0 +1,14 @@
+# 3D Axes with dummy normals for Assimp compatibility
+v 0.0 0.0 0.0
+v 100.0 0.0 0.0
+v 0.0 100.0 0.0
+v 0.0 0.0 100.0
+
+vn 0.0 0.0 1.0
+vn 0.0 0.0 1.0
+vn 0.0 0.0 1.0
+vn 0.0 0.0 1.0
+
+l 1//1 2//2
+l 1//1 3//3
+l 1//1 4//4

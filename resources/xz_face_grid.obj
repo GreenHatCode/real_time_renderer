@@ -1,0 +1,20 @@
+# XZ Plane Quad (Two Triangles for GL_TRIANGLES)
+
+# --- Vertices ---
+v -1.0 0.0 -1.0
+v  1.0 0.0 -1.0
+v  1.0 0.0  1.0
+v -1.0 0.0  1.0
+
+# --- Normals ---
+vn 0.0 1.0 0.0
+vn 0.0 1.0 0.0
+vn 0.0 1.0 0.0
+vn 0.0 1.0 0.0
+
+# --- Faces (Triangles) ---
+# Triangle 1 (Bottom-Left, Top-Left, Top-Right)
+f 1//1 4//4 2//2
+
+# Triangle 2 (Top-Right, Bottom-Left, Bottom-Right)
+f 2//2 4//4 3//3

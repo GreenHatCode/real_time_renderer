@@ -133,18 +133,18 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
     }
 }
 
-void assimp_wrapper::Model::draw(bool draw_transparent, Shader &shader_program) const
+void assimp_wrapper::Model::draw(GLenum draw_mode, bool draw_transparent, Shader &shader_program) const
 {
     if (draw_transparent) {
         for (auto& mesh : transparent_meshes_) {
             materials_[mesh.get_material_index()].bind(shader_program);
-            mesh.render();
+            mesh.render(draw_mode);
         }
     }
     else {
         for (auto& mesh : opaque_meshes_) {
             materials_[mesh.get_material_index()].bind(shader_program);
-            mesh.render();
+            mesh.render(draw_mode);
         }
     }
 }

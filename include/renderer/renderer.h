@@ -17,6 +17,9 @@ namespace renderer {
         inline constexpr std::string_view OUTLINE_FRAGMENT_SHADER = "shaders_sources/stencil_outline/fragment_shader.frag";
         inline constexpr float OUTLINE_WIDTH = 0.1f;
         inline constexpr glm::vec3 OUTLINE_COLOR = glm::vec3(0.0f, 0.8f, 1.0f);
+
+        inline constexpr uint8_t AXES_LINES_ID = 0x01;
+        inline constexpr uint8_t XZ_FACE_GRID_ID = 0x02;    
     } // namespace defaults
 
     class Renderer final {
@@ -24,6 +27,7 @@ namespace renderer {
         struct RenderQueueObject {
             std::shared_ptr<const scene::physical_objects::IRender> obj_ptr;
             float distance_to_viewer;
+            GLenum draw_mode;
         };
 
     private:
@@ -39,6 +43,8 @@ namespace renderer {
 
         std::vector<RenderQueueObject> opaque_objects_;
         std::vector<RenderQueueObject> transparent_objects_;
+
+        uint8_t internal_objects_id_mask_;
 
         glm::vec4 clear_color_rgba_;
         glm::mat4 view_mat_;
@@ -58,7 +64,7 @@ namespace renderer {
         void render_opaque_scene_objects();
         void render_transparent_scene_objects();
         
-        void render_scene_object_with_outline(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
+        void render_scene_object_with_outline(const RenderQueueObject& obj);
 
     public:
         Renderer(std::shared_ptr<const scene::Scene> scene);
@@ -70,6 +76,7 @@ namespace renderer {
         void set_view_mat(const glm::mat4& view_mat);
         void set_projection_mat(const glm::mat4& projection_mat);
         void set_camera_position(const glm::vec3& camera_position);
+        void set_internal_objects_id_mask(uint8_t internal_objects_id_mask);
 
         void set_post_processing(PostProcessingTypes type = PostProcessingTypes::NO_POST_PROCESSING);
         void set_geometry_post_processing(GeometryProcessingTypes type = GeometryProcessingTypes::NO_GEOMETRY_PROCESSING);

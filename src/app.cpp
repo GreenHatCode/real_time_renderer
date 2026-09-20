@@ -243,11 +243,11 @@ void App::load_sources_debug()
     // imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
     // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
 
-    imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
+    // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
     // imgui_window_->load_model("blending", "sphere", "resources/light_sphere.obj");
 
-    imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
-    imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
+    // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
+    // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
     // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
 }
 
@@ -269,6 +269,8 @@ int32_t App::run()
         renderer_->set_camera_position(camera_->get_position());
         renderer_->set_post_processing(imgui_window_->get_post_processing_type());
         renderer_->set_geometry_post_processing(imgui_window_->get_geometry_processing_type());
+        renderer_->set_internal_objects_id_mask(0x01 | 0x02);
+
         renderer_->render_scene(framebuffer_width_, framebuffer_height_);
 
         imgui_window_->set_gpu_time_to_display(renderer_->get_gpu_time());

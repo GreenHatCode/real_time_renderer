@@ -23,7 +23,7 @@ namespace assimp_wrapper
         
     public:
         Model(const std::filesystem::path &path, uint32_t postprocess_flags);
-        void draw(bool draw_transparent, Shader &shader_program) const;
+        void draw(GLenum draw_mode, bool draw_transparent, Shader &shader_program) const;
         uint32_t get_vertices_count() const;
         uint32_t get_faces_count() const;
         bool is_transparent() const;
