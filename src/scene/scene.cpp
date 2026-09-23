@@ -10,7 +10,7 @@ scene::Scene::Scene()
 {
     // add internal objects that will be used but not displayed in ui
 
-    // physical objects to render axes markers (three perpendicular lines)
+    // physical object to render axes markers (three perpendicular lines)
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(
             "axes_lines_shader", 
@@ -30,7 +30,7 @@ scene::Scene::Scene()
         spdlog::error("Failed to load internal model {}, what: {}", "resources/internal_models/axes_lines/axes_lines.obj", e.what());
     }
 
-    // physical objects to render xz face grid
+    // physical object to render xz face grid
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(
             "xz_face_grid_shader", 
@@ -41,16 +41,41 @@ scene::Scene::Scene()
 
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
             assimp_wrapper::Model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
-            "xz_face_grid_obj"
+            "xz_face_grid_obj_top",
+            shader
         );
 
-        loaded_model->set_shader(shader);
+
+        // todo: 
+        // due to Z-fighting between 
+        // xz grid and xz solid face (they have equal Y axis value)
+        // the Y coord for grid is changed 
+        // 
+        // due to using lighting calculations 
+        // in xz solid face shader (see shader sources)
+        // the second (mirrored) xz grid added to save good view of grid
+        // from another side of the solid surface
         loaded_model->scale(glm::vec3(100.0f, 1.0f, 100.0f));
+        loaded_model->move(glm::vec3(0.0f, 0.01f, 0.0f));
         internal_physical_objects_.emplace_back(std::move(loaded_model), renderer::defaults::XZ_FACE_GRID_ID, GL_TRIANGLES);
+
+        loaded_model.reset();
+        loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
+            assimp_wrapper::Model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
+            "xz_face_grid_obj_bottom",
+            shader
+        );
+        loaded_model->scale(glm::vec3(100.0f, 1.0f, 100.0f));
+        loaded_model->move(glm::vec3(0.0f, -0.01f, 0.0f));
+        internal_physical_objects_.emplace_back(std::move(loaded_model), renderer::defaults::XZ_FACE_GRID_ID, GL_TRIANGLES);
+
+
+
     } catch (const std::exception &e) {
         spdlog::error("Failed to load internal model {}, what: {}", "resources/internal_models/axes_lines/axes_lines.obj", e.what());
     }
 
+    // physical object to render xz solid face
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(
             "xz_solid_face_shader", 
@@ -70,7 +95,6 @@ scene::Scene::Scene()
     } catch (const std::exception &e) {
         spdlog::error("Failed to load internal model {}, what: {}", "resources/internal_models/axes_lines/axes_lines.obj", e.what());
     }
-
 
 }
 

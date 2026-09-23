@@ -74,7 +74,7 @@ void renderer::Renderer::build_rendering_queues()
 
     for (const auto &obj : scene_->get_internal_objects()) {
         if (internal_objects_id_mask_ & obj.id) {
-            obj.ptr->move(camera_position_);
+            obj.ptr->move(glm::vec3(camera_position_.x, obj.ptr->get_move_vector().y, camera_position_.z));
             
             opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj.ptr, .distance_to_viewer=0.0f, .draw_mode=obj.draw_mode});
         }
