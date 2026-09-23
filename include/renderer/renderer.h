@@ -18,8 +18,9 @@ namespace renderer {
         inline constexpr float OUTLINE_WIDTH = 0.1f;
         inline constexpr glm::vec3 OUTLINE_COLOR = glm::vec3(0.0f, 0.8f, 1.0f);
 
-        inline constexpr uint8_t AXES_LINES_ID = 0x01;
-        inline constexpr uint8_t XZ_FACE_GRID_ID = 0x02;    
+        inline constexpr uint8_t AXES_LINES_ID = 0x01; // 0b00000001
+        inline constexpr uint8_t XZ_FACE_GRID_ID = 0x02; // 0b000010
+        inline constexpr uint8_t XZ_FACE_SOLID_ID = 0x04; // 0b00100
     } // namespace defaults
 
     class Renderer final {

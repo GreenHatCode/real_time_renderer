@@ -51,6 +51,26 @@ scene::Scene::Scene()
         spdlog::error("Failed to load internal model {}, what: {}", "resources/internal_models/axes_lines/axes_lines.obj", e.what());
     }
 
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(
+            "xz_solid_face_shader", 
+            "shaders_sources/internal/xz_solid_face/vertex_shader.vert",
+            "shaders_sources/internal/xz_solid_face/fragment_shader.frag"
+        );
+        add_shader(shader);
+
+        std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
+            assimp_wrapper::Model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
+            "xz_solid_face_obj"
+        );
+
+        loaded_model->set_shader(shader);
+        loaded_model->scale(glm::vec3(100.0f, 1.0f, 100.0f));
+        internal_physical_objects_.emplace_back(std::move(loaded_model), renderer::defaults::XZ_FACE_SOLID_ID, GL_TRIANGLES);
+    } catch (const std::exception &e) {
+        spdlog::error("Failed to load internal model {}, what: {}", "resources/internal_models/axes_lines/axes_lines.obj", e.what());
+    }
+
 
 }
 

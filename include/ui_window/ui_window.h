@@ -65,6 +65,7 @@ private: // should be accessible
 
     bool render_axes_;
     bool render_xz_grid_;
+    bool render_xz_surface_;
 
     float gamma_;
 

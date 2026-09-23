@@ -20,6 +20,7 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , selected_geometry_processing_type_(static_cast<int32_t>(renderer::GeometryProcessingTypes::NO_GEOMETRY_PROCESSING))
     , render_axes_(false)
     , render_xz_grid_(false)
+    , render_xz_surface_(false)
     , gamma_(2.2f)
 {
 
@@ -39,6 +40,7 @@ void UIWindow::render_window()
 
     ImGui::Checkbox("Render axes", &render_axes_);
     ImGui::Checkbox("Render XZ grid", &render_xz_grid_);
+    ImGui::Checkbox("Render XZ surface", &render_xz_surface_);
 
     if (static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_) == renderer::PostProcessingTypes::GAMMA_CORRECTION) {
         ImGui::SliderFloat("Gamma", &gamma_, renderer::MIN_GAMMA, renderer::MAX_GAMMA);
@@ -105,6 +107,7 @@ uint8_t UIWindow::get_selected_internal_objects_id_mask() const
 
     if (render_axes_) mask |= renderer::defaults::AXES_LINES_ID;
     if (render_xz_grid_) mask |= renderer::defaults::XZ_FACE_GRID_ID;
+    if (render_xz_surface_) mask |= renderer::defaults::XZ_FACE_SOLID_ID;
 
     return mask;
 }
