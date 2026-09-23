@@ -417,17 +417,13 @@ void UIWindow::render_point_light_editor(scene::lights::PointLight &light)
             spdlog::warn("Failed to edit point light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
     }
 
-    auto constant = light.get_constant();
-    if (ImGui::DragFloat("Constant", &constant, 0.05f))
-        light.set_constant(constant);
-
     auto linear = light.get_linear();
-    if (ImGui::DragFloat("Linear", &linear, 0.05f))
-        light.set_constant(linear);
+    if (ImGui::SliderFloat("Linear", &linear, scene::lights::lighting_constants::MIN_LIGHT_LINEAR, scene::lights::lighting_constants::MAX_LIGHT_LINEAR))
+        light.set_linear(linear);
 
     auto quadratic = light.get_quadratic();
-    if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
-        light.set_constant(quadratic);
+    if (ImGui::SliderFloat("Quadratic", &quadratic, scene::lights::lighting_constants::MIN_LIGHT_QUADRATIC, scene::lights::lighting_constants::MAX_LIGHT_QUADRATIC))
+        light.set_quadratic(quadratic);
 }
 
 void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
@@ -464,24 +460,20 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
         }
     }
 
-    auto constant = light.get_constant();
-    if (ImGui::DragFloat("Constant", &constant, 0.05f))
-        light.set_constant(constant);
-
     auto linear = light.get_linear();
-    if (ImGui::DragFloat("Linear", &linear, 0.05f))
+    if (ImGui::SliderFloat("Linear", &linear, scene::lights::lighting_constants::MIN_LIGHT_LINEAR, scene::lights::lighting_constants::MAX_LIGHT_LINEAR))
         light.set_linear(linear);
 
     auto quadratic = light.get_quadratic();
-    if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
+    if (ImGui::SliderFloat("Quadratic", &quadratic, scene::lights::lighting_constants::MIN_LIGHT_QUADRATIC, scene::lights::lighting_constants::MAX_LIGHT_QUADRATIC))
         light.set_quadratic(quadratic);
 
     auto cut_off = light.get_cut_off();
-    if (ImGui::DragFloat("Cut off angle (degrees)", &cut_off, 0.05f))
+    if (ImGui::SliderFloat("Cut off angle (degrees)", &cut_off, scene::lights::lighting_constants::MIN_SPOT_CUTOFF, light.get_outer_cut_off()))
         light.set_cut_off(cut_off);
 
     auto outer_cut_off = light.get_outer_cut_off();
-    if (ImGui::DragFloat("Outer cut off angle (degrees)", &outer_cut_off, 0.05f))
+    if (ImGui::SliderFloat("Outer cut off angle (degrees)", &outer_cut_off, light.get_cut_off(), scene::lights::lighting_constants::MAX_SPOT_CUTOFF))
         light.set_outer_cut_off(outer_cut_off);
 }
 

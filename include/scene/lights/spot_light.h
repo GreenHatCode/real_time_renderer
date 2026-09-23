@@ -29,8 +29,7 @@ namespace scene::lights
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
             glm::vec3 direction_ = physical_objects::physical_light_object_constants::SPOT_LIGHT_MODEL_DEFAULT_FORWARD,
-            float constant = 1.0f, 
-            float linear = 0.09f, 
+            float linear = 0.09f, // todo:
             float quadratic = 0.032f, 
             float cut_off_rad = glm::radians(25.0f), 
             float outer_cut_off_rad = glm::radians(30.0f)
@@ -43,8 +42,6 @@ namespace scene::lights
         glm::vec3 get_position() const;
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;
-        void set_constant(float value);
-        float get_constant() const;
         void set_linear(float value);
         float get_linear() const;
         void set_quadratic(float value);

@@ -11,7 +11,6 @@ scene::lights::SpotLight::SpotLight(
     glm::vec3 rgb_color, 
     glm::vec3 position, 
     glm::vec3 direction_, 
-    float constant, 
     float linear, 
     float quadratic, 
     float cut_off_rad, 
@@ -23,7 +22,6 @@ scene::lights::SpotLight::SpotLight(
     , name_(name)
     , type_(LightType::SPOT_LIGHT)
     , light_cone_(cone_model)
-    , constant_(constant)
     , linear_(linear)
     , quadratic_(quadratic)
     , cosine_cut_off_rad_(glm::cos(cut_off_rad))
@@ -51,19 +49,9 @@ glm::vec3 scene::lights::SpotLight::get_direction() const
     return direction_;
 }
 
-void scene::lights::SpotLight::set_constant(float value)
-{
-    constant_ = std::min(value, POINT_LIGHT_MIN_CONSTANT);
-}
-
-float scene::lights::SpotLight::get_constant() const
-{
-    return constant_;
-}
-
 void scene::lights::SpotLight::set_linear(float value)
 {
-    linear_ = std::min(value, POINT_LIGHT_MIN_LINEAR);
+    linear_ = glm::clamp(value, MIN_LIGHT_LINEAR, MAX_LIGHT_LINEAR);
 }
 
 float scene::lights::SpotLight::get_linear() const
@@ -73,7 +61,7 @@ float scene::lights::SpotLight::get_linear() const
 
 void scene::lights::SpotLight::set_quadratic(float value)
 {
-    quadratic_ = std::min(value, POINT_LIGHT_MIN_QUADRATIC);
+    quadratic_ = glm::clamp(value, MIN_LIGHT_QUADRATIC, MAX_LIGHT_QUADRATIC);
 }
 
 float scene::lights::SpotLight::get_quadratic() const
@@ -83,7 +71,7 @@ float scene::lights::SpotLight::get_quadratic() const
 
 void scene::lights::SpotLight::set_cut_off(float degrees)
 {
-    cosine_cut_off_rad_ = glm::cos(glm::radians(std::clamp(degrees, SPOT_MIN_CUTOFF, SPOT_MAX_CUTOFF)));
+    cosine_cut_off_rad_ = glm::cos(glm::radians(std::clamp(degrees, MIN_SPOT_CUTOFF, MAX_SPOT_CUTOFF)));
 }
 
 float scene::lights::SpotLight::get_cut_off() const
@@ -93,7 +81,7 @@ float scene::lights::SpotLight::get_cut_off() const
 
 void scene::lights::SpotLight::set_outer_cut_off(float degrees)
 {
-    cosine_outer_cut_off_rad_ = glm::cos(glm::radians(std::clamp(degrees, SPOT_MIN_CUTOFF, SPOT_MAX_CUTOFF)));
+    cosine_outer_cut_off_rad_ = glm::cos(glm::radians(std::clamp(degrees, MIN_SPOT_CUTOFF, MAX_SPOT_CUTOFF)));
 }
 
 float scene::lights::SpotLight::get_outer_cut_off() const
@@ -129,7 +117,7 @@ void scene::lights::SpotLight::upload_components(Shader &obj_shader, size_t ligh
     obj_shader.set_uniform(uniform_name + ".color", get_color());
     obj_shader.set_uniform(uniform_name + ".position", position_);
     obj_shader.set_uniform(uniform_name + ".direction", direction_);
-    obj_shader.set_uniform(uniform_name + ".constant", constant_);
+    obj_shader.set_uniform(uniform_name + ".constant", LIGHT_CONSTANT);
     obj_shader.set_uniform(uniform_name + ".linear", linear_);
     obj_shader.set_uniform(uniform_name + ".quadratic", quadratic_);
     obj_shader.set_uniform(uniform_name + ".cut_off", cosine_cut_off_rad_);

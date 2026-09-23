@@ -25,7 +25,6 @@ namespace scene::lights
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
-            float constant = 1.0f, 
             float linear = 0.09f, 
             float quadratic = 0.032f
         );
@@ -35,8 +34,6 @@ namespace scene::lights
 
         void set_position(glm::vec3 position);
         glm::vec3 get_position() const;  
-        void set_constant(float value); 
-        float get_constant() const;
         void set_linear(float value);
         float get_linear() const;
         void set_quadratic(float value);
