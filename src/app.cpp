@@ -238,7 +238,7 @@ void App::load_sources_debug()
     imgui_window_->load_shader("assimp", "shaders_sources/assimp/spider_vertex_shader.vert", "shaders_sources/assimp/spider_fragment_shader.frag");
     imgui_window_->load_shader("blending", "shaders_sources/blending/vertex_shader.vert", "shaders_sources/blending/fragment_shader.frag");
 
-    // imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");   
+    imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");   
     // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj");
     // imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
     // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
@@ -270,6 +270,7 @@ int32_t App::run()
         renderer_->set_post_processing(imgui_window_->get_post_processing_type());
         renderer_->set_geometry_post_processing(imgui_window_->get_geometry_processing_type());
         renderer_->set_internal_objects_id_mask(imgui_window_->get_selected_internal_objects_id_mask());
+        renderer_->set_gamma(imgui_window_->get_gamma());
 
         renderer_->render_scene(framebuffer_width_, framebuffer_height_);
 

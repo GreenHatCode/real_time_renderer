@@ -53,18 +53,20 @@ private: // do not expose outside
     ModelInspectorState_t model_inspector_state_;
     LightInspectorState_t light_inspector_state_;
 
-    int32_t selected_post_processing_type_;
-    int32_t selected_geometry_processing_type_;
-
     double gpu_time_to_display_;
     double cpu_time_to_display_;
-
-    bool render_axes_;
-    bool render_xz_grid_;
 
 private: // should be accessible 
     glm::vec4 clear_color_;
     double delta_time_;
+
+    int32_t selected_post_processing_type_;
+    int32_t selected_geometry_processing_type_;
+
+    bool render_axes_;
+    bool render_xz_grid_;
+
+    float gamma_;
 
 public:
     UIWindow(const std::shared_ptr<scene::Scene>& scene);
@@ -77,6 +79,8 @@ public:
 
     void set_gpu_time_to_display(double value);
     void set_cpu_time_to_display(double value);
+
+    float get_gamma() const;
 
 private:
     double calculate_fps();

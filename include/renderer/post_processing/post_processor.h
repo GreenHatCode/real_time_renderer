@@ -5,12 +5,16 @@
 
 namespace renderer {
 
+    inline constexpr float MIN_GAMMA = 0.1f;
+    inline constexpr float MAX_GAMMA = 5.0f;
+
     enum class PostProcessingTypes {
         NO_POST_PROCESSING,
         INVERSION,
         GRAYSCALE, 
         BLUR, 
-        EDGE_DETECTION, 
+        EDGE_DETECTION,
+        GAMMA_CORRECTION, 
         COUNT
     };
 
@@ -21,7 +25,8 @@ namespace renderer {
             "Inversion",
             "Grayscale",
             "Blur",
-            "Edge detection"
+            "Edge detection",
+            "Gamma correction"
         };
         return names;
     }
@@ -30,11 +35,14 @@ namespace renderer {
         FrameBuffer framebuffer_;
         std::map<PostProcessingTypes, Shader> post_processing_shaders_;
         GLuint vao_, vbo_;
+        float gamma_;
 
     public:
         PostProcessor(GLsizei width, GLsizei height);
         ~PostProcessor();
         void enable_off_sceen_rendering(GLsizei scr_width, GLsizei scr_height);
-        void do_post_process(PostProcessingTypes type);     
+        void do_post_process(PostProcessingTypes type); 
+        
+        void set_gamma(float value);
     };
 } // namespace renderer

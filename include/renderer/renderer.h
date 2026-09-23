@@ -81,6 +81,7 @@ namespace renderer {
         void set_post_processing(PostProcessingTypes type = PostProcessingTypes::NO_POST_PROCESSING);
         void set_geometry_post_processing(GeometryProcessingTypes type = GeometryProcessingTypes::NO_GEOMETRY_PROCESSING);
         
+        void set_gamma(float value);
     };
 
 } // namespace renderer

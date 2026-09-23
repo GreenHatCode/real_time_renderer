@@ -20,6 +20,7 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , selected_geometry_processing_type_(static_cast<int32_t>(renderer::GeometryProcessingTypes::NO_GEOMETRY_PROCESSING))
     , render_axes_(false)
     , render_xz_grid_(false)
+    , gamma_(2.2f)
 {
 
 }
@@ -38,6 +39,10 @@ void UIWindow::render_window()
 
     ImGui::Checkbox("Render axes", &render_axes_);
     ImGui::Checkbox("Render XZ grid", &render_xz_grid_);
+
+    if (static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_) == renderer::PostProcessingTypes::GAMMA_CORRECTION) {
+        ImGui::SliderFloat("Gamma", &gamma_, renderer::MIN_GAMMA, renderer::MAX_GAMMA);
+    }
 
 
     ImGui::Separator();
@@ -112,6 +117,11 @@ void UIWindow::set_gpu_time_to_display(double value)
 void UIWindow::set_cpu_time_to_display(double value)
 {
     cpu_time_to_display_ = value;
+}
+
+float UIWindow::get_gamma() const
+{
+    return gamma_;
 }
 
 double UIWindow::calculate_fps()

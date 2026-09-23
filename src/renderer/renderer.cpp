@@ -329,3 +329,8 @@ void renderer::Renderer::set_geometry_post_processing(GeometryProcessingTypes ty
 {
     geometry_processing_type_ = type;
 }
+
+void renderer::Renderer::set_gamma(float value)
+{
+    post_processor_.set_gamma(value);
+}
