@@ -5,6 +5,7 @@ project(real_time_renderer LANGUAGES C CXX)
 option(OFFLINE_BUILD "Disable network calls for FetchContent" OFF)
 if(OFFLINE_BUILD)
     # Tells FetchContent to skip git fetch/pull entirely
+    message("Using offline build")
     set(FETCHCONTENT_FULLY_DISCONNECTED ON CACHE BOOL "" FORCE)
 endif()
 
