@@ -9,6 +9,7 @@
 #include "renderer/simple_profiler.h"
 #include "renderer/post_processing/post_processor.h"
 #include "renderer/post_processing/geometry_processor.h"
+#include "renderer/shadow_frame_buffer.h"
 
 namespace renderer {
     namespace defaults {
@@ -55,11 +56,14 @@ namespace renderer {
         double profile_gpu_time_;
         double profile_cpu_time_;
 
+        ShadowFrameBuffer shadow_framebuffer_;
+
         // uniforms and shaders
         void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
         void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
         void build_rendering_queues();
+        void do_render();
         void use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
         void use_shader(const std::shared_ptr<Shader> &shader_ptr);
         void render_opaque_scene_objects();

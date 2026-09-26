@@ -1,5 +1,6 @@
 #include "renderer/renderer.h"
 #include "glm/gtx/norm.hpp"
+#include "scene/lights/spot_light.h"
 
 using namespace renderer;
 
@@ -14,6 +15,7 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
     , internal_objects_id_mask_(0)
+    , shadow_framebuffer_(1, 1)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -99,6 +101,15 @@ void renderer::Renderer::build_rendering_queues()
             return lhs.distance_to_viewer > rhs.distance_to_viewer; 
         }
     );
+}
+
+void renderer::Renderer::do_render()
+{
+    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    render_opaque_scene_objects();
+    render_transparent_scene_objects();
 }
 
 void renderer::Renderer::use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
@@ -263,23 +274,76 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     profiler_.begin_gpu_profiling_query();
 
     scene_lights_buffer_ = scene_->get_lights();
-
-    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING)
-        post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);
-
-    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    
-
     build_rendering_queues();
-    render_opaque_scene_objects();
-    render_transparent_scene_objects();
+
+
+
+    /*
+        1) render to shadow depth buffer from positon of each light
+        2) render normally (including offscreen rendering) to selected fbo
+        at this point use generated framebuffers to apply shodow mapping
+        
+        rules:
+        - shadows applied to every object (we consider that the object's shader program can render shadows)
+        - use only one light (for now)
+        - one object can produce shadow on another object (even the surface is an object)
+    
+    */
+
+#if 1
+    // rendering to shadow framebuffer (todo: add in a loop for each light that has a direction)
+    glm::mat4 tmp_view_mat = view_mat_;
+    glm::mat4 tmp_projection_mat = projection_mat_;
+
+    std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[0];
+    glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f); // move to global constants
+
+    if (glm::abs(glm::dot(world_up, static_cast<scene::lights::SpotLight &>(*light).get_direction())) > 0.999f) {
+        // the dir and world_up vectors are collinear, fallback
+        world_up = glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+
+    view_mat_ = glm::lookAt(
+        static_cast<scene::lights::SpotLight &>(*light).get_position(),
+        static_cast<scene::lights::SpotLight &>(*light).get_direction() + static_cast<scene::lights::SpotLight &>(*light).get_position(),
+        world_up
+    );
+
+    projection_mat_ = glm::perspective(
+        glm::radians(2*static_cast<scene::lights::SpotLight &>(*light).get_outer_cut_off()),
+        (float)framebuffer_width / framebuffer_height,
+        0.1f, // near
+        20.0f // far, try to calculate dynamically
+    );
+
+
+    // bind shadow framebuffer (for a particular light)
+    shadow_framebuffer_.rescale(framebuffer_width, framebuffer_height);
+    shadow_framebuffer_.bind();
+    // bind shader with empty fragment shader (only do transformation to clip space in vertex) to avoid useless fragment processing
+    do_render();
+
+    // we have a depth buffer from light's pov 
+    shadow_framebuffer_.unbind();
+    post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
+    curr_shader_ptr_->use(); // restore renderer's shader
+
+
+
+#else
+    post_processing_type_ = PostProcessingTypes::GAMMA_CORRECTION;
+    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
+        post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);
+    }
+
+    do_render();
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.do_post_process(post_processing_type_);
         curr_shader_ptr_->use(); // restore renderer's shader
     }
+
+#endif
 
     profiler_.end_gpu_profiling_query();
     profiler_.end_cpu_profiling_query();

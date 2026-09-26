@@ -1,6 +1,4 @@
 #pragma once
-
-#include <iostream>
 #include "opengl.h"
 #include <glm/glm.hpp>
 
