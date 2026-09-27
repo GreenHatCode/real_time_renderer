@@ -18,7 +18,10 @@ namespace scene::lights {
         inline constexpr float MIN_SPOT_CUTOFF = 1.0f;
         inline constexpr float MAX_SPOT_CUTOFF = 89.0f;
 
-        inline constexpr float SPOT_LIGHT_DEFAULT_NEAR_PLANE = 0.1f;
+        // shadow mapping
+        inline constexpr float SPOT_LIGHT_DEFAULT_NEAR_PLANE = -100.0f;
+        inline constexpr float LIGHTS_ORTHO_SIDE_SIZE = 120.0f;
+        inline constexpr float DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE = 300.0f;
     }
 
     enum class LightType

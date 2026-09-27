@@ -103,6 +103,8 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
+    float shadow = ShadowCalculation(vs_out.frag_pos_light_space);
+
     for (int i = 0; i < u_directional_lights_count; ++i) {
         ambient += directional_lights[i].ambient * directional_lights[i].color;
 
@@ -115,7 +117,7 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
         specular += spec * directional_lights[i].color;
     }
     
-    return ambient + diffuse + specular;
+    return ambient + (1.0 - shadow) * (diffuse + specular);
 }
 
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {

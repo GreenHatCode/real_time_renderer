@@ -9,6 +9,9 @@ namespace scene::lights
         std::string name_;
         LightType type_;
 
+        inline static constexpr glm::vec3 LOOK_POINT = glm::vec3(0.0f);
+        inline static constexpr glm::vec3 DISTANCE_FROM_DIRECTION_PRESCALER = glm::vec3(50.0f);
+
     public:
         DirectionalLight(
             const std::string& name, 
@@ -23,11 +26,8 @@ namespace scene::lights
 
 
         // shadow mapping
-        virtual glm::mat4 view_matrix() const override { return glm::mat4(1.0f); }
-        virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override { return glm::mat4(1.0f); }
-
-
-
+        virtual glm::mat4 view_matrix() const override;
+        virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const;
 
         std::string get_name() const override;
         LightType get_type() const override;

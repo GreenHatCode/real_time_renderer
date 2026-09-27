@@ -282,33 +282,11 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     scene_lights_buffer_ = scene_->get_lights();
     build_rendering_queues();
 
-
-
-    /*
-        1) render to shadow depth buffer from positon of each light
-        2) render normally (including offscreen rendering) to selected fbo
-        at this point use generated framebuffers to apply shodow mapping
-        
-        rules:
-        - shadows applied to every object (we consider that the object's shader program can render shadows)
-        - use only one light (for now)
-        - one object can produce shadow on another object (even the surface is an object)
-    
-    */
-
     // rendering to shadow framebuffer (todo: add in a loop for each light that has a direction)
     glm::mat4 tmp_view_mat = view_mat_;
     glm::mat4 tmp_projection_mat = projection_mat_;
 
     std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[0];
-
-#if 0
-    projection_mat_ = glm::ortho(
-        -10.0f, 10.0f, -10.0f, 10.0f,
-        5.0f, // near
-        20.0f // far, try to calculate dynamically
-    );
-#endif
 
     view_mat_ = light->view_matrix();
     projection_mat_ = light->projection_matrix(framebuffer_width, framebuffer_height);
@@ -322,10 +300,12 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
 
     // we have a depth buffer from light's pov 
     shadow_framebuffer_.unbind();
-    // post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
-    // curr_shader_ptr_->use(); // restore renderer's shader
+
+#if 0
+    post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
+    curr_shader_ptr_->use(); // restore renderer's shader
     
-#if 1
+#else
     light_space_mat_ = projection_mat_ * view_mat_;
     view_mat_ = tmp_view_mat;
     projection_mat_ = tmp_projection_mat;

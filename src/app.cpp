@@ -244,11 +244,11 @@ void App::load_sources_debug()
     // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
 
     // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
-    imgui_window_->load_model("blending", "sphere", "resources/light_sphere.obj");
+    imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
-    imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
+    // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
     // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
-    // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
 }
 
 int32_t App::run()
