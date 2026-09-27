@@ -109,6 +109,44 @@ void renderer::Renderer::build_rendering_queues()
     );
 }
 
+void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float framebuffer_height)
+{
+    std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[0];
+    // loop and push rendered framebuffer to vector
+
+    light_space_mat_ = light->projection_matrix(framebuffer_width, framebuffer_height) * light->view_matrix();
+
+    // bind shadow framebuffer (for a particular light) 
+    shadow_framebuffer_.rescale(framebuffer_width, framebuffer_height);
+    shadow_framebuffer_.bind();
+    
+    std::shared_ptr<Shader> shader = scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER);
+    curr_shader_ptr_ = shader.get();
+    curr_shader_ptr_->use();
+    curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat_);
+
+    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    // render opaque objects (without anything)
+    for (const auto& obj: opaque_objects_) {
+        obj.obj_ptr->render(obj.draw_mode, false, shader); 
+    }
+
+    // render transparent objects (in two steps)
+    for (const auto& obj: transparent_objects_) {
+        obj.obj_ptr->render(obj.draw_mode, false);       
+    }
+
+    for (const auto& obj: transparent_objects_) {
+        glDepthMask(GL_FALSE);
+        obj.obj_ptr->render(obj.draw_mode, true); 
+        glDepthMask(GL_TRUE);
+    }
+
+
+    shadow_framebuffer_.unbind();
+}
+
 void renderer::Renderer::do_render()
 {
     glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
@@ -282,34 +320,13 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     scene_lights_buffer_ = scene_->get_lights();
     build_rendering_queues();
 
-    // rendering to shadow framebuffer (todo: add in a loop for each light that has a direction)
-    glm::mat4 tmp_view_mat = view_mat_;
-    glm::mat4 tmp_projection_mat = projection_mat_;
-
-    std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[0];
-
-    view_mat_ = light->view_matrix();
-    projection_mat_ = light->projection_matrix(framebuffer_width, framebuffer_height);
-
-
-    // bind shadow framebuffer (for a particular light)
-    shadow_framebuffer_.rescale(framebuffer_width, framebuffer_height);
-    shadow_framebuffer_.bind();
-    // bind shader with empty fragment shader (only do transformation to clip space in vertex) to avoid useless fragment processing
-    do_render();
-
-    // we have a depth buffer from light's pov 
-    shadow_framebuffer_.unbind();
+    do_shadow_map_render(framebuffer_width, framebuffer_height);
 
 #if 0
     post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
     curr_shader_ptr_->use(); // restore renderer's shader
     
 #else
-    light_space_mat_ = projection_mat_ * view_mat_;
-    view_mat_ = tmp_view_mat;
-    projection_mat_ = tmp_projection_mat;
-
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);

@@ -96,6 +96,21 @@ scene::Scene::Scene()
         spdlog::error("Failed to load internal model {}, what: {}", "resources/internal_models/axes_lines/axes_lines.obj", e.what());
     }
 
+
+
+
+    // specific shaders
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(
+            "shadow_map_empty_frag_shader", 
+            "shaders_sources/internal/shadow_map_empty_frag_shader/vertex_shader.vert",
+            "shaders_sources/internal/shadow_map_empty_frag_shader/fragment_shader.frag"
+        );
+        internal_shaders_.emplace(InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER, shader);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load internal shader: {}, what: {}", "shadow_map_empty_frag_shader", e.what());
+    }
 }
 
 void scene::Scene::add_object(const std::shared_ptr<scene::physical_objects::PhysicalObject> &ptr)
@@ -245,6 +260,19 @@ std::shared_ptr<Shader> scene::Scene::get_shader(const std::string &name) const
     if (it != shaders_.end()) return *it;
         
     return nullptr;
+}
+
+std::shared_ptr<Shader> scene::Scene::get_internal_shader(InternalShadersIDS id) const
+{
+    try
+    {
+        return internal_shaders_.at(id);
+    }
+    catch(const std::exception& e)
+    {
+        spdlog::error("There is no shader with id={}", static_cast<int>(id));
+        return nullptr;
+    }
 }
 
 uint32_t scene::Scene::get_total_vertices_count() const

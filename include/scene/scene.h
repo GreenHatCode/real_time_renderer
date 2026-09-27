@@ -13,6 +13,10 @@
 
 namespace scene
 {
+    enum class InternalShadersIDS {
+        SHADOW_MAP_EMPTY_FRAG_SHADER
+    };
+
     class Scene {
 
     public:
@@ -28,6 +32,7 @@ namespace scene
         std::vector<internal_physical_object> internal_physical_objects_;
         std::vector<std::shared_ptr<scene::lights::LightBase>> lights_;
         std::vector<std::shared_ptr<Shader>> shaders_;
+        std::map<InternalShadersIDS, std::shared_ptr<Shader>> internal_shaders_;
     
         uint32_t total_vertices_count_;
         uint32_t total_faces_count_;
@@ -47,6 +52,7 @@ namespace scene
         std::shared_ptr<scene::physical_objects::PhysicalObject> get_object(const std::string &name) const;
         std::shared_ptr<scene::lights::LightBase> get_light(const std::string &name) const;
         std::shared_ptr<Shader> get_shader(const std::string& name) const;
+        std::shared_ptr<Shader> get_internal_shader(InternalShadersIDS id) const;
 
         uint32_t get_total_vertices_count() const;
         uint32_t get_total_faces_count() const;

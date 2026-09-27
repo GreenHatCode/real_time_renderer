@@ -67,6 +67,7 @@ namespace renderer {
         void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
         void build_rendering_queues();
+        void do_shadow_map_render(float framebuffer_width, float framebuffer_height);
         void do_render();
         void use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
         void use_shader(const std::shared_ptr<Shader> &shader_ptr);
