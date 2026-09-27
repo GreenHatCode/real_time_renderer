@@ -7,12 +7,18 @@ uniform mat3 u_normal_mat;
 uniform mat4 u_model_mat;
 uniform mat4 u_view_mat;
 uniform mat4 u_projection_mat;
+uniform mat4 u_light_space_mat;
 
-out vec3 v_normal;
-out vec3 v_frag_pos;
+out VSOut {
+    vec3 frag_pos;
+    vec3 normal;
+    vec4 frag_pos_light_space;
+} vs_out;
 
 void main() {
     gl_Position = u_projection_mat * u_view_mat * u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0);
-    v_normal = normalize(u_normal_mat * a_normal);
-    v_frag_pos = vec3(u_model_mat * vec4(a_pos, 1.0));
+    
+    vs_out.frag_pos = vec3(u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0));
+    vs_out.normal = u_normal_mat * a_normal;
+    vs_out.frag_pos_light_space = u_light_space_mat * u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0);
 }

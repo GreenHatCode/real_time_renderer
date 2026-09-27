@@ -75,7 +75,6 @@ uint32_t assimp_wrapper::Mesh::get_material_index() const
 }
 void assimp_wrapper::Mesh::render(GLenum mode) const
 {
-    glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao_);
     glDrawElements(mode, indices_count_, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

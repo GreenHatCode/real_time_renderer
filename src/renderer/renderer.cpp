@@ -36,6 +36,12 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     shader_ptr->set_uniform("u_view_mat", view_mat_);
     shader_ptr->set_uniform("u_projection_mat", projection_mat_);
     shader_ptr->set_uniform("u_camera_pos", camera_position_);
+
+
+    glActiveTexture(GL_TEXTURE0);
+    shader_ptr->set_uniform("u_light_space_mat", light_space_mat_);
+    shader_ptr->set_uniform("u_shadow_map", 0);
+    glBindTexture(GL_TEXTURE_2D, shadow_framebuffer_.get_depth_map());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -290,7 +296,6 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     
     */
 
-#if 1
     // rendering to shadow framebuffer (todo: add in a loop for each light that has a direction)
     glm::mat4 tmp_view_mat = view_mat_;
     glm::mat4 tmp_projection_mat = projection_mat_;
@@ -309,12 +314,20 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
         world_up
     );
 
+#if 1
     projection_mat_ = glm::perspective(
         glm::radians(2*static_cast<scene::lights::SpotLight &>(*light).get_outer_cut_off()),
         (float)framebuffer_width / framebuffer_height,
         0.1f, // near
+        50.0f // far, try to calculate dynamically
+    );
+#else
+    projection_mat_ = glm::ortho(
+        -10.0f, 10.0f, -10.0f, 10.0f,
+        5.0f, // near
         20.0f // far, try to calculate dynamically
     );
+#endif
 
 
     // bind shadow framebuffer (for a particular light)
@@ -325,13 +338,15 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
 
     // we have a depth buffer from light's pov 
     shadow_framebuffer_.unbind();
-    post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
-    curr_shader_ptr_->use(); // restore renderer's shader
+    // post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
+    // curr_shader_ptr_->use(); // restore renderer's shader
+    
+#if 1
+    light_space_mat_ = projection_mat_ * view_mat_;
+    view_mat_ = tmp_view_mat;
+    projection_mat_ = tmp_projection_mat;
 
 
-
-#else
-    post_processing_type_ = PostProcessingTypes::GAMMA_CORRECTION;
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);
     }
@@ -342,8 +357,8 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
         post_processor_.do_post_process(post_processing_type_);
         curr_shader_ptr_->use(); // restore renderer's shader
     }
-
 #endif
+
 
     profiler_.end_gpu_profiling_query();
     profiler_.end_cpu_profiling_query();

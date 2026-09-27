@@ -40,11 +40,15 @@ const float MAX_GRID_VISIBILITY_DISTANCE = 120.0;
 const uint MAX_LIGHTS = 10;
 const vec3 BASE_COLOR = vec3(1.0);
 
-in vec3 v_normal;
-in vec3 v_frag_pos;
+in VSOut {
+    vec3 frag_pos;
+    vec3 normal;
+    vec4 frag_pos_light_space;
+} vs_out;
 
 out vec4 FragColor;
 
+uniform sampler2D u_shadow_map;
 uniform vec3 u_camera_pos;
 uniform DirectionalLight directional_lights[MAX_LIGHTS];
 uniform PointLight point_lights[MAX_LIGHTS];
@@ -58,20 +62,38 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir);
 
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    vec3 ndc_coords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    ndc_coords = ndc_coords * 0.5 + 0.5;
+    
+    // shadow map is in [-1; 1], if after conversion fragment is outside it - skip shadowing
+    if (ndc_coords.z > 1.0 || ndc_coords.x < 0.0 || ndc_coords.x > 1.0 || ndc_coords.y < 0.0 || ndc_coords.y > 1.0) {
+        return 0.0;
+    }
+
+    float closest_depth = texture(u_shadow_map, ndc_coords.xy).r;
+    float curr_depth = ndc_coords.z;
+
+    return curr_depth > closest_depth ? 1.0 : 0.0;
+}
+
 void main() {
 
-    float dist_to_camera = length(v_frag_pos.xz - u_camera_pos.xz);
+
+    float dist_to_camera = length(vs_out.frag_pos.xz - u_camera_pos.xz);
     float fade_alpha = 1.0 - smoothstep(20.0, MAX_GRID_VISIBILITY_DISTANCE, dist_to_camera);
     if (fade_alpha <= 0.0) discard;
 
 
-    vec3 view_dir = normalize(u_camera_pos - v_frag_pos);
+    vec3 view_dir = normalize(u_camera_pos - vs_out.frag_pos);
+    vec3 unit_normal = normalize(vs_out.normal);    
 
-    vec3 direction_lights_color = process_directional_lights(v_normal, view_dir);
-    vec3 point_lights_color = process_point_lights(v_normal, view_dir);
-    vec3 spot_lights_color = process_spot_lights(v_normal, view_dir);
+    vec3 direction_lights_color = process_directional_lights(unit_normal, view_dir);
+    vec3 point_lights_color = process_point_lights(unit_normal, view_dir);
+    vec3 spot_lights_color = process_spot_lights(unit_normal, view_dir);
 
-    vec3 result = (direction_lights_color + point_lights_color + spot_lights_color) * BASE_COLOR;
+    vec3 result = (direction_lights_color + point_lights_color + spot_lights_color) * BASE_COLOR + BASE_COLOR * 0.1;
 
     FragColor = vec4(result, fade_alpha);
 }
@@ -103,14 +125,14 @@ vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
 
     for (int i = 0; i < u_point_lights_count; ++i) {
 
-        vec3 light_dir = normalize(point_lights[i].position - v_frag_pos);
+        vec3 light_dir = normalize(point_lights[i].position - vs_out.frag_pos);
         float diff = max(dot(unit_normal, light_dir), 0.0);
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
         // vec3 halfway_dir = normalize(light_dir + view_dir);
         float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
 
-        float distance = length(point_lights[i].position - v_frag_pos);
+        float distance = length(point_lights[i].position - vs_out.frag_pos);
         float attenuation = 1.0 / (point_lights[i].constant  + point_lights[i].linear * distance + point_lights[i].quadratic * pow(distance, 2));
 
         ambient += point_lights[i].ambient * point_lights[i].color * attenuation;
@@ -126,9 +148,11 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
+    float shadow = ShadowCalculation(vs_out.frag_pos_light_space);
+
     for (int i = 0; i < u_spot_lights_count; ++i) {
 
-        vec3 light_dir = normalize(spot_lights[i].position - v_frag_pos); // direction of the light ray, not spot light itself
+        vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
         float diff = max(dot(unit_normal, light_dir), 0.0); 
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
@@ -142,7 +166,7 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
         diff *= intensity;
         spec *= intensity;
 
-        float distance = length(spot_lights[i].position - v_frag_pos);
+        float distance = length(spot_lights[i].position - vs_out.frag_pos);
         float attenuation = 1.0 / (spot_lights[i].constant  + spot_lights[i].linear * distance + spot_lights[i].quadratic * pow(distance, 2));
 
         ambient += spot_lights[i].ambient * spot_lights[i].color * attenuation;
@@ -150,5 +174,5 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
         specular += spot_lights[i].specular *  spot_lights[i].color * spec * attenuation;
     }
 
-    return ambient + diffuse + specular;
+    return ambient + (1.0 - shadow) * (diffuse + specular);
 }
