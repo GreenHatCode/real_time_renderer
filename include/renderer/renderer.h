@@ -18,6 +18,9 @@ namespace renderer {
         inline constexpr std::string_view OUTLINE_FRAGMENT_SHADER = "shaders_sources/stencil_outline/fragment_shader.frag";
         inline constexpr float OUTLINE_WIDTH = 0.1f;
         inline constexpr glm::vec3 OUTLINE_COLOR = glm::vec3(0.0f, 0.8f, 1.0f);
+        
+        inline constexpr glm::vec3 WORLD_UP = glm::vec3(0.0f, 1.0f, 0.0f);
+        inline constexpr glm::vec3 FALLBACK_WORLD_UP = glm::vec3(0.0f, 0.0f, 1.0f);
 
         inline constexpr uint8_t AXES_LINES_ID = 0x01; // 0b00000001
         inline constexpr uint8_t XZ_FACE_GRID_ID = 0x02; // 0b000010

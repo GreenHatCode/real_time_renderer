@@ -20,6 +20,15 @@ namespace scene::lights
         );
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;
+
+
+        // shadow mapping
+        virtual glm::mat4 view_matrix() const override { return glm::mat4(1.0f); }
+        virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override { return glm::mat4(1.0f); }
+
+
+
+
         std::string get_name() const override;
         LightType get_type() const override;
         void upload_components(Shader &obj_shader, size_t light_idx) const override;

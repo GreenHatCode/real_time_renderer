@@ -39,6 +39,11 @@ namespace scene::lights
         void set_quadratic(float value);
         float get_quadratic() const;
 
+        // shadow mapping
+        virtual glm::mat4 view_matrix() const override { return glm::mat4(1.0f); }
+        virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override { return glm::mat4(1.0f); }
+
+
         void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };

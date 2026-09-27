@@ -301,33 +301,17 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     glm::mat4 tmp_projection_mat = projection_mat_;
 
     std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[0];
-    glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f); // move to global constants
 
-    if (glm::abs(glm::dot(world_up, static_cast<scene::lights::SpotLight &>(*light).get_direction())) > 0.999f) {
-        // the dir and world_up vectors are collinear, fallback
-        world_up = glm::vec3(0.0f, 0.0f, 1.0f);
-    }
-
-    view_mat_ = glm::lookAt(
-        static_cast<scene::lights::SpotLight &>(*light).get_position(),
-        static_cast<scene::lights::SpotLight &>(*light).get_direction() + static_cast<scene::lights::SpotLight &>(*light).get_position(),
-        world_up
-    );
-
-#if 1
-    projection_mat_ = glm::perspective(
-        glm::radians(2*static_cast<scene::lights::SpotLight &>(*light).get_outer_cut_off()),
-        (float)framebuffer_width / framebuffer_height,
-        0.1f, // near
-        50.0f // far, try to calculate dynamically
-    );
-#else
+#if 0
     projection_mat_ = glm::ortho(
         -10.0f, 10.0f, -10.0f, 10.0f,
         5.0f, // near
         20.0f // far, try to calculate dynamically
     );
 #endif
+
+    view_mat_ = light->view_matrix();
+    projection_mat_ = light->projection_matrix(framebuffer_width, framebuffer_height);
 
 
     // bind shadow framebuffer (for a particular light)

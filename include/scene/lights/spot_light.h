@@ -19,6 +19,8 @@ namespace scene::lights
         float cosine_cut_off_rad_;
         float cosine_outer_cut_off_rad_;
 
+        float calculate_far_plane(float threshold = 1.0f / 256.0f) const;
+
     public:
         SpotLight(
             const std::string& name, 
@@ -50,6 +52,10 @@ namespace scene::lights
         float get_cut_off() const;
         void set_outer_cut_off(float degrees);
         float get_outer_cut_off() const;
+
+        // shadow mapping
+        virtual glm::mat4 view_matrix() const override;
+        virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override;
 
         void set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
