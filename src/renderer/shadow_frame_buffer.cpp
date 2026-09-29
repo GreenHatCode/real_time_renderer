@@ -3,11 +3,11 @@
 #include "spdlog/spdlog.h"
 #include <sstream>
 
-renderer::ShadowFrameBuffer::ShadowFrameBuffer(GLsizei width, GLsizei height)
-    : width_(width), height_(height)
+renderer::ShadowFrameBuffer::ShadowFrameBuffer(GLsizei width, GLsizei height, size_t size)
+    : width_(width), height_(height), size_(size)
 {
-    glCreateTextures(GL_TEXTURE_2D, 1, &depth_map_);
-	glTextureStorage2D(depth_map_, 1, GL_DEPTH_COMPONENT24, width_, height_);
+    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &depth_map_);
+	glTextureStorage3D(depth_map_, 1, GL_DEPTH_COMPONENT24, width_, height_, size_);
 
     glTexParameteri(depth_map_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(depth_map_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -67,17 +67,15 @@ GLsizei renderer::ShadowFrameBuffer::get_depth_map()
     return depth_map_;
 }
 
-void renderer::ShadowFrameBuffer::rescale(GLsizei width, GLsizei height)
+void renderer::ShadowFrameBuffer::resize(GLsizei size)
 {
-    if (width_ == width && height_ == height) return;
-
-	width_ = width;
-	height_ = height;
+    if (size_ == size) return;
+	size_ = size;
 
 	glDeleteTextures(1, &depth_map_);
 	
-	glCreateTextures(GL_TEXTURE_2D, 1, &depth_map_);
-	glTextureStorage2D(depth_map_, 1, GL_DEPTH_COMPONENT24, width_, height_);
+	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &depth_map_);
+	glTextureStorage3D(depth_map_, 1, GL_DEPTH_COMPONENT24, width_, height_, size_);
 
     glTexParameteri(depth_map_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(depth_map_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -92,9 +90,29 @@ void renderer::ShadowFrameBuffer::bind() const
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 }
 
+void renderer::ShadowFrameBuffer::bind_layer(GLsizei layer) const
+{
+	glNamedFramebufferTextureLayer(fbo_, GL_DEPTH_ATTACHMENT, depth_map_, 0, layer);
+}
+
 void renderer::ShadowFrameBuffer::unbind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLsizei renderer::ShadowFrameBuffer::get_width() const
+{
+	return width_;
+}
+
+GLsizei renderer::ShadowFrameBuffer::get_height() const 
+{
+    return height_;
+}
+
+size_t renderer::ShadowFrameBuffer::get_size() const
+{
+    return size_;
 }
 
 renderer::ShadowFrameBuffer::~ShadowFrameBuffer()

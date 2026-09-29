@@ -15,7 +15,7 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
     , internal_objects_id_mask_(0)
-    , shadow_framebuffer_(1, 1)
+    , shadow_framebuffer_(ShadowFrameBuffer::DEFAULT_SHADOW_MAP_WIDTH, ShadowFrameBuffer::DEFAULT_SHADOW_MAP_HEIGHT)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -38,10 +38,9 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     shader_ptr->set_uniform("u_camera_pos", camera_position_);
 
 
-    glActiveTexture(GL_TEXTURE0);
     shader_ptr->set_uniform("u_light_space_mat", light_space_mat_);
-    shader_ptr->set_uniform("u_shadow_map", 0);
-    glBindTexture(GL_TEXTURE_2D, shadow_framebuffer_.get_depth_map());
+    shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
+    glBindTextureUnit(0, shadow_framebuffer_.get_depth_map());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -111,40 +110,48 @@ void renderer::Renderer::build_rendering_queues()
 
 void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float framebuffer_height)
 {
-    std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[0];
-    // loop and push rendered framebuffer to vector
-
-    light_space_mat_ = light->projection_matrix(framebuffer_width, framebuffer_height) * light->view_matrix();
-
-    // bind shadow framebuffer (for a particular light) 
-    shadow_framebuffer_.rescale(framebuffer_width, framebuffer_height);
+    shadow_framebuffer_.resize(scene_lights_buffer_.size());
     shadow_framebuffer_.bind();
+
+    float width = shadow_framebuffer_.get_width();
+    float height = shadow_framebuffer_.get_height();
+    glViewport(0, 0, width, height);
     
     std::shared_ptr<Shader> shader = scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER);
     curr_shader_ptr_ = shader.get();
     curr_shader_ptr_->use();
-    curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat_);
 
-    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    // render opaque objects (without anything)
-    for (const auto& obj: opaque_objects_) {
-        obj.obj_ptr->render(obj.draw_mode, false, shader); 
-    }
 
-    // render transparent objects (in two steps)
-    for (const auto& obj: transparent_objects_) {
-        obj.obj_ptr->render(obj.draw_mode, false);       
-    }
+    for (size_t i = 0; i < scene_lights_buffer_.size(); ++i) {
+        std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[i];
+        assert(light->get_type() == scene::lights::LightType::DIRECTIONAL_LIGHT);
 
-    for (const auto& obj: transparent_objects_) {
-        glDepthMask(GL_FALSE);
-        obj.obj_ptr->render(obj.draw_mode, true); 
-        glDepthMask(GL_TRUE);
+        shadow_framebuffer_.bind_layer(i);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        light_space_mat_ = light->projection_matrix(width, height) * light->view_matrix();
+        curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat_);
+    
+        // render opaque objects (without anything)
+        for (const auto& obj: opaque_objects_) {
+            obj.obj_ptr->render(obj.draw_mode, false, shader); 
+        }
+
+        // render transparent objects (in two steps)
+        for (const auto& obj: transparent_objects_) {
+            obj.obj_ptr->render(obj.draw_mode, false, shader);       
+        }
+
+        for (const auto& obj: transparent_objects_) {
+            glDepthMask(GL_FALSE);
+            obj.obj_ptr->render(obj.draw_mode, true, shader); 
+            glDepthMask(GL_TRUE);
+        }
     }
 
 
     shadow_framebuffer_.unbind();
+    glViewport(0, 0, framebuffer_width, framebuffer_height);
 }
 
 void renderer::Renderer::do_render()

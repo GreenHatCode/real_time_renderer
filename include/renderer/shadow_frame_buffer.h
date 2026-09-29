@@ -9,15 +9,25 @@ namespace renderer
         GLuint depth_map_;
         GLuint rbo_;
 
-        GLsizei width_;
-        GLsizei height_;
+        const GLsizei width_;
+        const GLsizei height_;
+        size_t size_; // number of 2D textures that will be stored
 
     public:
-        ShadowFrameBuffer(GLsizei width, GLsizei height);
+
+        inline static constexpr GLsizei DEFAULT_SHADOW_MAP_HEIGHT = 1024;
+        inline static constexpr GLsizei DEFAULT_SHADOW_MAP_WIDTH = 1024;
+        inline static constexpr GLsizei DEFAULT_SHADOW_MAP_LAYERS = 1;
+
+        ShadowFrameBuffer(GLsizei width, GLsizei height, size_t size = DEFAULT_SHADOW_MAP_LAYERS);
         GLsizei get_depth_map();
-        void rescale(GLsizei width, GLsizei height);
+        void resize(GLsizei size);
         void bind() const;
+        void bind_layer(GLsizei layer) const;
         void unbind() const;
+        GLsizei get_width() const;
+        GLsizei get_height() const;
+        size_t get_size() const;
         ~ShadowFrameBuffer();
 
     };

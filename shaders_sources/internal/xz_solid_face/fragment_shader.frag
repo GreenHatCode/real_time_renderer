@@ -48,7 +48,7 @@ in VSOut {
 
 out vec4 FragColor;
 
-uniform sampler2D u_shadow_map;
+uniform sampler2DArray u_directional_lights_shadow_map_array;
 uniform vec3 u_camera_pos;
 uniform DirectionalLight directional_lights[MAX_LIGHTS];
 uniform PointLight point_lights[MAX_LIGHTS];
@@ -62,7 +62,7 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir);
 
-float ShadowCalculation(vec4 fragPosLightSpace)
+float ShadowCalculation(vec4 fragPosLightSpace, uint layer)
 {
     vec3 ndc_coords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     ndc_coords = ndc_coords * 0.5 + 0.5;
@@ -72,7 +72,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
         return 0.0;
     }
 
-    float closest_depth = texture(u_shadow_map, ndc_coords.xy).r;
+    float closest_depth = texture(u_directional_lights_shadow_map_array, vec3(ndc_coords.xy, layer)).r;
     float curr_depth = ndc_coords.z;
 
     return curr_depth > closest_depth ? 1.0 : 0.0;
@@ -103,21 +103,22 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    float shadow = ShadowCalculation(vs_out.frag_pos_light_space);
-
     for (int i = 0; i < u_directional_lights_count; ++i) {
+        float shadow = ShadowCalculation(vs_out.frag_pos_light_space, i);
+
         ambient += directional_lights[i].ambient * directional_lights[i].color;
 
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
-        diffuse += diff * directional_lights[i].color;
 
         vec3 reflect_dir = reflect(-directional_lights[i].direction, unit_normal);
-        // vec3 halfway_dir = normalize(directional_lights[i].direction + view_dir);
         float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
-        specular += spec * directional_lights[i].color;
+
+
+        diffuse += diff * directional_lights[i].color * (1.0 - shadow);
+        specular += spec * directional_lights[i].color * (1.0 - shadow);
     }
     
-    return ambient + (1.0 - shadow) * (diffuse + specular);
+    return ambient + diffuse + specular;
 }
 
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
@@ -150,9 +151,10 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    float shadow = ShadowCalculation(vs_out.frag_pos_light_space);
+    
 
     for (int i = 0; i < u_spot_lights_count; ++i) {
+        float shadow = ShadowCalculation(vs_out.frag_pos_light_space, i);
 
         vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
         float diff = max(dot(unit_normal, light_dir), 0.0); 
@@ -172,9 +174,9 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
         float attenuation = 1.0 / (spot_lights[i].constant  + spot_lights[i].linear * distance + spot_lights[i].quadratic * pow(distance, 2));
 
         ambient += spot_lights[i].ambient * spot_lights[i].color * attenuation;
-        diffuse += spot_lights[i].diffuse * spot_lights[i].color * diff * attenuation;
-        specular += spot_lights[i].specular *  spot_lights[i].color * spec * attenuation;
+        diffuse += spot_lights[i].diffuse * spot_lights[i].color * diff * attenuation * (1.0 - shadow);
+        specular += spot_lights[i].specular *  spot_lights[i].color * spec * attenuation * (1.0 - shadow);
     }
 
-    return ambient + (1.0 - shadow) * (diffuse + specular);
+    return ambient + diffuse + specular;
 }
