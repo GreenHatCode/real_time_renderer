@@ -11,8 +11,9 @@ renderer::ShadowFrameBuffer::ShadowFrameBuffer(GLsizei width, GLsizei height, si
 
     glTexParameteri(depth_map_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(depth_map_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(depth_map_, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(depth_map_, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+	glTexParameteri(depth_map_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(depth_map_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTextureParameterfv(depth_map_, GL_TEXTURE_BORDER_COLOR, border_color);
 
     glCreateFramebuffers(1, &fbo_);
 	glNamedFramebufferTexture(fbo_, GL_DEPTH_ATTACHMENT, depth_map_, 0);
@@ -79,8 +80,9 @@ void renderer::ShadowFrameBuffer::resize(GLsizei size)
 
     glTexParameteri(depth_map_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(depth_map_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(depth_map_, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(depth_map_, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+	glTexParameteri(depth_map_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(depth_map_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTextureParameterfv(depth_map_, GL_TEXTURE_BORDER_COLOR, border_color);
 
 	glNamedFramebufferTexture(fbo_, GL_DEPTH_ATTACHMENT, depth_map_, 0);
 }

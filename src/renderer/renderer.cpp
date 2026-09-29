@@ -115,13 +115,13 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
 
     float width = shadow_framebuffer_.get_width();
     float height = shadow_framebuffer_.get_height();
-    glViewport(0, 0, width, height);
     
     std::shared_ptr<Shader> shader = scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER);
     curr_shader_ptr_ = shader.get();
     curr_shader_ptr_->use();
 
-
+    glViewport(0, 0, width, height);
+    glCullFace(GL_FRONT);
     for (size_t i = 0; i < scene_lights_buffer_.size(); ++i) {
         std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[i];
         assert(light->get_type() == scene::lights::LightType::DIRECTIONAL_LIGHT);
@@ -148,10 +148,10 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
             glDepthMask(GL_TRUE);
         }
     }
-
+    glCullFace(GL_BACK);
+    glViewport(0, 0, framebuffer_width, framebuffer_height);
 
     shadow_framebuffer_.unbind();
-    glViewport(0, 0, framebuffer_width, framebuffer_height);
 }
 
 void renderer::Renderer::do_render()

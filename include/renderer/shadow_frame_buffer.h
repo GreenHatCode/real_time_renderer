@@ -13,6 +13,8 @@ namespace renderer
         const GLsizei height_;
         size_t size_; // number of 2D textures that will be stored
 
+        static constexpr float border_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+
     public:
 
         inline static constexpr GLsizei DEFAULT_SHADOW_MAP_HEIGHT = 1024;
