@@ -51,9 +51,9 @@ uniform DirectionalLight directional_lights[MAX_LIGHTS];
 uniform PointLight point_lights[MAX_LIGHTS];
 uniform SpotLight spot_lights[MAX_LIGHTS];
 
-uniform int u_directional_lights_count;
-uniform int u_point_lights_count;
-uniform int u_spot_lights_count;
+uniform uint u_directional_lights_count;
+uniform uint u_point_lights_count;
+uniform uint u_spot_lights_count;
 
 vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
