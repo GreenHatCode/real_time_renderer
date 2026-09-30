@@ -9,6 +9,8 @@ namespace scene::lights
         std::string name_;
         LightType type_;
 
+        glm::mat4 ortho_mat_;
+
         inline static constexpr glm::vec3 LOOK_POINT = glm::vec3(0.0f);
         inline static constexpr glm::vec3 DISTANCE_FROM_DIRECTION_PRESCALER = glm::vec3(50.0f);
 

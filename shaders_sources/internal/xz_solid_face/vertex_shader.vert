@@ -7,12 +7,10 @@ uniform mat3 u_normal_mat;
 uniform mat4 u_model_mat;
 uniform mat4 u_view_mat;
 uniform mat4 u_projection_mat;
-uniform mat4 u_light_space_mat;
 
 out VSOut {
     vec3 frag_pos;
     vec3 normal;
-    vec4 frag_pos_light_space;
 } vs_out;
 
 void main() {
@@ -20,5 +18,4 @@ void main() {
     
     vs_out.frag_pos = vec3(u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0));
     vs_out.normal = u_normal_mat * a_normal;
-    vs_out.frag_pos_light_space = u_light_space_mat * u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0);
 }

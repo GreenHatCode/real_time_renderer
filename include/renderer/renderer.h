@@ -60,7 +60,6 @@ namespace renderer {
         double profile_cpu_time_;
 
         ShadowFrameBuffer shadow_framebuffer_;
-        glm::mat4 light_space_mat_;
 
         // uniforms and shaders
         void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);

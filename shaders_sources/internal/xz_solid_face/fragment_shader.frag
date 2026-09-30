@@ -6,6 +6,8 @@ struct DirectionalLight {
     vec3 specular;
     vec3 color;
     vec3 direction;
+
+    mat4 light_space_mat; // light's projection_mat * view_mat
 };
 
 struct PointLight {
@@ -34,6 +36,8 @@ struct SpotLight {
 
     float cut_off;
     float outer_cut_off;
+
+    mat4 light_space_mat; // light's projection_mat * view_mat
 };
 
 const float MAX_GRID_VISIBILITY_DISTANCE = 120.0;
@@ -44,7 +48,6 @@ const float BIAS = 0.005;
 in VSOut {
     vec3 frag_pos;
     vec3 normal;
-    vec4 frag_pos_light_space;
 } vs_out;
 
 out vec4 FragColor;
@@ -63,9 +66,9 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir);
 
-float ShadowCalculation(vec4 fragPosLightSpace, uint layer, vec3 light_dir, vec3 frag_normal)
+float ShadowCalculation(vec4 frag_pos_light_space, uint layer, vec3 light_dir, vec3 frag_normal)
 {
-    vec3 ndc_coords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    vec3 ndc_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
     ndc_coords = ndc_coords * 0.5 + 0.5;
     
     if (ndc_coords.z > 1.0 || ndc_coords.x < 0.0 || ndc_coords.x > 1.0 || ndc_coords.y < 0.0 || ndc_coords.y > 1.0) {
@@ -103,7 +106,8 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 specular = vec3(0.0);
 
     for (int i = 0; i < u_directional_lights_count; ++i) {
-        float shadow = ShadowCalculation(vs_out.frag_pos_light_space, i, directional_lights[i].direction, unit_normal);
+        vec4 frag_pos_light_space = directional_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
+        float shadow = ShadowCalculation(frag_pos_light_space, i, directional_lights[i].direction, unit_normal);
 
         ambient += directional_lights[i].ambient * directional_lights[i].color;
 
@@ -152,7 +156,8 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
     
 
     for (int i = 0; i < u_spot_lights_count; ++i) {
-        float shadow = ShadowCalculation(vs_out.frag_pos_light_space, i, spot_lights[i].direction, unit_normal);
+        vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
+        float shadow = ShadowCalculation(frag_pos_light_space, i, spot_lights[i].direction, unit_normal);
 
         vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
         float diff = max(dot(unit_normal, light_dir), 0.0); 

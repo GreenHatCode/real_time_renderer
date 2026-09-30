@@ -38,7 +38,7 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     shader_ptr->set_uniform("u_camera_pos", camera_position_);
 
 
-    shader_ptr->set_uniform("u_light_space_mat", light_space_mat_);
+    // todo:
     shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
     glBindTextureUnit(0, shadow_framebuffer_.get_depth_map());
 }
@@ -71,7 +71,6 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
     shader_ptr->set_uniform("u_directional_lights_count", directional_light_idx);
     shader_ptr->set_uniform("u_point_lights_count", point_light_idx);
     shader_ptr->set_uniform("u_spot_lights_count", spot_light_idx);
-
 }
 
 void renderer::Renderer::build_rendering_queues()
@@ -129,8 +128,8 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
         shadow_framebuffer_.bind_layer(i);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        light_space_mat_ = light->projection_matrix(width, height) * light->view_matrix();
-        curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat_);
+        glm::mat4 light_space_mat = light->projection_matrix(width, height) * light->view_matrix();
+        curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat);
     
         // render opaque objects (without anything)
         for (const auto& obj: opaque_objects_) {

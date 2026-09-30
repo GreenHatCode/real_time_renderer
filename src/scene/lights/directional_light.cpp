@@ -14,6 +14,15 @@ scene::lights::DirectionalLight::DirectionalLight(
     , name_(name)
     , type_(LightType::DIRECTIONAL_LIGHT)
 {
+
+    ortho_mat_ = glm::ortho(
+        -lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
+        lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
+        -lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
+        lighting_constants::LIGHTS_ORTHO_SIDE_SIZE,
+        lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, 
+        lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE
+    );
 }
 
 void scene::lights::DirectionalLight::set_direction(glm::vec3 direction)
@@ -40,14 +49,7 @@ glm::mat4 scene::lights::DirectionalLight::view_matrix() const
 
 glm::mat4 scene::lights::DirectionalLight::projection_matrix(float framebuffer_width, float framebuffer_height) const
 {
-    return glm::ortho(
-        -lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
-        lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
-        -lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
-        lighting_constants::LIGHTS_ORTHO_SIDE_SIZE,
-        lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, 
-        lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE
-    );
+    return ortho_mat_;
 }
 
 std::string scene::lights::DirectionalLight::get_name() const
@@ -68,4 +70,5 @@ void scene::lights::DirectionalLight::upload_components(Shader& obj_shader, size
     obj_shader.set_uniform(uniform_name + ".specular", get_specular());
     obj_shader.set_uniform(uniform_name + ".color", get_color());
     obj_shader.set_uniform(uniform_name + ".direction", direction_);
+    obj_shader.set_uniform(uniform_name + ".light_space_mat", ortho_mat_ * view_matrix());
 }
