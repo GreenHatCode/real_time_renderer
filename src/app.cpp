@@ -253,6 +253,13 @@ void App::load_sources_debug()
     // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
     imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
     imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
+
+#if 0
+    for (int i = 0; i < 10; i++) {
+            imgui_window_->add_light("dir" + std::to_string(i), scene::lights::LightType::DIRECTIONAL_LIGHT);
+    }
+
+#endif
 }
 
 int32_t App::run()

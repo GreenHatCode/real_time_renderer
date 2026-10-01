@@ -82,9 +82,8 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
         diffuse += diff * directional_lights[i].color;
 
-        vec3 reflect_dir = reflect(-directional_lights[i].direction, unit_normal);
-        // vec3 halfway_dir = normalize(directional_lights[i].direction + view_dir);
-        float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
+        vec3 reflect_dir = reflect(directional_lights[i].direction, unit_normal);
+        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
         specular += spec * directional_lights[i].color;
     }
     

@@ -44,6 +44,7 @@ const float MAX_GRID_VISIBILITY_DISTANCE = 120.0;
 const uint MAX_LIGHTS = 10;
 const vec3 BASE_COLOR = vec3(1.0);
 const float BIAS = 0.005;
+const float DEFAULT_AMBIENT = 0.01;
 
 in VSOut {
     vec3 frag_pos;
@@ -95,13 +96,12 @@ void main() {
     vec3 point_lights_color = process_point_lights(unit_normal, view_dir);
     vec3 spot_lights_color = process_spot_lights(unit_normal, view_dir);
 
-    vec3 result = (direction_lights_color + point_lights_color + spot_lights_color) * BASE_COLOR + BASE_COLOR * 0.1;
+    vec3 result = (direction_lights_color + point_lights_color + spot_lights_color) * BASE_COLOR + BASE_COLOR * DEFAULT_AMBIENT;
 
     FragColor = vec4(result, fade_alpha);
 }
 
 vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
-    vec3 ambient = vec3(0.0);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
@@ -109,23 +109,20 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
         vec4 frag_pos_light_space = directional_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
         float shadow = ShadowCalculation(frag_pos_light_space, i, directional_lights[i].direction, unit_normal);
 
-        ambient += directional_lights[i].ambient * directional_lights[i].color;
-
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
 
-        vec3 reflect_dir = reflect(-directional_lights[i].direction, unit_normal);
-        float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
+        vec3 reflect_dir = reflect(directional_lights[i].direction, unit_normal);
+        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
 
 
         diffuse += diff * directional_lights[i].color * (1.0 - shadow);
         specular += spec * directional_lights[i].color * (1.0 - shadow);
     }
     
-    return ambient + diffuse + specular;
+    return diffuse + specular;
 }
 
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
-    vec3 ambient = vec3(0.0);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
@@ -140,20 +137,16 @@ vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
         float distance = length(point_lights[i].position - vs_out.frag_pos);
         float attenuation = 1.0 / (point_lights[i].constant  + point_lights[i].linear * distance + point_lights[i].quadratic * pow(distance, 2));
 
-        ambient += point_lights[i].ambient * point_lights[i].color * attenuation;
         diffuse += point_lights[i].diffuse * point_lights[i].color * diff * attenuation;
         specular += point_lights[i].specular * point_lights[i].color * spec * attenuation;
     }
 
-    return ambient + diffuse + specular;
+    return diffuse + specular;
 }
 
 vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
-    vec3 ambient = vec3(0.0);
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
-
-    
 
     for (int i = 0; i < u_spot_lights_count; ++i) {
         vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
@@ -163,7 +156,6 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
         float diff = max(dot(unit_normal, light_dir), 0.0); 
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
-        // vec3 halfway_dir = normalize(light_dir + view_dir);
         float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
 
         // problem
@@ -176,10 +168,9 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
         float distance = length(spot_lights[i].position - vs_out.frag_pos);
         float attenuation = 1.0 / (spot_lights[i].constant  + spot_lights[i].linear * distance + spot_lights[i].quadratic * pow(distance, 2));
 
-        ambient += spot_lights[i].ambient * spot_lights[i].color * attenuation;
         diffuse += spot_lights[i].diffuse * spot_lights[i].color * diff * attenuation * (1.0 - shadow);
         specular += spot_lights[i].specular *  spot_lights[i].color * spec * attenuation * (1.0 - shadow);
     }
 
-    return ambient + diffuse + specular;
+    return diffuse + specular;
 }
