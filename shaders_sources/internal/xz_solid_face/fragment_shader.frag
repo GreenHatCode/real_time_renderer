@@ -67,7 +67,7 @@ vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
 vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir);
 
-float ShadowCalculation(vec4 frag_pos_light_space, uint layer, vec3 light_dir, vec3 frag_normal)
+float calculate_shadow(sampler2DArray depth_map, vec4 frag_pos_light_space, uint layer, vec3 light_dir, vec3 frag_normal)
 {
     vec3 ndc_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
     ndc_coords = ndc_coords * 0.5 + 0.5;
@@ -76,7 +76,7 @@ float ShadowCalculation(vec4 frag_pos_light_space, uint layer, vec3 light_dir, v
         return 0.0;
     }
 
-    float closest_depth = texture(u_directional_lights_shadow_map_array, vec3(ndc_coords.xy, layer)).r;
+    float closest_depth = texture(depth_map, vec3(ndc_coords.xy, layer)).r;
     float curr_depth = ndc_coords.z;
 
     return curr_depth - BIAS > closest_depth ? 1.0 : 0.0;
@@ -103,23 +103,17 @@ void main() {
 
 vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
-    vec3 specular = vec3(0.0);
 
     for (int i = 0; i < u_directional_lights_count; ++i) {
         vec4 frag_pos_light_space = directional_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
-        float shadow = ShadowCalculation(frag_pos_light_space, i, directional_lights[i].direction, unit_normal);
+        float shadow = calculate_shadow(u_directional_lights_shadow_map_array, frag_pos_light_space, i, directional_lights[i].direction, unit_normal);
 
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
 
-        vec3 reflect_dir = reflect(directional_lights[i].direction, unit_normal);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
-
-
         diffuse += diff * directional_lights[i].color * (1.0 - shadow);
-        specular += spec * directional_lights[i].color * (1.0 - shadow);
     }
     
-    return diffuse + specular;
+    return diffuse;
 }
 
 vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
@@ -132,7 +126,7 @@ vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
         float diff = max(dot(unit_normal, light_dir), 0.0);
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
-        float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
+        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
 
         float distance = length(point_lights[i].position - vs_out.frag_pos);
         float attenuation = 1.0 / (point_lights[i].constant  + point_lights[i].linear * distance + point_lights[i].quadratic * pow(distance, 2));
@@ -150,13 +144,13 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
 
     for (int i = 0; i < u_spot_lights_count; ++i) {
         vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
-        float shadow = ShadowCalculation(frag_pos_light_space, i, spot_lights[i].direction, unit_normal);
+        float shadow = calculate_shadow(u_directional_lights_shadow_map_array, frag_pos_light_space, i, spot_lights[i].direction, unit_normal);
 
         vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
         float diff = max(dot(unit_normal, light_dir), 0.0); 
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
-        float spec = pow(max(dot(unit_normal, reflect_dir), 0.0), 64);
+        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
 
         // problem
         float theta = dot(light_dir, -spot_lights[i].direction);
