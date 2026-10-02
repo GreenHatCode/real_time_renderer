@@ -18,7 +18,7 @@ FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 
 	glGenRenderbuffers(1, &rbo_);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width_, height_);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width_, height_);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

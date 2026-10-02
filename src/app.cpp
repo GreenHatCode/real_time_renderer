@@ -218,7 +218,7 @@ App::App(uint32_t screen_width, uint32_t screen_height)
 #else
     camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(
         95.0f, // ortho size
-        scene::lights::lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, 
+        scene::lights::lighting_constants::CAMERA_DEFAULT_NEAR_PLANE, 
         scene::lights::lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE));
 #endif
 
@@ -249,10 +249,10 @@ void App::load_sources_debug()
     // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
     imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
-    // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
+    imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
     // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
-    imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
-    imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    // imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
 
 #if 0
     for (int i = 0; i < 10; i++) {

@@ -10,6 +10,7 @@
 #include "renderer/post_processing/post_processor.h"
 #include "renderer/post_processing/geometry_processor.h"
 #include "renderer/shadow_frame_buffer.h"
+#include "scene/lights/light_base.h"
 
 namespace renderer {
     namespace defaults {
@@ -59,7 +60,10 @@ namespace renderer {
         double profile_gpu_time_;
         double profile_cpu_time_;
 
-        ShadowFrameBuffer shadow_framebuffer_;
+        ShadowFrameBuffer directional_lights_shadow_framebuffer_;
+        ShadowFrameBuffer spot_lights_shadow_framebuffer_;
+
+        ShadowFrameBuffer* select_shadow_framebuffer(scene::lights::LightType type);
 
         // uniforms and shaders
         void set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);

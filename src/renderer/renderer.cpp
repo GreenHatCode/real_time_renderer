@@ -15,7 +15,8 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
     , internal_objects_id_mask_(0)
-    , shadow_framebuffer_(ShadowFrameBuffer::DEFAULT_SHADOW_MAP_WIDTH, ShadowFrameBuffer::DEFAULT_SHADOW_MAP_HEIGHT)
+    , directional_lights_shadow_framebuffer_(ShadowFrameBuffer::DEFAULT_SHADOW_MAP_WIDTH, ShadowFrameBuffer::DEFAULT_SHADOW_MAP_HEIGHT)
+    , spot_lights_shadow_framebuffer_(ShadowFrameBuffer::DEFAULT_SHADOW_MAP_WIDTH, ShadowFrameBuffer::DEFAULT_SHADOW_MAP_HEIGHT)
 {
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
@@ -31,6 +32,21 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 
 }
 
+ShadowFrameBuffer* renderer::Renderer::select_shadow_framebuffer(scene::lights::LightType type)
+{
+    switch (type)
+    {
+    case scene::lights::LightType::DIRECTIONAL_LIGHT:
+        return &directional_lights_shadow_framebuffer_;
+    case scene::lights::LightType::SPOT_LIGHT:
+        return &spot_lights_shadow_framebuffer_;  
+    default:
+        assert(false && "Unsupported light type for 2D shadow map");
+        return nullptr;
+        break;
+    }
+}
+
 void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
     shader_ptr->set_uniform("u_view_mat", view_mat_);
@@ -38,9 +54,11 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     shader_ptr->set_uniform("u_camera_pos", camera_position_);
 
 
-    // todo:
+    // todo: reserve first 5 texture units
     shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
-    glBindTextureUnit(0, shadow_framebuffer_.get_depth_map());
+    glBindTextureUnit(0, directional_lights_shadow_framebuffer_.get_depth_map());
+    shader_ptr->set_uniform("u_spot_lights_shadow_map_array", 1);
+    glBindTextureUnit(1, spot_lights_shadow_framebuffer_.get_depth_map());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -49,7 +67,7 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
     uint32_t point_light_idx = 0;
     uint32_t spot_light_idx = 0;
 
-    for (const auto& light: scene_lights_buffer_) {
+    for (auto&& light: scene_lights_buffer_) {
         switch (light->get_type())
         {
         case scene::lights::LightType::DIRECTIONAL_LIGHT:
@@ -109,28 +127,46 @@ void renderer::Renderer::build_rendering_queues()
 
 void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float framebuffer_height)
 {
-    shadow_framebuffer_.resize(scene_lights_buffer_.size());
-    shadow_framebuffer_.bind();
-
-    float width = shadow_framebuffer_.get_width();
-    float height = shadow_framebuffer_.get_height();
-    
     std::shared_ptr<Shader> shader = scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER);
     curr_shader_ptr_ = shader.get();
     curr_shader_ptr_->use();
+    
+    uint32_t directional_light_idx = 0;
+    uint32_t point_light_idx = 0;
+    uint32_t spot_light_idx = 0;
 
-    glViewport(0, 0, width, height);
-    glCullFace(GL_FRONT);
-    for (size_t i = 0; i < scene_lights_buffer_.size(); ++i) {
-        std::shared_ptr<scene::lights::LightBase> light = scene_lights_buffer_[i];
-        assert(light->get_type() == scene::lights::LightType::DIRECTIONAL_LIGHT);
+    for (auto&& light: scene_lights_buffer_) {
+        ShadowFrameBuffer* fb = select_shadow_framebuffer(light->get_type());
+        fb->bind();
 
-        shadow_framebuffer_.bind_layer(i);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        float width = fb->get_width();
+        float height = fb->get_height();
+
+        switch (light->get_type())
+        {
+        case scene::lights::LightType::DIRECTIONAL_LIGHT:
+            fb->bind_layer(directional_light_idx);
+            ++directional_light_idx;
+            break;
+        // case scene::lights::LightType::POINT_LIGHT:
+        //     light->upload_components(*shader_ptr, point_light_idx++);
+        //     break;
+        case scene::lights::LightType::SPOT_LIGHT:
+            fb->bind_layer(spot_light_idx);
+            ++spot_light_idx;
+            break;
+        default:
+            assert(false && "Unsupported light type");
+            break;
+        }   
 
         glm::mat4 light_space_mat = light->projection_matrix(width, height) * light->view_matrix();
         curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat);
     
+        glViewport(0, 0, width, height);
+        glCullFace(GL_FRONT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
         // render opaque objects (without anything)
         for (const auto& obj: opaque_objects_) {
             obj.obj_ptr->render(obj.draw_mode, false, shader); 
@@ -146,11 +182,11 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
             obj.obj_ptr->render(obj.draw_mode, true, shader); 
             glDepthMask(GL_TRUE);
         }
-    }
-    glCullFace(GL_BACK);
-    glViewport(0, 0, framebuffer_width, framebuffer_height);
 
-    shadow_framebuffer_.unbind();
+        glCullFace(GL_BACK);
+        glViewport(0, 0, framebuffer_width, framebuffer_height);
+        fb->unbind();
+    }
 }
 
 void renderer::Renderer::do_render()
@@ -324,12 +360,26 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     profiler_.begin_gpu_profiling_query();
 
     scene_lights_buffer_ = scene_->get_lights();
+    directional_lights_shadow_framebuffer_.resize(
+        std::count_if(scene_lights_buffer_.cbegin(), scene_lights_buffer_.cend(), 
+        [](const std::shared_ptr<scene::lights::LightBase>& l){
+            return l->get_type() == scene::lights::LightType::DIRECTIONAL_LIGHT;
+        }
+    ));
+    
+    spot_lights_shadow_framebuffer_.resize(
+        std::count_if(scene_lights_buffer_.cbegin(), scene_lights_buffer_.cend(), 
+        [](const std::shared_ptr<scene::lights::LightBase>& l){
+            return l->get_type() == scene::lights::LightType::SPOT_LIGHT;
+        }
+    ));
+    
     build_rendering_queues();
 
     do_shadow_map_render(framebuffer_width, framebuffer_height);
 
 #if 0
-    post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, shadow_framebuffer_.get_depth_map());
+    post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, spot_lights_shadow_framebuffer_.get_depth_map());
     curr_shader_ptr_->use(); // restore renderer's shader
     
 #else

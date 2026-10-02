@@ -27,6 +27,7 @@ scene::lights::SpotLight::SpotLight(
     , quadratic_(quadratic)
     , cosine_cut_off_rad_(glm::cos(cut_off_rad))
     , cosine_outer_cut_off_rad_(glm::cos(outer_cut_off_rad))
+    , proj_mat_(1.0f)
 {
 }
 
@@ -129,7 +130,11 @@ glm::mat4 scene::lights::SpotLight::projection_matrix(float framebuffer_width, f
     assert(framebuffer_height > 0.0f);
     assert(framebuffer_width > 0.0f);
 
-    return glm::perspective(2 * cosine_outer_cut_off_rad_, framebuffer_width / framebuffer_height, lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, calculate_far_plane());
+    // bad idea, but in case we do not store last calculated mat
+    // we need to pass framebuffer width and height during uploading light's components
+
+    proj_mat_ = glm::perspective(2 * glm::acos(cosine_outer_cut_off_rad_), framebuffer_width / framebuffer_height, lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, calculate_far_plane());
+    return proj_mat_;
 }
 
 void scene::lights::SpotLight::set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject> &value)
@@ -165,5 +170,6 @@ void scene::lights::SpotLight::upload_components(Shader &obj_shader, size_t ligh
     obj_shader.set_uniform(uniform_name + ".quadratic", quadratic_);
     obj_shader.set_uniform(uniform_name + ".cut_off", cosine_cut_off_rad_);
     obj_shader.set_uniform(uniform_name + ".outer_cut_off", cosine_outer_cut_off_rad_);
+    obj_shader.set_uniform(uniform_name + ".light_space_mat", proj_mat_ * view_matrix());
 }
 

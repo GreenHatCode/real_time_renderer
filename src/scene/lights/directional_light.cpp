@@ -20,7 +20,7 @@ scene::lights::DirectionalLight::DirectionalLight(
         lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
         -lighting_constants::LIGHTS_ORTHO_SIDE_SIZE, 
         lighting_constants::LIGHTS_ORTHO_SIDE_SIZE,
-        lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, 
+        lighting_constants::CAMERA_DEFAULT_NEAR_PLANE, 
         lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE
     );
 }

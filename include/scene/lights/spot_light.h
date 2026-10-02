@@ -2,6 +2,7 @@
 #include "scene/lights/light_base.h"
 #include <string>
 #include "scene/physical_objects/light_model_object.h"
+#include "glm/glm.hpp"
 
 namespace scene::lights
 {
@@ -18,6 +19,8 @@ namespace scene::lights
         float quadratic_;
         float cosine_cut_off_rad_;
         float cosine_outer_cut_off_rad_;
+
+        mutable glm::mat4 proj_mat_;
 
         float calculate_far_plane(float threshold = 1.0f / 256.0f) const;
 

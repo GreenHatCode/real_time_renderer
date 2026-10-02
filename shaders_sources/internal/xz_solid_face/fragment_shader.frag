@@ -54,6 +54,8 @@ in VSOut {
 out vec4 FragColor;
 
 uniform sampler2DArray u_directional_lights_shadow_map_array;
+uniform sampler2DArray u_spot_lights_shadow_map_array;
+
 uniform vec3 u_camera_pos;
 uniform DirectionalLight directional_lights[MAX_LIGHTS];
 uniform PointLight point_lights[MAX_LIGHTS];
@@ -79,7 +81,9 @@ float calculate_shadow(sampler2DArray depth_map, vec4 frag_pos_light_space, uint
     float closest_depth = texture(depth_map, vec3(ndc_coords.xy, layer)).r;
     float curr_depth = ndc_coords.z;
 
-    return curr_depth - BIAS > closest_depth ? 1.0 : 0.0;
+    float bias = max(0.001 * (1.0 - dot(frag_normal, -light_dir)), 0.0001);
+
+    return curr_depth - bias > closest_depth ? 1.0 : 0.0;
 }
 
 void main() {
@@ -144,7 +148,7 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
 
     for (int i = 0; i < u_spot_lights_count; ++i) {
         vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
-        float shadow = calculate_shadow(u_directional_lights_shadow_map_array, frag_pos_light_space, i, spot_lights[i].direction, unit_normal);
+        float shadow = calculate_shadow(u_spot_lights_shadow_map_array, frag_pos_light_space, i, spot_lights[i].direction, unit_normal);
 
         vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
         float diff = max(dot(unit_normal, light_dir), 0.0); 
