@@ -60,8 +60,8 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
 
 
     // todo: reserve first 5 texture units
-    // shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
-    // glBindTextureUnit(0, shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->get_depth_map());
+    shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
+    glBindTextureUnit(0, shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->get_depth_map());
     shader_ptr->set_uniform("u_spot_lights_shadow_map_array", 1);
     glBindTextureUnit(1, shadow_frame_buffers_.at(scene::lights::LightType::SPOT_LIGHT)->get_depth_map());
 }
@@ -153,11 +153,7 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
         //     light->upload_components(*shader_ptr, point_light_idx++);
         //     break;
         case scene::lights::LightType::SPOT_LIGHT:
-            spdlog::debug("1render call");
-
-            fb->bind(spot_light_idx); // problem
-                spdlog::debug("render call");
-
+            fb->bind(spot_light_idx);
             ++spot_light_idx;
             break;
         default:
