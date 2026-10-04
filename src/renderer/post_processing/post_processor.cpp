@@ -99,26 +99,6 @@ void renderer::PostProcessor::do_post_process(PostProcessingTypes type)
     glEnable(GL_DEPTH_TEST);
 }
 
-void renderer::PostProcessor::do_post_process_debug(PostProcessingTypes type, GLuint fbo)
-{
-    glDisable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    post_processing_shaders_.at(type).use();
-
-    glActiveTexture(GL_TEXTURE0);
-    post_processing_shaders_.at(type).set_uniform("u_screen_texture", 0);
-    post_processing_shaders_.at(type).set_uniform("near_plane", 0.1f);
-    post_processing_shaders_.at(type).set_uniform("far_plane", 100.0f);
-    glBindTexture(GL_TEXTURE_2D, fbo);
-    glBindVertexArray(vao_);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-    // restore to defaults
-    glEnable(GL_DEPTH_TEST);
-}
-
 void renderer::PostProcessor::set_gamma(float value)
 {
     gamma_ = value;

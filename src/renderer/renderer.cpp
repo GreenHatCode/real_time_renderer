@@ -378,12 +378,6 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
 
     do_shadow_map_render(framebuffer_width, framebuffer_height);
 
-#if 0
-    post_processor_.do_post_process_debug(PostProcessingTypes::GAMMA_CORRECTION, spot_lights_shadow_framebuffer_.get_depth_map());
-    curr_shader_ptr_->use(); // restore renderer's shader
-    
-#else
-
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);
     }
@@ -394,8 +388,6 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
         post_processor_.do_post_process(post_processing_type_);
         curr_shader_ptr_->use(); // restore renderer's shader
     }
-#endif
-
 
     profiler_.end_gpu_profiling_query();
     profiler_.end_cpu_profiling_query();

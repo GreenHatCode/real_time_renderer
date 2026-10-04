@@ -42,7 +42,6 @@ namespace renderer {
         ~PostProcessor();
         void enable_off_sceen_rendering(GLsizei scr_width, GLsizei scr_height);
         void do_post_process(PostProcessingTypes type); 
-        void do_post_process_debug(PostProcessingTypes type, GLuint fbo);
         void set_gamma(float value);
     };
 } // namespace renderer
