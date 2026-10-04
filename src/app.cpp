@@ -12,6 +12,7 @@ void App::initialize_opengl()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
     window_ = glfwCreateWindow(framebuffer_width_, framebuffer_height_, "Read-Time Renderer", NULL, NULL);
     if (window_ == NULL)
@@ -33,6 +34,23 @@ void App::initialize_opengl()
     }
 
     glfwGetFramebufferSize(window_, &framebuffer_width_, &framebuffer_height_);
+
+
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        
+        // Ensures callback runs on the thread that triggered the error,
+        // making it easy to hit breakpoints directly on the bad GL call.
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+        
+        glDebugMessageCallback(openglDebugCallback, nullptr);
+        
+        // Enable all message groups
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
 
 
     IMGUI_CHECKVERSION();

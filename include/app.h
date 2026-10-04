@@ -43,7 +43,22 @@ class App {
     void enter_viewport_mode();
     void enter_ui_mode();
 
-
+    static void GLAPIENTRY openglDebugCallback(
+        GLenum source,
+        GLenum type,
+        GLuint id,
+        GLenum severity,
+        GLsizei length,
+        const GLchar* message,
+        const void* userParam
+    ) {
+        // Print critical errors to stderr, other notifications to stdout
+        if (type == GL_DEBUG_TYPE_ERROR) {
+            spdlog::error("Opengl: {}", message);
+        } else {
+            spdlog::debug("Opengl: {}", message);
+        }
+    }
 
 public:
     App(uint32_t screen_width = 800, uint32_t screen_height = 600);
