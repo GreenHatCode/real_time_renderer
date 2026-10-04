@@ -1,5 +1,5 @@
 #pragma once 
-#include "renderer/frame_buffer.h"
+#include "renderer/frame_buffers/frame_buffer.h"
 #include "shader/shader.h"
 #include <map>
 
@@ -32,7 +32,7 @@ namespace renderer {
     }
 
     class PostProcessor final {
-        FrameBuffer framebuffer_;
+        framebuffers::FrameBuffer framebuffer_;
         std::map<PostProcessingTypes, Shader> post_processing_shaders_;
         GLuint vao_, vbo_;
         float gamma_;

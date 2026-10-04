@@ -1,5 +1,7 @@
 #include "renderer/post_processing/post_processor.h"
 
+using namespace renderer::framebuffers;
+
 renderer::PostProcessor::PostProcessor(GLsizei width, GLsizei height)
     : framebuffer_(width, height)
 {

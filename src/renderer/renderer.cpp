@@ -1,6 +1,8 @@
 #include "renderer/renderer.h"
 #include "glm/gtx/norm.hpp"
 #include "scene/lights/spot_light.h"
+#include "renderer/frame_buffers/shadow_cubemap_frame_buffer.h"
+#include "renderer/frame_buffers/shadow_frame_buffer.h"
 
 using namespace renderer;
 
@@ -15,9 +17,27 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
     , internal_objects_id_mask_(0)
-    , directional_lights_shadow_framebuffer_(ShadowFrameBuffer::DEFAULT_SHADOW_MAP_WIDTH, ShadowFrameBuffer::DEFAULT_SHADOW_MAP_HEIGHT)
-    , spot_lights_shadow_framebuffer_(ShadowFrameBuffer::DEFAULT_SHADOW_MAP_WIDTH, ShadowFrameBuffer::DEFAULT_SHADOW_MAP_HEIGHT)
 {
+
+    shadow_frame_buffers_.emplace(
+        scene::lights::LightType::DIRECTIONAL_LIGHT, 
+        std::make_unique<framebuffers::ShadowFrameBuffer>(framebuffers::ShadowFrameBuffer(framebuffers::DEFAULT_SHADOW_MAP_WIDTH, framebuffers::DEFAULT_SHADOW_MAP_HEIGHT))
+    );
+
+    shadow_frame_buffers_.emplace(
+        scene::lights::LightType::SPOT_LIGHT, 
+        std::make_unique<framebuffers::ShadowFrameBuffer>(framebuffers::ShadowFrameBuffer(framebuffers::DEFAULT_SHADOW_MAP_WIDTH, framebuffers::DEFAULT_SHADOW_MAP_HEIGHT))
+    );
+
+    // shadow_frame_buffers_.emplace(
+    //     scene::lights::LightType::POINT_LIGHT, 
+    //     std::make_unique<framebuffers::ShadowCubemapFrameBuffer>(framebuffers::ShadowCubemapFrameBuffer(framebuffers::DEFAULT_SHADOW_MAP_WIDTH, framebuffers::DEFAULT_SHADOW_MAP_HEIGHT))
+    // );
+
+
+
+
+
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -32,21 +52,6 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 
 }
 
-ShadowFrameBuffer* renderer::Renderer::select_shadow_framebuffer(scene::lights::LightType type)
-{
-    switch (type)
-    {
-    case scene::lights::LightType::DIRECTIONAL_LIGHT:
-        return &directional_lights_shadow_framebuffer_;
-    case scene::lights::LightType::SPOT_LIGHT:
-        return &spot_lights_shadow_framebuffer_;  
-    default:
-        assert(false && "Unsupported light type for 2D shadow map");
-        return nullptr;
-        break;
-    }
-}
-
 void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
 {
     shader_ptr->set_uniform("u_view_mat", view_mat_);
@@ -55,10 +60,10 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
 
 
     // todo: reserve first 5 texture units
-    shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
-    glBindTextureUnit(0, directional_lights_shadow_framebuffer_.get_depth_map());
+    // shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
+    // glBindTextureUnit(0, shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->get_depth_map());
     shader_ptr->set_uniform("u_spot_lights_shadow_map_array", 1);
-    glBindTextureUnit(1, spot_lights_shadow_framebuffer_.get_depth_map());
+    glBindTextureUnit(1, shadow_frame_buffers_.at(scene::lights::LightType::SPOT_LIGHT)->get_depth_map());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -136,23 +141,23 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
     uint32_t spot_light_idx = 0;
 
     for (auto&& light: scene_lights_buffer_) {
-        ShadowFrameBuffer* fb = select_shadow_framebuffer(light->get_type());
-        fb->bind();
-
-        float width = fb->get_width();
-        float height = fb->get_height();
+        framebuffers::IShadowFrameBuffer* fb = shadow_frame_buffers_.at(light->get_type()).get(); // todo: raw pointer
 
         switch (light->get_type())
         {
         case scene::lights::LightType::DIRECTIONAL_LIGHT:
-            fb->bind_layer(directional_light_idx);
+            fb->bind(directional_light_idx);
             ++directional_light_idx;
             break;
         // case scene::lights::LightType::POINT_LIGHT:
         //     light->upload_components(*shader_ptr, point_light_idx++);
         //     break;
         case scene::lights::LightType::SPOT_LIGHT:
-            fb->bind_layer(spot_light_idx);
+            spdlog::debug("1render call");
+
+            fb->bind(spot_light_idx); // problem
+                spdlog::debug("render call");
+
             ++spot_light_idx;
             break;
         default:
@@ -160,6 +165,8 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
             break;
         }   
 
+        float width = fb->get_width();
+        float height = fb->get_height();
         glm::mat4 light_space_mat = light->projection_matrix(width, height) * light->view_matrix();
         curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat);
     
@@ -359,15 +366,20 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     profiler_.begin_cpu_profiling_query();
     profiler_.begin_gpu_profiling_query();
 
+
+
+    // render preparations
     scene_lights_buffer_ = scene_->get_lights();
-    directional_lights_shadow_framebuffer_.resize(
+
+    // todo: maybe place counter in scene class
+    shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->set_layers_count(
         std::count_if(scene_lights_buffer_.cbegin(), scene_lights_buffer_.cend(), 
         [](const std::shared_ptr<scene::lights::LightBase>& l){
             return l->get_type() == scene::lights::LightType::DIRECTIONAL_LIGHT;
         }
     ));
     
-    spot_lights_shadow_framebuffer_.resize(
+    shadow_frame_buffers_.at(scene::lights::LightType::SPOT_LIGHT)->set_layers_count(
         std::count_if(scene_lights_buffer_.cbegin(), scene_lights_buffer_.cend(), 
         [](const std::shared_ptr<scene::lights::LightBase>& l){
             return l->get_type() == scene::lights::LightType::SPOT_LIGHT;
@@ -376,6 +388,10 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     
     build_rendering_queues();
 
+
+
+
+    // render
     do_shadow_map_render(framebuffer_width, framebuffer_height);
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {

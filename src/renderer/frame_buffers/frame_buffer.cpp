@@ -1,9 +1,9 @@
-#include "renderer/frame_buffer.h"
+#include "renderer/frame_buffers/frame_buffer.h"
 #include "spdlog/spdlog.h"
 #include <exception>
 #include <sstream>
 
-FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
+renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	: width_(width), height_(height)
 {
 	glGenFramebuffers(1, &fbo_);
@@ -66,19 +66,19 @@ FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);  
 }
 
-FrameBuffer::~FrameBuffer()
+renderer::framebuffers::FrameBuffer::~FrameBuffer()
 {
 	glDeleteFramebuffers(1, &fbo_);
 	glDeleteTextures(1, &texture_);
 	glDeleteRenderbuffers(1, &rbo_);
 }
 
-GLuint FrameBuffer::get_frame_texture()
+GLuint renderer::framebuffers::FrameBuffer::get_frame_texture()
 {
     return texture_;
 }
 
-void FrameBuffer::rescale(GLsizei width, GLsizei height)
+void renderer::framebuffers::FrameBuffer::rescale(GLsizei width, GLsizei height)
 {
 	if (width_ == width && height_ == height) return;
 
@@ -96,12 +96,12 @@ void FrameBuffer::rescale(GLsizei width, GLsizei height)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 }
 
-void FrameBuffer::bind() const
+void renderer::framebuffers::FrameBuffer::bind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
 }
 
-void FrameBuffer::unbind() const
+void renderer::framebuffers::FrameBuffer::unbind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
