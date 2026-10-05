@@ -9,11 +9,17 @@ namespace renderer
         class FrameBuffer final {
         public:
             FrameBuffer(GLsizei width, GLsizei height);
-            ~FrameBuffer();
+            FrameBuffer(const FrameBuffer& rhs) = delete;
+            FrameBuffer& operator=(const FrameBuffer& rhs) = delete;
+            FrameBuffer(FrameBuffer&& rhs) = delete;
+            FrameBuffer& operator=(FrameBuffer&& rhs) = delete;
+
             GLuint get_frame_texture();
             void rescale(GLsizei width, GLsizei height);
             void bind() const;
             void unbind() const;
+            
+            ~FrameBuffer();
 
         private:
             GLuint fbo_;

@@ -2,26 +2,23 @@
 #include "spdlog/spdlog.h"
 #include <exception>
 #include <sstream>
-
+// todo: to opengl4+
 renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	: width_(width), height_(height)
 {
-	glGenFramebuffers(1, &fbo_);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
+	glCreateTextures(GL_TEXTURE_2D, 1, &texture_);
+	glTextureStorage2D(texture_, 1, GL_RGB8, width_, height_);
+	glTextureParameteri(texture_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(texture_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	glCreateFramebuffers(1, &fbo_);
+	glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_, 0);
 
-	glGenTextures(1, &texture_);
-	glBindTexture(GL_TEXTURE_2D, texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_, 0);
+	glCreateRenderbuffers(1, &rbo_);
+	glNamedRenderbufferStorage(rbo_, GL_DEPTH32F_STENCIL8, width_, height_);
+	glNamedFramebufferRenderbuffer(fbo_, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
-	glGenRenderbuffers(1, &rbo_);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, width_, height_);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
-
-	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	GLenum status = glCheckNamedFramebufferStatus(fbo_, GL_FRAMEBUFFER);
 	if (status != GL_FRAMEBUFFER_COMPLETE) {
 		std::stringstream ss;
 		ss << "FRAMEBUFFER: Framebuffer is not complete! Status: ";
@@ -53,7 +50,7 @@ renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 			ss << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
 			break;
 		default:
-			spdlog::error("Unknown glCheckFramebufferStatus");
+			spdlog::error("Unknown glCheckNamedFramebufferStatus");
 			assert(false);
 			break;
 		}
@@ -62,8 +59,6 @@ renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	}
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);  
 }
 
 renderer::framebuffers::FrameBuffer::~FrameBuffer()
@@ -84,16 +79,21 @@ void renderer::framebuffers::FrameBuffer::rescale(GLsizei width, GLsizei height)
 
 	width_ = width;
 	height_ = height;
+	glDeleteTextures(1, &texture_);
+	glDeleteRenderbuffers(1, &rbo_);
 
-	glBindTexture(GL_TEXTURE_2D, texture_);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_, 0);
 
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width_, height_);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
+	glCreateTextures(GL_TEXTURE_2D, 1, &texture_);
+	glTextureStorage2D(texture_, 1, GL_RGB8, width_, height_);
+	glTextureParameteri(texture_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(texture_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_, 0);
+
+	glCreateRenderbuffers(1, &rbo_);
+	glNamedRenderbufferStorage(rbo_, GL_DEPTH32F_STENCIL8, width_, height_);
+	glNamedFramebufferRenderbuffer(fbo_, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
+
 }
 
 void renderer::framebuffers::FrameBuffer::bind() const

@@ -1,18 +1,18 @@
 #include "renderer/frame_buffers/shadow_cubemap_frame_buffer.h"
 #include <sstream>
 #include "spdlog/spdlog.h"
-
+// todo: rewrite as shadow_frame_buffer
 renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(GLsizei width, GLsizei height, size_t layers)
     : width_(width), height_(height), layers_(layers), mip_levels_(1 + std::floor(std::log2(std::max(width, height))))
 {
     glCreateTextures(GL_TEXTURE_CUBE_MAP_ARRAY, 1, &cube_maps_array_);
     glTextureStorage3D(cube_maps_array_, 1, GL_DEPTH_COMPONENT24, width_, height_, layers_ * CUBEMAP_LAYERS_MULTIPLICATOR);
 
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
 
     glCreateFramebuffers(1, &fbo_);
 	glNamedFramebufferTexture(fbo_, GL_DEPTH_ATTACHMENT, cube_maps_array_, 0);
@@ -51,7 +51,7 @@ renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(GLsiz
 			ss << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
 			break;
 		default:
-			spdlog::error("Unknown glCheckFramebufferStatus");
+			spdlog::error("Unknown glCheckNamedFramebufferStatus");
 			assert(false);
 			break;
 		}
@@ -77,11 +77,11 @@ void renderer::framebuffers::ShadowCubemapFrameBuffer::set_layers_count(GLsizei 
     glCreateTextures(GL_TEXTURE_CUBE_MAP_ARRAY, 1, &cube_maps_array_);
     glTextureStorage3D(cube_maps_array_, 1, GL_DEPTH_COMPONENT24, width_, height_, layers_ * CUBEMAP_LAYERS_MULTIPLICATOR);
 
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(cube_maps_array_, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(cube_maps_array_, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
 
 	glNamedFramebufferTexture(fbo_, GL_DEPTH_ATTACHMENT, cube_maps_array_, 0);
 }
