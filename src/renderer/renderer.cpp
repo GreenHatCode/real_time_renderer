@@ -29,10 +29,10 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
         std::make_unique<framebuffers::ShadowFrameBuffer>(framebuffers::ShadowFrameBuffer(framebuffers::DEFAULT_SHADOW_MAP_WIDTH, framebuffers::DEFAULT_SHADOW_MAP_HEIGHT))
     );
 
-    // shadow_frame_buffers_.emplace(
-    //     scene::lights::LightType::POINT_LIGHT, 
-    //     std::make_unique<framebuffers::ShadowCubemapFrameBuffer>(framebuffers::ShadowCubemapFrameBuffer(framebuffers::DEFAULT_SHADOW_MAP_WIDTH, framebuffers::DEFAULT_SHADOW_MAP_HEIGHT))
-    // );
+    shadow_frame_buffers_.emplace(
+        scene::lights::LightType::POINT_LIGHT, 
+        std::make_unique<framebuffers::ShadowCubemapFrameBuffer>(framebuffers::ShadowCubemapFrameBuffer(framebuffers::DEFAULT_SHADOW_MAP_WIDTH, framebuffers::DEFAULT_SHADOW_MAP_HEIGHT))
+    );
 
 
 
@@ -132,64 +132,52 @@ void renderer::Renderer::build_rendering_queues()
 
 void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float framebuffer_height)
 {
-    std::shared_ptr<Shader> shader = scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER);
-    curr_shader_ptr_ = shader.get();
-    curr_shader_ptr_->use();
+    std::shared_ptr<Shader> shader = nullptr;
     
     uint32_t directional_light_idx = 0;
     uint32_t point_light_idx = 0;
     uint32_t spot_light_idx = 0;
 
     for (auto&& light: scene_lights_buffer_) {
-        framebuffers::IShadowFrameBuffer* fb = shadow_frame_buffers_.at(light->get_type()).get(); // todo: raw pointer
 
-        switch (light->get_type())
-        {
-        case scene::lights::LightType::DIRECTIONAL_LIGHT:
-            fb->bind(directional_light_idx);
-            ++directional_light_idx;
-            break;
-        // case scene::lights::LightType::POINT_LIGHT:
-        //     light->upload_components(*shader_ptr, point_light_idx++);
-        //     break;
-        case scene::lights::LightType::SPOT_LIGHT:
-            fb->bind(spot_light_idx);
-            ++spot_light_idx;
-            break;
-        default:
-            assert(false && "Unsupported light type");
-            break;
-        }   
+        const auto type = light->get_type();
+        framebuffers::IShadowFrameBuffer* fb = shadow_frame_buffers_.at(type).get(); // todo: raw pointer
+        glViewport(0, 0, fb->get_width(), fb->get_height());
 
-        float width = fb->get_width();
-        float height = fb->get_height();
-        glm::mat4 light_space_mat = light->projection_matrix(width, height) * light->view_matrix();
-        curr_shader_ptr_->set_uniform("u_light_space_mat", light_space_mat);
-    
-        glViewport(0, 0, width, height);
-        glCullFace(GL_FRONT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        std::shared_ptr<Shader> shader = (type == scene::lights::LightType::POINT_LIGHT)
+                ? scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_POINT_LIGHT_SHADER)
+                : scene_->get_internal_shader(scene::InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER);
 
-        // render opaque objects (without anything)
-        for (const auto& obj: opaque_objects_) {
-            obj.obj_ptr->render(obj.draw_mode, false, shader); 
+        shader->use();
+
+        uint32_t base_slice;
+        if (type == scene::lights::LightType::DIRECTIONAL_LIGHT) base_slice = directional_light_idx++;
+        else if (type == scene::lights::LightType::SPOT_LIGHT) base_slice = spot_light_idx++;
+        else if (type == scene::lights::LightType::POINT_LIGHT) base_slice = point_light_idx++ * framebuffers::ShadowCubemapFrameBuffer::CUBEMAP_LAYERS_MULTIPLICATOR;
+        else assert(false && "Unsupported light type");
+
+        const size_t view_count = light->get_view_count();
+        for (size_t face = 0; face < view_count; ++face) {
+            fb->bind(base_slice + face);
+
+            shader->set_uniform("u_light_space_mat", light->projection_matrix(fb->get_width(), fb->get_height()) * light->view_matrix(face));
+
+            // if (type == scene::lights::LightType::POINT_LIGHT) {
+            //     shader->set_uniform("u_light_pos", light->get_position());
+            //     shader->set_uniform("u_far_plane", light->calculate_far_plane(0.01f));
+            // }
+
+            render_shadow_depth_buffer(shader);
+
         }
+        
 
-        // render transparent objects (in two steps)
-        for (const auto& obj: transparent_objects_) {
-            obj.obj_ptr->render(obj.draw_mode, false, shader);       
-        }
 
-        for (const auto& obj: transparent_objects_) {
-            glDepthMask(GL_FALSE);
-            obj.obj_ptr->render(obj.draw_mode, true, shader); 
-            glDepthMask(GL_TRUE);
-        }
-
-        glCullFace(GL_BACK);
-        glViewport(0, 0, framebuffer_width, framebuffer_height);
         fb->unbind();
     }
+
+    glViewport(0, 0, framebuffer_width, framebuffer_height);
+    if (curr_shader_ptr_) curr_shader_ptr_->use(); // restore last used shader
 }
 
 void renderer::Renderer::do_render()
@@ -355,7 +343,31 @@ void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 #ifdef MERGED_OUTLINES
     glDepthMask(GL_TRUE);
 #endif
-}   
+}
+
+void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader> &shader_ptr)
+{
+        glCullFace(GL_FRONT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        // render opaque objects (without anything)
+        for (const auto& obj: opaque_objects_) {
+            obj.obj_ptr->render(obj.draw_mode, false, shader_ptr); 
+        }
+
+        // render transparent objects (in two steps)
+        for (const auto& obj: transparent_objects_) {
+            obj.obj_ptr->render(obj.draw_mode, false, shader_ptr);       
+        }
+
+        for (const auto& obj: transparent_objects_) {
+            glDepthMask(GL_FALSE);
+            obj.obj_ptr->render(obj.draw_mode, true, shader_ptr); 
+            glDepthMask(GL_TRUE);
+        }
+
+        glCullFace(GL_BACK);
+}
 
 void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height)
 {

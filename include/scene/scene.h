@@ -14,7 +14,8 @@
 namespace scene
 {
     enum class InternalShadersIDS {
-        SHADOW_MAP_EMPTY_FRAG_SHADER
+        SHADOW_MAP_EMPTY_FRAG_SHADER, 
+        SHADOW_MAP_POINT_LIGHT_SHADER
     };
 
     class Scene {

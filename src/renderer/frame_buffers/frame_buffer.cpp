@@ -2,7 +2,7 @@
 #include "spdlog/spdlog.h"
 #include <exception>
 #include <sstream>
-// todo: to opengl4+
+
 renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	: width_(width), height_(height)
 {

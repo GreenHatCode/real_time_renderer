@@ -63,7 +63,8 @@ namespace scene::lights {
         glm::vec3 get_specular() const;
 
         // shadow mapping
-        virtual glm::mat4 view_matrix() const = 0;
+        virtual size_t get_view_count() const = 0;
+        virtual glm::mat4 view_matrix(size_t face_idx = 0) const = 0;
         virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const = 0;
 
         virtual void upload_components(Shader& obj_shader, size_t light_idx) const = 0; // push light's data to shader

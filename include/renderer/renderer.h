@@ -76,6 +76,8 @@ namespace renderer {
         
         void render_scene_object_with_outline(const RenderQueueObject& obj);
 
+        void render_shadow_depth_buffer(const std::shared_ptr<Shader> &shader_ptr);
+
     public:
         Renderer(std::shared_ptr<const scene::Scene> scene);
         void render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height);

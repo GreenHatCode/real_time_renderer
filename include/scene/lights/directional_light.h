@@ -28,8 +28,9 @@ namespace scene::lights
 
 
         // shadow mapping
-        virtual glm::mat4 view_matrix() const override;
-        virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const;
+        size_t get_view_count() const override;
+        glm::mat4 view_matrix(size_t face_idx = 0) const override;
+        glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const;
 
         std::string get_name() const override;
         LightType get_type() const override;

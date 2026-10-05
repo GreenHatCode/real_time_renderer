@@ -269,7 +269,7 @@ void App::load_sources_debug()
 
     imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
     // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
-    // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
     // imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
 
 #if 0

@@ -115,7 +115,12 @@ float scene::lights::SpotLight::get_outer_cut_off() const
     return glm::degrees(glm::acos(cosine_outer_cut_off_rad_));
 }
 
-glm::mat4 scene::lights::SpotLight::view_matrix() const
+size_t scene::lights::SpotLight::get_view_count() const
+{
+    return 1; // todo:
+}
+
+glm::mat4 scene::lights::SpotLight::view_matrix(size_t face_idx) const
 {
     if (glm::abs(glm::dot(renderer::defaults::WORLD_UP, direction_)) > 0.999f) {
         // the dir and world_up vectors are collinear, fallback

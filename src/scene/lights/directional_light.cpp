@@ -35,7 +35,12 @@ glm::vec3 scene::lights::DirectionalLight::get_direction() const
     return direction_;
 }
 
-glm::mat4 scene::lights::DirectionalLight::view_matrix() const
+size_t scene::lights::DirectionalLight::get_view_count() const
+{
+    return 1; // todo:
+}
+
+glm::mat4 scene::lights::DirectionalLight::view_matrix(size_t face_idx) const
 {
     glm::vec3 position = -direction_ * DISTANCE_FROM_DIRECTION_PRESCALER;
 

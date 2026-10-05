@@ -1,7 +1,7 @@
 #include "renderer/frame_buffers/shadow_cubemap_frame_buffer.h"
 #include <sstream>
 #include "spdlog/spdlog.h"
-// todo: rewrite as shadow_frame_buffer
+
 renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(GLsizei width, GLsizei height, size_t layers)
     : width_(width), height_(height), layers_(layers), mip_levels_(1 + std::floor(std::log2(std::max(width, height))))
 {
@@ -89,7 +89,7 @@ void renderer::framebuffers::ShadowCubemapFrameBuffer::set_layers_count(GLsizei 
 void renderer::framebuffers::ShadowCubemapFrameBuffer::bind(GLsizei layer) const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
-    if (layer >= 0) glNamedFramebufferTextureLayer(fbo_, GL_DEPTH_ATTACHMENT, cube_maps_array_, 0, layer * CUBEMAP_LAYERS_MULTIPLICATOR);
+    if (layer >= 0) glNamedFramebufferTextureLayer(fbo_, GL_DEPTH_ATTACHMENT, cube_maps_array_, 0, layer);
 }
 
 void renderer::framebuffers::ShadowCubemapFrameBuffer::unbind() const
