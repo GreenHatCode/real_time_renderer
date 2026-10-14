@@ -101,7 +101,6 @@ float calculate_point_light_shadow(
     uint layer, 
     vec3 light_pos, 
     float far_plane,
-    vec3 light_dir,
     vec3 frag_normal
 )
 {
@@ -111,8 +110,7 @@ float calculate_point_light_shadow(
 
     float curr_depth = length(frag_to_light);
 
-    // float bias = 0.005;
-    float bias = max(0.001 * (1.0 - dot(frag_normal, -light_dir)), 0.0001);
+    float bias = max(0.001 * (1.0 - dot(frag_normal, normalize(frag_to_light))), 0.0001);
 
     return curr_depth - bias > closest_depth ? 1.0 : 0.0;
 }
@@ -162,7 +160,7 @@ vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
         vec3 light_dir = normalize(point_lights[i].position - vs_out.frag_pos);
 
         float shadow = calculate_point_light_shadow(
-            u_point_lights_shadow_map_array, vs_out.frag_pos, i, point_lights[i].position, point_lights[i].far_plane, light_dir, unit_normal
+            u_point_lights_shadow_map_array, vs_out.frag_pos, i, point_lights[i].position, point_lights[i].far_plane, unit_normal
         );
 
         
