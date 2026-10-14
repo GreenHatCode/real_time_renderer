@@ -8,7 +8,8 @@ scene::physical_objects::LightModelObject::LightModelObject(const std::string &o
         aiProcess_Triangulate |
         aiProcess_JoinIdenticalVertices |
         aiProcess_ImproveCacheLocality |
-        aiProcess_ValidateDataStructure))
+        aiProcess_ValidateDataStructure |
+        aiProcess_GenNormals))
     , name_(object_name)
     , shader_(shader)
     , color_(1.0f, 1.0f, 1.0f)
