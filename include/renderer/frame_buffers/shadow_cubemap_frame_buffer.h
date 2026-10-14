@@ -9,17 +9,23 @@ namespace renderer
         class ShadowCubemapFrameBuffer final: public IShadowFrameBuffer {
             GLuint fbo_;
             GLuint cube_maps_array_;
-            GLuint rbo_;
 
-            const GLsizei width_;
-            const GLsizei height_;
-            const GLsizei mip_levels_;
+            GLsizei width_;
+            GLsizei height_;
+            GLsizei mip_levels_;
             size_t layers_; // number of cubemaps that will be stored
 
         public:
             inline static constexpr GLsizei CUBEMAP_LAYERS_MULTIPLICATOR = 6;
 
             ShadowCubemapFrameBuffer(GLsizei width, GLsizei height, size_t layers = DEFAULT_SHADOW_MAP_LAYERS_NUMBER);
+            ShadowCubemapFrameBuffer(const ShadowCubemapFrameBuffer& rhs) = delete;
+            ShadowCubemapFrameBuffer(ShadowCubemapFrameBuffer&& rhs);
+            ShadowCubemapFrameBuffer& operator=(const ShadowCubemapFrameBuffer& rhs) = delete;
+            ShadowCubemapFrameBuffer& operator=(ShadowCubemapFrameBuffer&& rhs);
+
+           
+           
             GLsizei get_depth_map() override;
             void set_layers_count(GLsizei layers) override;
             void bind(GLsizei layer = -1) const override;

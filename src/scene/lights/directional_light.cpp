@@ -37,7 +37,7 @@ glm::vec3 scene::lights::DirectionalLight::get_direction() const
 
 size_t scene::lights::DirectionalLight::get_view_count() const
 {
-    return 1; // todo:
+    return VIEW_COUNT;
 }
 
 glm::mat4 scene::lights::DirectionalLight::view_matrix(size_t face_idx) const

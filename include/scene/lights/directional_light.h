@@ -13,7 +13,7 @@ namespace scene::lights
 
         inline static constexpr glm::vec3 LOOK_POINT = glm::vec3(0.0f);
         inline static constexpr glm::vec3 DISTANCE_FROM_DIRECTION_PRESCALER = glm::vec3(50.0f);
-
+        inline static constexpr size_t VIEW_COUNT = 1;
     public:
         DirectionalLight(
             const std::string& name, 

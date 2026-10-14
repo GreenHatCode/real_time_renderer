@@ -62,6 +62,30 @@ renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(GLsiz
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 }
 
+renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(ShadowCubemapFrameBuffer &&rhs)
+	: fbo_(rhs.fbo_)
+	, cube_maps_array_(rhs.cube_maps_array_)
+	, width_(rhs.width_)
+	, height_(rhs.height_)
+	, mip_levels_(rhs.mip_levels_)
+	, layers_(rhs.layers_)
+{
+	rhs.fbo_ = 0;
+	rhs.cube_maps_array_ = 0;
+}
+
+renderer::framebuffers::ShadowCubemapFrameBuffer &renderer::framebuffers::ShadowCubemapFrameBuffer::operator=(ShadowCubemapFrameBuffer &&rhs)
+{
+    if (this == &rhs) return *this;
+
+	std::swap(fbo_, rhs.fbo_);
+	std::swap(cube_maps_array_, rhs.cube_maps_array_);
+	width_ = rhs.width_;
+	height_ = rhs.height_;
+	layers_ = rhs.layers_;
+	return *this;
+}
+
 GLsizei renderer::framebuffers::ShadowCubemapFrameBuffer::get_depth_map()
 {
     return cube_maps_array_;

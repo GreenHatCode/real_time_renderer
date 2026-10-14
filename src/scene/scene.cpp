@@ -111,6 +111,18 @@ scene::Scene::Scene()
     } catch (const std::exception& e) {
         spdlog::error("Failed to load internal shader: {}, what: {}", "shadow_map_empty_frag_shader", e.what());
     }
+
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(
+            "shadow_map_point_light_shader", 
+            "shaders_sources/internal/shadow_map_point_light_shader/vertex_shader.vert",
+            "shaders_sources/internal/shadow_map_point_light_shader/fragment_shader.frag"
+        );
+        internal_shaders_.emplace(InternalShadersIDS::SHADOW_MAP_POINT_LIGHT_SHADER, shader);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load internal shader: {}, what: {}", "shadow_map_point_light_shader", e.what());
+    }
 }
 
 void scene::Scene::add_object(const std::shared_ptr<scene::physical_objects::PhysicalObject> &ptr)

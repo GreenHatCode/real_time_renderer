@@ -64,6 +64,8 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     glBindTextureUnit(0, shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->get_depth_map());
     shader_ptr->set_uniform("u_spot_lights_shadow_map_array", 1);
     glBindTextureUnit(1, shadow_frame_buffers_.at(scene::lights::LightType::SPOT_LIGHT)->get_depth_map());
+    shader_ptr->set_uniform("u_point_lights_shadow_map_array", 2);
+    glBindTextureUnit(2, shadow_frame_buffers_.at(scene::lights::LightType::POINT_LIGHT)->get_depth_map());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -150,6 +152,7 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
 
         shader->use();
 
+
         uint32_t base_slice;
         if (type == scene::lights::LightType::DIRECTIONAL_LIGHT) base_slice = directional_light_idx++;
         else if (type == scene::lights::LightType::SPOT_LIGHT) base_slice = spot_light_idx++;
@@ -162,22 +165,20 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
 
             shader->set_uniform("u_light_space_mat", light->projection_matrix(fb->get_width(), fb->get_height()) * light->view_matrix(face));
 
-            // if (type == scene::lights::LightType::POINT_LIGHT) {
-            //     shader->set_uniform("u_light_pos", light->get_position());
-            //     shader->set_uniform("u_far_plane", light->calculate_far_plane(0.01f));
-            // }
+            if (type == scene::lights::LightType::POINT_LIGHT) {
+                light->upload_components(*shader, 0); // upload additional components
+
+            }
 
             render_shadow_depth_buffer(shader);
 
         }
         
-
-
         fb->unbind();
     }
 
     glViewport(0, 0, framebuffer_width, framebuffer_height);
-    if (curr_shader_ptr_) curr_shader_ptr_->use(); // restore last used shader
+    // if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
 }
 
 void renderer::Renderer::do_render()
@@ -347,7 +348,7 @@ void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 
 void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader> &shader_ptr)
 {
-        glCullFace(GL_FRONT);
+        // glCullFace(GL_FRONT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // render opaque objects (without anything)
@@ -366,7 +367,7 @@ void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader
             glDepthMask(GL_TRUE);
         }
 
-        glCullFace(GL_BACK);
+        // glCullFace(GL_BACK);
 }
 
 void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height)
@@ -394,6 +395,13 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
         }
     ));
     
+    shadow_frame_buffers_.at(scene::lights::LightType::POINT_LIGHT)->set_layers_count(
+        std::count_if(scene_lights_buffer_.cbegin(), scene_lights_buffer_.cend(), 
+        [](const std::shared_ptr<scene::lights::LightBase>& l){
+            return l->get_type() == scene::lights::LightType::POINT_LIGHT;
+        }
+    ));
+
     build_rendering_queues();
 
 

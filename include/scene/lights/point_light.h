@@ -16,6 +16,12 @@ namespace scene::lights
         float linear_;
         float quadratic_;
 
+        mutable glm::mat4 proj_mat_;
+
+        float calculate_far_plane(float threshold = 1.0f / 256.0f) const;
+
+        inline static constexpr size_t VIEW_COUNT = 6;
+
     public:
         PointLight(
             const std::string& name, 
@@ -40,9 +46,9 @@ namespace scene::lights
         float get_quadratic() const;
 
         // shadow mapping
-        size_t get_view_count() const override { return 6; }
-        glm::mat4 view_matrix(size_t face_idx = 0) const override { return glm::mat4(1.0f); }
-        glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override { return glm::mat4(1.0f); }
+        size_t get_view_count() const override;
+        glm::mat4 view_matrix(size_t face_idx = 0) const override;
+        glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override;
 
 
         void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);

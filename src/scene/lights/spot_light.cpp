@@ -117,7 +117,7 @@ float scene::lights::SpotLight::get_outer_cut_off() const
 
 size_t scene::lights::SpotLight::get_view_count() const
 {
-    return 1; // todo:
+    return VIEW_COUNT;
 }
 
 glm::mat4 scene::lights::SpotLight::view_matrix(size_t face_idx) const

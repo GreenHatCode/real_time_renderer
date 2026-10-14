@@ -24,6 +24,8 @@ namespace scene::lights
 
         float calculate_far_plane(float threshold = 1.0f / 256.0f) const;
 
+        inline static constexpr size_t VIEW_COUNT = 1;
+
     public:
         SpotLight(
             const std::string& name, 
