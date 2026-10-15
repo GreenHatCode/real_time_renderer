@@ -9,6 +9,7 @@ using namespace renderer;
 Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     : scene_(scene)
     , clear_color_rgba_(0.0)
+    , curr_shader_ptr_(nullptr)
     , view_mat_(1.0)
     , projection_mat_(1.0)
     , camera_position_(1.0) 
@@ -178,7 +179,7 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
     }
 
     glViewport(0, 0, framebuffer_width, framebuffer_height);
-    // if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
+    if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
 }
 
 void renderer::Renderer::do_render()

@@ -90,7 +90,7 @@ float calculate_shadow(
     float closest_depth = texture(depth_map, vec3(ndc_coords.xy, layer)).r;
     float curr_depth = ndc_coords.z;
 
-    float bias = max(0.001 * (1.0 - dot(frag_normal, -light_dir)), 0.0001);
+    float bias = max(0.005 * (1.0 - dot(frag_normal, -light_dir)), 0.0005);
 
     return curr_depth - bias > closest_depth ? 1.0 : 0.0;
 }
