@@ -81,3 +81,8 @@ uniform mat4 u_model_mat;
 uniform mat4 u_view_mat;
 uniform mat4 u_projection_mat;
 uniform mat3 u_normal_mat;
+
+
+
+// --- Warning and Recommendations ---
+- do not add gamma correction to any shader, it is already added as a separate post processing shader: `gamma_correction/`

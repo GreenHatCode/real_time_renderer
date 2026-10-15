@@ -17,7 +17,7 @@ namespace scene::physical_objects
         void set_shader(const std::shared_ptr<Shader>& shader) override;
         std::shared_ptr<Shader> get_shader() const override;
         std::string get_name() const override;
-        void render(bool render_transparent_meshes, const std::shared_ptr<Shader>& specific_shader = nullptr) const override;
+        void render(GLenum draw_mode, bool render_transparent_meshes, const std::shared_ptr<Shader>& specific_shader = nullptr) const override;
         bool is_transparent() const override;
     };
 

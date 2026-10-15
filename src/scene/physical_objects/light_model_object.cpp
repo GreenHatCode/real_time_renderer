@@ -8,7 +8,8 @@ scene::physical_objects::LightModelObject::LightModelObject(const std::string &o
         aiProcess_Triangulate |
         aiProcess_JoinIdenticalVertices |
         aiProcess_ImproveCacheLocality |
-        aiProcess_ValidateDataStructure))
+        aiProcess_ValidateDataStructure |
+        aiProcess_GenNormals))
     , name_(object_name)
     , shader_(shader)
     , color_(1.0f, 1.0f, 1.0f)
@@ -41,21 +42,18 @@ std::string scene::physical_objects::LightModelObject::get_name() const
     return name_;
 }
 
-void scene::physical_objects::LightModelObject::render(bool render_transparent_meshes, const std::shared_ptr<Shader> &specific_shader) const
+void scene::physical_objects::LightModelObject::render(GLenum draw_mode, bool render_transparent_meshes, const std::shared_ptr<Shader> &specific_shader) const
 {
-    glm::mat4 model = model_matrix();
-    glm::mat3 normal_mat = glm::mat3(normal_matrix());    
-
     if (specific_shader == nullptr) { // render using model's shader
-        shader_->set_uniform("u_model_mat", model);
-        shader_->set_uniform("u_normal_mat", normal_mat);
+        shader_->set_uniform("u_model_mat", model_matrix());
+        shader_->set_uniform("u_normal_mat", normal_matrix());
         shader_->set_uniform("u_light_object_color", color_);
-        model_.draw(render_transparent_meshes, *shader_);
+        model_.draw(draw_mode, render_transparent_meshes, *shader_);
     } else {
-        specific_shader->set_uniform("u_model_mat", model);
-        specific_shader->set_uniform("u_normal_mat", normal_mat);
+        specific_shader->set_uniform("u_model_mat", model_matrix());
+        specific_shader->set_uniform("u_normal_mat", normal_matrix());
         specific_shader->set_uniform("u_light_object_color", color_);
-        model_.draw(render_transparent_meshes, *specific_shader);
+        model_.draw(draw_mode, render_transparent_meshes, *specific_shader);
     }
 }
 

@@ -12,6 +12,7 @@ void App::initialize_opengl()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
     window_ = glfwCreateWindow(framebuffer_width_, framebuffer_height_, "Read-Time Renderer", NULL, NULL);
     if (window_ == NULL)
@@ -33,6 +34,23 @@ void App::initialize_opengl()
     }
 
     glfwGetFramebufferSize(window_, &framebuffer_width_, &framebuffer_height_);
+
+
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        
+        // Ensures callback runs on the thread that triggered the error,
+        // making it easy to hit breakpoints directly on the bad GL call.
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+        
+        glDebugMessageCallback(openglDebugCallback, nullptr);
+        
+        // Enable all message groups
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
 
 
     IMGUI_CHECKVERSION();
@@ -209,13 +227,18 @@ App::App(uint32_t screen_width, uint32_t screen_height)
     //configure logging
     spdlog::set_level(spdlog::level::debug);
     
-
-    // camera_ = std::make_unique<FreeCamera>(
-    //     Projection::Perspective(45.0f, 0.1f, 300.0f), 
-    //     glm::vec3(0.0f, 0.0f, -10.0f),
-    //     glm::vec3(0.0f, 0.0f, -1.0f)
-    // );
-    camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(95.0f, -100.0f, 300.0f));
+#ifdef FREE_CAMERA
+    camera_ = std::make_unique<FreeCamera>(
+        Projection::Perspective(45.0f, 0.1f, scene::lights::lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE), 
+        glm::vec3(0.0f, 0.0f, -10.0f),
+        glm::vec3(0.0f, 0.0f, -1.0f)
+    );
+#else
+    camera_ = std::make_unique<OrbitCamera>(Projection::Orthographic(
+        95.0f, // ortho size
+        scene::lights::lighting_constants::CAMERA_DEFAULT_NEAR_PLANE, 
+        scene::lights::lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE));
+#endif
 
     scene_ = std::make_shared<scene::Scene>();
     imgui_window_ = std::make_unique<UIWindow>(scene_);
@@ -241,11 +264,20 @@ void App::load_sources_debug()
     // imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
     // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
 
-    imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
-    // imgui_window_->load_model("blending", "sphere", "resources/light_sphere.obj");
+    // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
+    imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
-    // imgui_window_->add_light("spot_light", scene::lights::LightType::SPOT_LIGHT);
-    imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
+    imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
+    // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    // imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
+
+#if 0
+    for (int i = 0; i < 10; i++) {
+            imgui_window_->add_light("dir" + std::to_string(i), scene::lights::LightType::DIRECTIONAL_LIGHT);
+    }
+
+#endif
 }
 
 int32_t App::run()
@@ -266,6 +298,9 @@ int32_t App::run()
         renderer_->set_camera_position(camera_->get_position());
         renderer_->set_post_processing(imgui_window_->get_post_processing_type());
         renderer_->set_geometry_post_processing(imgui_window_->get_geometry_processing_type());
+        renderer_->set_internal_objects_id_mask(imgui_window_->get_selected_internal_objects_id_mask());
+        renderer_->set_gamma(imgui_window_->get_gamma());
+
         renderer_->render_scene(framebuffer_width_, framebuffer_height_);
 
         imgui_window_->set_gpu_time_to_display(renderer_->get_gpu_time());

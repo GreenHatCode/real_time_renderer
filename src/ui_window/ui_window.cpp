@@ -2,6 +2,8 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "scene/physical_objects/physical_light_object.h"
 #include "glm/gtx/quaternion.hpp"
+#include "assimp_wrapper/mesh.h"
+#include "renderer/renderer.h"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -16,6 +18,10 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , delta_time_(0.0)
     , selected_post_processing_type_(static_cast<int32_t>(renderer::PostProcessingTypes::NO_POST_PROCESSING))
     , selected_geometry_processing_type_(static_cast<int32_t>(renderer::GeometryProcessingTypes::NO_GEOMETRY_PROCESSING))
+    , render_axes_(false)
+    , render_xz_grid_(false)
+    , render_xz_surface_(false)
+    , gamma_(2.2f)
 {
 
 }
@@ -31,7 +37,17 @@ void UIWindow::render_window()
     ImGui::Combo("Geometry processing", &selected_geometry_processing_type_, renderer::geometry_processing_types_names(), static_cast<int>(renderer::GeometryProcessingTypes::COUNT));    
     ImGui::Separator();
 
-    
+
+    ImGui::Checkbox("Render axes", &render_axes_);
+    ImGui::Checkbox("Render XZ grid", &render_xz_grid_);
+    ImGui::Checkbox("Render XZ surface", &render_xz_surface_);
+
+    if (static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_) == renderer::PostProcessingTypes::GAMMA_CORRECTION) {
+        ImGui::SliderFloat("Gamma", &gamma_, renderer::MIN_GAMMA, renderer::MAX_GAMMA);
+    }
+
+
+    ImGui::Separator();
     if (ImGui::Button("manage model")) {
         ImGui::OpenPopup("manage model");
     }
@@ -85,6 +101,17 @@ float UIWindow::get_delta_time() const
     return static_cast<float>(delta_time_);
 }
 
+uint8_t UIWindow::get_selected_internal_objects_id_mask() const
+{
+    uint8_t mask = 0;
+
+    if (render_axes_) mask |= renderer::defaults::AXES_LINES_ID;
+    if (render_xz_grid_) mask |= renderer::defaults::XZ_FACE_GRID_ID;
+    if (render_xz_surface_) mask |= renderer::defaults::XZ_FACE_SOLID_ID;
+
+    return mask;
+}
+
 void UIWindow::set_gpu_time_to_display(double value)
 {
     gpu_time_to_display_ = value;
@@ -93,6 +120,11 @@ void UIWindow::set_gpu_time_to_display(double value)
 void UIWindow::set_cpu_time_to_display(double value)
 {
     cpu_time_to_display_ = value;
+}
+
+float UIWindow::get_gamma() const
+{
+    return gamma_;
 }
 
 double UIWindow::calculate_fps()
@@ -198,6 +230,30 @@ void UIWindow::render_light_dialog()
         ImGui::SameLine();
 
         if (ImGui::Button("Delete")) {
+            std::shared_ptr<scene::lights::LightBase> light = scene_->get_light(light_dialog_state_.light_name);
+            
+            switch(light->get_type())
+            {
+            case scene::lights::LightType::DIRECTIONAL_LIGHT: break;
+            case scene::lights::LightType::POINT_LIGHT:
+            {
+                scene::lights::PointLight& light_ref = static_cast<scene::lights::PointLight&>(*light);
+                scene_->delete_scene_object(light_ref.get_model_ptr().lock()->get_name());
+            }
+                break;
+            case scene::lights::LightType::SPOT_LIGHT:
+            {
+                scene::lights::SpotLight& light_ref = static_cast<scene::lights::SpotLight&>(*light);
+                scene_->delete_scene_object(light_ref.get_model_ptr().lock()->get_name());
+            }
+                break;
+
+            default:
+                spdlog::error("Unknow light type to delete light's model, light_name={} type={}", light->get_name(), static_cast<int>(light->get_type()));
+                assert(false);
+                break;
+            }
+            
             scene_->delete_scene_object(light_dialog_state_.light_name);
         }
 
@@ -388,17 +444,13 @@ void UIWindow::render_point_light_editor(scene::lights::PointLight &light)
             spdlog::warn("Failed to edit point light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
     }
 
-    auto constant = light.get_constant();
-    if (ImGui::DragFloat("Constant", &constant, 0.05f))
-        light.set_constant(constant);
-
     auto linear = light.get_linear();
-    if (ImGui::DragFloat("Linear", &linear, 0.05f))
-        light.set_constant(linear);
+    if (ImGui::SliderFloat("Linear", &linear, scene::lights::lighting_constants::MIN_LIGHT_LINEAR, scene::lights::lighting_constants::MAX_LIGHT_LINEAR))
+        light.set_linear(linear);
 
     auto quadratic = light.get_quadratic();
-    if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
-        light.set_constant(quadratic);
+    if (ImGui::SliderFloat("Quadratic", &quadratic, scene::lights::lighting_constants::MIN_LIGHT_QUADRATIC, scene::lights::lighting_constants::MAX_LIGHT_QUADRATIC))
+        light.set_quadratic(quadratic);
 }
 
 void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
@@ -435,24 +487,20 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
         }
     }
 
-    auto constant = light.get_constant();
-    if (ImGui::DragFloat("Constant", &constant, 0.05f))
-        light.set_constant(constant);
-
     auto linear = light.get_linear();
-    if (ImGui::DragFloat("Linear", &linear, 0.05f))
+    if (ImGui::SliderFloat("Linear", &linear, scene::lights::lighting_constants::MIN_LIGHT_LINEAR, scene::lights::lighting_constants::MAX_LIGHT_LINEAR))
         light.set_linear(linear);
 
     auto quadratic = light.get_quadratic();
-    if (ImGui::DragFloat("Quadratic", &quadratic, 0.05f))
+    if (ImGui::SliderFloat("Quadratic", &quadratic, scene::lights::lighting_constants::MIN_LIGHT_QUADRATIC, scene::lights::lighting_constants::MAX_LIGHT_QUADRATIC))
         light.set_quadratic(quadratic);
 
     auto cut_off = light.get_cut_off();
-    if (ImGui::DragFloat("Cut off angle (degrees)", &cut_off, 0.05f))
+    if (ImGui::SliderFloat("Cut off angle (degrees)", &cut_off, scene::lights::lighting_constants::MIN_SPOT_CUTOFF, light.get_outer_cut_off()))
         light.set_cut_off(cut_off);
 
     auto outer_cut_off = light.get_outer_cut_off();
-    if (ImGui::DragFloat("Outer cut off angle (degrees)", &outer_cut_off, 0.05f))
+    if (ImGui::SliderFloat("Outer cut off angle (degrees)", &outer_cut_off, light.get_cut_off(), scene::lights::lighting_constants::MAX_SPOT_CUTOFF))
         light.set_outer_cut_off(outer_cut_off);
 }
 
@@ -521,7 +569,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
 
     try {
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model(file_path, aiProcessPreset_TargetRealtime_Quality | aiProcess_ForceGenNormals),
+            assimp_wrapper::Model(file_path, assimp_wrapper::POST_PROCESSING_FLAGS),
             name
         );
 

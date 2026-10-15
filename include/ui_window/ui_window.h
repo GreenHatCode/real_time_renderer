@@ -13,7 +13,7 @@
 #include <filesystem>
 
 class UIWindow final {
-
+    
     struct AddModelDialog_t {
         std::string model_file_path;
         std::string shader_name;
@@ -53,15 +53,21 @@ private: // do not expose outside
     ModelInspectorState_t model_inspector_state_;
     LightInspectorState_t light_inspector_state_;
 
-    int32_t selected_post_processing_type_;
-    int32_t selected_geometry_processing_type_;
-
     double gpu_time_to_display_;
     double cpu_time_to_display_;
 
 private: // should be accessible 
     glm::vec4 clear_color_;
     double delta_time_;
+
+    int32_t selected_post_processing_type_;
+    int32_t selected_geometry_processing_type_;
+
+    bool render_axes_;
+    bool render_xz_grid_;
+    bool render_xz_surface_;
+
+    float gamma_;
 
 public:
     UIWindow(const std::shared_ptr<scene::Scene>& scene);
@@ -70,9 +76,12 @@ public:
     renderer::PostProcessingTypes get_post_processing_type() const;
     renderer::GeometryProcessingTypes get_geometry_processing_type() const;
     float get_delta_time() const;
+    uint8_t get_selected_internal_objects_id_mask() const;
 
     void set_gpu_time_to_display(double value);
     void set_cpu_time_to_display(double value);
+
+    float get_gamma() const;
 
 private:
     double calculate_fps();

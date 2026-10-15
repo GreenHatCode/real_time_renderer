@@ -3,6 +3,13 @@
 
 using namespace assimp_wrapper;
 
+Mesh::Mesh(const std::vector<vertex> &vertices, const std::vector<uint32_t> &vertex_indices, uint32_t material_idx)
+    :   indices_count_(vertex_indices.size())
+    ,   material_idx_(material_idx)
+{
+    mesh_init(vertices, vertex_indices);
+}
+
 void assimp_wrapper::Mesh::mesh_init(const std::vector<vertex>& vertices, const std::vector<uint32_t>& vertex_indices)
 {
     glGenVertexArrays(1, &vao_);
@@ -27,13 +34,6 @@ void assimp_wrapper::Mesh::mesh_init(const std::vector<vertex>& vertices, const 
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, tex_coords));
 
     glBindVertexArray(0);
-}
-
-Mesh::Mesh(const std::vector<vertex> &vertices, const std::vector<uint32_t> &vertex_indices, uint32_t material_idx)
-    :   indices_count_(vertex_indices.size())
-    ,   material_idx_(material_idx)
-{
-    mesh_init(vertices, vertex_indices);
 }
 
 assimp_wrapper::Mesh::Mesh(Mesh &&rhs) noexcept
@@ -73,11 +73,10 @@ uint32_t assimp_wrapper::Mesh::get_material_index() const
 {
     return material_idx_;
 }
-void assimp_wrapper::Mesh::render() const
+void assimp_wrapper::Mesh::render(GLenum mode) const
 {
-    glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(vao_);
-    glDrawElements(GL_TRIANGLES, indices_count_, GL_UNSIGNED_INT, 0);
+    glDrawElements(mode, indices_count_, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 

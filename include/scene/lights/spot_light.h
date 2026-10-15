@@ -2,6 +2,7 @@
 #include "scene/lights/light_base.h"
 #include <string>
 #include "scene/physical_objects/light_model_object.h"
+#include "glm/glm.hpp"
 
 namespace scene::lights
 {
@@ -10,7 +11,7 @@ namespace scene::lights
         glm::vec3 direction_;
         std::string name_;
         LightType type_;
-        std::weak_ptr<scene::physical_objects::LightModelObject> light_cone_;
+        std::shared_ptr<scene::physical_objects::LightModelObject> light_cone_;
 
         // attenuation parameters
         float constant_;
@@ -19,18 +20,23 @@ namespace scene::lights
         float cosine_cut_off_rad_;
         float cosine_outer_cut_off_rad_;
 
+        mutable glm::mat4 proj_mat_;
+
+        float calculate_far_plane(float threshold = 1.0f / 256.0f) const;
+
+        inline static constexpr size_t VIEW_COUNT = 1;
+
     public:
         SpotLight(
             const std::string& name, 
-            const std::weak_ptr<scene::physical_objects::LightModelObject>& cone_model = {}, 
+            const std::shared_ptr<scene::physical_objects::LightModelObject>& cone_model = {}, 
             glm::vec3 ambient = glm::vec3(0.05f, 0.05f, 0.05f), 
             glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
-            glm::vec3 position = glm::vec3(0.0f, 10.0f, 0.0f), 
-            glm::vec3 direction_ = glm::vec3(0.0f, -1.0f, 0.0f),
-            float constant = 1.0f, 
-            float linear = 0.09f, 
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
+            glm::vec3 direction_ = physical_objects::physical_light_object_constants::SPOT_LIGHT_MODEL_DEFAULT_FORWARD,
+            float linear = 0.09f, // todo:
             float quadratic = 0.032f, 
             float cut_off_rad = glm::radians(25.0f), 
             float outer_cut_off_rad = glm::radians(30.0f)
@@ -43,8 +49,6 @@ namespace scene::lights
         glm::vec3 get_position() const;
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;
-        void set_constant(float value);
-        float get_constant() const;
         void set_linear(float value);
         float get_linear() const;
         void set_quadratic(float value);
@@ -54,7 +58,12 @@ namespace scene::lights
         void set_outer_cut_off(float degrees);
         float get_outer_cut_off() const;
 
-        void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
+        // shadow mapping
+        size_t get_view_count() const override;
+        glm::mat4 view_matrix(size_t face_idx = 0) const override;
+        glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override;
+
+        void set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };
 

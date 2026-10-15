@@ -33,19 +33,16 @@ std::string scene::physical_objects::ModelObject::get_name() const
     return name_;
 }
 
-void scene::physical_objects::ModelObject::render(bool render_transparent_meshes, const std::shared_ptr<Shader> &specific_shader) const
+void scene::physical_objects::ModelObject::render(GLenum draw_mode, bool render_transparent_meshes, const std::shared_ptr<Shader> &specific_shader) const
 {
-    glm::mat4 model = model_matrix();
-    glm::mat3 normal_mat = glm::mat3(normal_matrix());    
-
     if (specific_shader == nullptr) { // render using model's shader
-        shader_->set_uniform("u_model_mat", model);
-        shader_->set_uniform("u_normal_mat", normal_mat);
-        model_.draw(render_transparent_meshes, *shader_);
+        shader_->set_uniform("u_model_mat", model_matrix());
+        shader_->set_uniform("u_normal_mat", normal_matrix());
+        model_.draw(draw_mode, render_transparent_meshes, *shader_);
     } else {
-        specific_shader->set_uniform("u_model_mat", model);
-        specific_shader->set_uniform("u_normal_mat", normal_mat);
-        model_.draw(render_transparent_meshes, *specific_shader);
+        specific_shader->set_uniform("u_model_mat", model_matrix());
+        specific_shader->set_uniform("u_normal_mat", normal_matrix());
+        model_.draw(draw_mode, render_transparent_meshes, *specific_shader);
     } 
 }
 

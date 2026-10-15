@@ -3,9 +3,12 @@
 #include <string>
 #include <vector>
 #include "shader/shader.h"
+#include "assimp/postprocess.h"
 
 namespace assimp_wrapper {
 
+    inline static constexpr uint32_t POST_PROCESSING_FLAGS = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices;
+    inline static constexpr GLenum DEFAULT_DRAW_MODE = GL_TRIANGLES;
     struct vertex
     {
         glm::vec3 position;
@@ -31,7 +34,7 @@ namespace assimp_wrapper {
         Mesh& operator=(Mesh&& rhs) noexcept;
         ~Mesh();
 
-        void render() const;
+        void render(GLenum mode = GL_TRIANGLES) const;
         uint32_t get_material_index() const;
     };
 

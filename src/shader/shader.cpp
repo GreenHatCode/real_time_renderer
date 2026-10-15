@@ -16,22 +16,19 @@ Shader::Shader(const std::string& name, const std::string& vertex_path, const st
     fragment = create_shader(fragment_path.c_str(), GL_FRAGMENT_SHADER);
 
     // geometry shader is optional
-    if (!geometry_path.empty()) {
-        geometry = create_shader(geometry_path.c_str(), GL_GEOMETRY_SHADER);
-    }
+    if (!geometry_path.empty()) geometry = create_shader(geometry_path.c_str(), GL_GEOMETRY_SHADER);
 
     glAttachShader(shader_program_id_, vertex);
     glAttachShader(shader_program_id_, fragment);
-    if (!geometry_path.empty()) {
-        glAttachShader(shader_program_id_, geometry);
-    }
+    if (!geometry_path.empty()) glAttachShader(shader_program_id_, geometry);
 
     glLinkProgram(shader_program_id_);
     checkCompileErrors(shader_program_id_, GL_PROGRAM);
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
-    glDeleteShader(geometry);
+
+    if (!geometry_path.empty()) glDeleteShader(geometry);
 }
 void Shader::use()
 { 
@@ -96,7 +93,6 @@ uint32_t Shader::create_shader(const char *file, GLenum type)
     {
         std::ifstream inf(file);
         inf.exceptions(std::ifstream::badbit | std::ifstream::failbit);
-
         std::string source{std::istreambuf_iterator<char>(inf), std::istreambuf_iterator<char>()};
         const char *source_ptr = source.c_str();
 

@@ -16,6 +16,12 @@ namespace scene::lights
         float linear_;
         float quadratic_;
 
+        mutable glm::mat4 proj_mat_;
+
+        float calculate_far_plane(float threshold = 1.0f / 256.0f) const;
+
+        inline static constexpr size_t VIEW_COUNT = 6;
+
     public:
         PointLight(
             const std::string& name, 
@@ -24,8 +30,7 @@ namespace scene::lights
             glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
-            glm::vec3 position = glm::vec3(1.2f, 1.0f, 2.0f), 
-            float constant = 1.0f, 
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
             float linear = 0.09f, 
             float quadratic = 0.032f
         );
@@ -35,12 +40,16 @@ namespace scene::lights
 
         void set_position(glm::vec3 position);
         glm::vec3 get_position() const;  
-        void set_constant(float value); 
-        float get_constant() const;
         void set_linear(float value);
         float get_linear() const;
         void set_quadratic(float value);
         float get_quadratic() const;
+
+        // shadow mapping
+        size_t get_view_count() const override;
+        glm::mat4 view_matrix(size_t face_idx = 0) const override;
+        glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override;
+
 
         void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
         std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;

@@ -6,7 +6,7 @@ in vec2 o_tex_coords;
 
 out vec4 FragColor;
 
-uniform sampler2D screen_texture;
+uniform sampler2D u_screen_texture;
 
 void main() {
 
@@ -30,7 +30,7 @@ void main() {
 
     vec3 sampled_tex[9];
     for (int i = 0; i < 9; i++) {
-        sampled_tex[i] = texture(screen_texture, o_tex_coords + offsets[i]).rgb;
+        sampled_tex[i] = texture(u_screen_texture, o_tex_coords + offsets[i]).rgb;
     }
 
     vec3 color = vec3(0.0);

@@ -25,7 +25,7 @@ namespace scene::physical_objects
         glm::vec3 get_scaling_vector() const;
 
         glm::mat4 model_matrix() const;
-        glm::mat4 normal_matrix() const;
+        glm::mat3 normal_matrix() const;
 
         bool is_selected() const;
         void set_selected(bool selected);

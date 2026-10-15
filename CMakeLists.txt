@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.20)
 
 project(real_time_renderer LANGUAGES C CXX)
 
+option(OFFLINE_BUILD "Disable network calls for FetchContent" OFF)
+if(OFFLINE_BUILD)
+    # Tells FetchContent to skip git fetch/pull entirely
+    message("Using offline build")
+    set(FETCHCONTENT_FULLY_DISCONNECTED ON CACHE BOOL "" FORCE)
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -142,6 +149,7 @@ endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     GLM_ENABLE_EXPERIMENTAL
     # MERGED_OUTLINES
+    # FREE_CAMERA
 )
 
 # copy shader sources

@@ -93,3 +93,17 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 
 ### Stencil outline
 ![Failed to load file "./pics/stencil_outline.png"](./pics/stencil_outline.png)
+
+### Shadow mapping
+
+#### Directional lights shadows
+![Failed to load file "./pics/triple_directional_lights.png"](./pics/triple_directional_lights.png)
+
+#### Point lights shadows
+![Failed to load file "./pics/triple_point_lights.png"](./pics/triple_point_lights.png)
+
+#### Spot lights shadows
+![Failed to load file "./pics/triple_spot_lights.png"](./pics/triple_spot_lights.png)
+
+#### Different lights combination shadows
+![Failed to load file "./pics/three_lights_example.png"](./pics/three_lights_example.png)
