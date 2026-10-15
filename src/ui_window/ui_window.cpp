@@ -230,6 +230,30 @@ void UIWindow::render_light_dialog()
         ImGui::SameLine();
 
         if (ImGui::Button("Delete")) {
+            std::shared_ptr<scene::lights::LightBase> light = scene_->get_light(light_dialog_state_.light_name);
+            
+            switch(light->get_type())
+            {
+            case scene::lights::LightType::DIRECTIONAL_LIGHT: break;
+            case scene::lights::LightType::POINT_LIGHT:
+            {
+                scene::lights::PointLight& light_ref = static_cast<scene::lights::PointLight&>(*light);
+                scene_->delete_scene_object(light_ref.get_model_ptr().lock()->get_name());
+            }
+                break;
+            case scene::lights::LightType::SPOT_LIGHT:
+            {
+                scene::lights::SpotLight& light_ref = static_cast<scene::lights::SpotLight&>(*light);
+                scene_->delete_scene_object(light_ref.get_model_ptr().lock()->get_name());
+            }
+                break;
+
+            default:
+                spdlog::error("Unknow light type to delete light's model, light_name={} type={}", light->get_name(), static_cast<int>(light->get_type()));
+                assert(false);
+                break;
+            }
+            
             scene_->delete_scene_object(light_dialog_state_.light_name);
         }
 
