@@ -348,7 +348,7 @@ void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 
 void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader> &shader_ptr)
 {
-        // glCullFace(GL_FRONT);
+        glCullFace(GL_FRONT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // render opaque objects (without anything)
@@ -367,7 +367,7 @@ void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader
             glDepthMask(GL_TRUE);
         }
 
-        // glCullFace(GL_BACK);
+        glCullFace(GL_BACK);
 }
 
 void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height)

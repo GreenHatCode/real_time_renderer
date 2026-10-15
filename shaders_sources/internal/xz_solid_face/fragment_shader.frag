@@ -110,8 +110,7 @@ float calculate_point_light_shadow(
 
     float curr_depth = length(frag_to_light);
 
-    float bias = max(0.001 * (1.0 - dot(frag_normal, normalize(frag_to_light))), 0.0001);
-
+    float bias = max(0.051 * (1.0 - dot(frag_normal, normalize(frag_to_light))), 0.005);
     return curr_depth - bias > closest_depth ? 1.0 : 0.0;
 }
 
