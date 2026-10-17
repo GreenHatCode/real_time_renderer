@@ -381,7 +381,6 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     // render preparations
     scene_lights_buffer_ = scene_->get_lights();
 
-    // todo: maybe place counter in scene class
     shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->set_layers_count(
         std::count_if(scene_lights_buffer_.cbegin(), scene_lights_buffer_.cend(), 
         [](const std::shared_ptr<scene::lights::LightBase>& l){

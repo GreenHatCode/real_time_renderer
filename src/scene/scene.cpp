@@ -46,7 +46,6 @@ scene::Scene::Scene()
         );
 
 
-        // todo: 
         // due to Z-fighting between 
         // xz grid and xz solid face (they have equal Y axis value)
         // the Y coord for grid is changed 

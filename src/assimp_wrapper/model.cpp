@@ -30,10 +30,17 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
     spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", path.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
 
     materials_.reserve(scene->mNumMaterials);
-    opaque_meshes_.reserve(scene->mNumMeshes); // count how many transparent and opaque materials during materials loading
-    transparent_meshes_.reserve(scene->mNumMeshes);
+    size_t opaque_meshes_count = std::count_if(  // counts how many transparent and opaque materials during materials loading
+        materials_.cbegin(), 
+        materials_.cend(), 
+        [](const assimp_wrapper::Material& m) { 
+            return m.get_opacity() >= assimp_wrapper::Material::OPAQUE_MESH_MATERIAL_OPACITY;
+        }
+    );
+    opaque_meshes_.reserve(opaque_meshes_count);
+    transparent_meshes_.reserve(scene->mNumMeshes - opaque_meshes_count);
 
-    load_materials(scene); // load all meterial once
+    load_materials(scene); // load all meterials once
     process_node(scene->mRootNode, scene);
 }
 

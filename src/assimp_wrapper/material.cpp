@@ -43,6 +43,9 @@ void Material::bind(Shader& shader) const{
             break;        
         }
 
+        // the first 5 texture units 
+        // are reserved for renderers needs 
+        // (shadow mapping etc.)
         glActiveTexture(GL_TEXTURE0 + i);
         shader.set_uniform(uniform_name, static_cast<int>(i));
         glBindTexture(GL_TEXTURE_2D, textures_[i]->id());
