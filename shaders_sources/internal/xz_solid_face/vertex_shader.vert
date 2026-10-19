@@ -14,8 +14,8 @@ out VSOut {
 } vs_out;
 
 void main() {
-    gl_Position = u_projection_mat * u_view_mat * u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0);
+    gl_Position = u_projection_mat * u_view_mat * u_model_mat * vec4(a_pos, 1.0);
     
-    vs_out.frag_pos = vec3(u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0));
+    vs_out.frag_pos = vec3(u_model_mat * vec4(a_pos, 1.0));
     vs_out.normal = u_normal_mat * a_normal;
 }
