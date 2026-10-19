@@ -142,10 +142,10 @@ void main() {
 vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
 
-    for (int i = 0; i < u_directional_lights_count; ++i) {
+    for (uint i = 0; i < u_directional_lights_count; ++i) {
         vec4 frag_pos_light_space = directional_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
         float shadow = calculate_shadow(
-            u_directional_lights_shadow_map_array, frag_pos_light_space, i, directional_lights[i].direction, unit_normal
+            u_directional_lights_shadow_map_array, frag_pos_light_space, i, -directional_lights[i].direction, unit_normal
         );
 
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
@@ -160,7 +160,7 @@ vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    for (int i = 0; i < u_point_lights_count; ++i) {
+    for (uint i = 0; i < u_point_lights_count; ++i) {
 
         vec3 light_dir = normalize(point_lights[i].position - vs_out.frag_pos);
 
@@ -188,13 +188,14 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
-    for (int i = 0; i < u_spot_lights_count; ++i) {
+    for (uint i = 0; i < u_spot_lights_count; ++i) {
         vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
-        float shadow = calculate_shadow(
-            u_spot_lights_shadow_map_array, frag_pos_light_space, i, spot_lights[i].direction, unit_normal
-        );
 
         vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
+        float shadow = calculate_shadow(
+            u_spot_lights_shadow_map_array, frag_pos_light_space, i, light_dir, unit_normal
+        );
+
         float diff = max(dot(unit_normal, light_dir), 0.0); 
 
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
