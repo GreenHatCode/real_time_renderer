@@ -15,11 +15,12 @@ namespace assimp_wrapper
         std::vector<Mesh> opaque_meshes_;
         std::vector<Mesh> transparent_meshes_;
         std::vector<Material> materials_;
-        TexturesManager textures_manager_;
         uint32_t vertices_count_;
         uint32_t faces_count_;
 
         bool transparent_;
+
+        const std::filesystem::path file_path_;
         
     public:
         Model(const std::filesystem::path &path, uint32_t postprocess_flags);
@@ -29,7 +30,7 @@ namespace assimp_wrapper
         bool is_transparent() const;
 
     private:
-        void load_model(const std::filesystem::path &path, uint32_t postprocess_flags);
+        void load_model(uint32_t postprocess_flags);
         void process_node(aiNode *node, const aiScene *scene);
         Mesh process_mesh(aiMesh *mesh, const aiScene *scene);
         

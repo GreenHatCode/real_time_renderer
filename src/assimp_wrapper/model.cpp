@@ -6,20 +6,15 @@
 using namespace assimp_wrapper;
 
 assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
-    : textures_manager_(path.parent_path()), 
-    vertices_count_(0), 
-    faces_count_(0),
-    transparent_(false)
+    : vertices_count_(0)
+    , faces_count_(0)
+    , transparent_(false)
+    , file_path_(path)
 {
-    load_model(path, postprocess_flags);
-}
 
-void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32_t postprocess_flags)
-{
     Assimp::Importer importer;
-    
     const aiScene *scene = importer.ReadFile(
-        path.string(),
+        file_path_.string(),
         postprocess_flags
     );
 
@@ -27,10 +22,11 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
         spdlog::error("ASSIMP:{}", importer.GetErrorString());
         throw std::runtime_error(importer.GetErrorString());
     }
-    spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", path.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
+    spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", 
+        file_path_.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
 
     materials_.reserve(scene->mNumMaterials);
-    size_t opaque_meshes_count = std::count_if(  // counts how many transparent and opaque materials during materials loading
+    size_t opaque_meshes_count = std::count_if(  // how many transparent and opaque materials 
         materials_.cbegin(), 
         materials_.cend(), 
         [](const assimp_wrapper::Material& m) { 
@@ -42,9 +38,9 @@ void assimp_wrapper::Model::load_model(const std::filesystem::path &path, uint32
 
     load_materials(scene); // load all meterials once
     process_node(scene->mRootNode, scene);
+
 }
 
-// todo: recursion
 void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
 {
     // processing all meshes in selected node
@@ -118,6 +114,8 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
 
 void assimp_wrapper::Model::load_materials(const aiScene *scene)
 {
+    TexturesManager manager(file_path_.parent_path(), scene);
+
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial *material_ptr = scene->mMaterials[i];
 
@@ -134,9 +132,13 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
         aiString mat_name;
         material_ptr->Get(AI_MATKEY_NAME, mat_name);
         spdlog::info("Loaded Material: {} | Opacity: {}", mat_name.C_Str(), opacity);
-
-        Material material(glm::vec4(color.r, color.g, color.b, color.a), opacity, textures_manager_.load_material_textures(material_ptr, scene, kMaterialTextureTypes));
-        materials_.push_back(material);
+        
+        std::shared_ptr<Texture2D> ambient = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_AMBIENT);
+        std::shared_ptr<Texture2D> diffuse = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_DIFFUSE);
+        std::shared_ptr<Texture2D> specular = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_SPECULAR);
+        std::shared_ptr<Texture2D> height = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_HEIGHT);
+        
+        materials_.emplace_back(glm::vec4(color.r, color.g, color.b, color.a), opacity, ambient, diffuse, specular, height);
     }
 }
 

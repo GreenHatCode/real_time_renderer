@@ -9,6 +9,7 @@
 #include "assimp/material.h"
 #include "assimp_wrapper/textures/texture_2d.h"
 
+
 namespace assimp_wrapper {
 
     namespace helpers {
@@ -37,15 +38,15 @@ namespace assimp_wrapper {
     class TexturesManager final {
         std::unordered_map<std::filesystem::path, std::shared_ptr<Texture2D>> textures_; // stores all textures, used in model
         std::filesystem::path model_base_dir_;
+        const aiScene *scene_;
     
     public:
-        using textures_vector = std::vector<std::shared_ptr<Texture2D>>;
-        TexturesManager(const std::filesystem::path &model_base_dir);
-        textures_vector load_material_textures(aiMaterial *material, const aiScene *scene, std::span<const aiTextureType> textures_types);
+        TexturesManager(const std::filesystem::path &model_base_dir, const aiScene *scene);
+        std::shared_ptr<Texture2D> load_material_texture(aiMaterial *material, const aiTextureType type);
 
     private:
-        textures_vector load_embedded_textures(const aiScene *scene);
-        textures_vector load_file_textures(aiMaterial *material, const aiTextureType type, const aiScene *scene);
+        std::shared_ptr<Texture2D> load_embedded_texture(const aiTexture *texture_ptr, const aiTextureType type);
+        std::shared_ptr<Texture2D> load_file_texture(const std::filesystem::path file, const aiTextureType type);
 
         bool starts_with(const std::string& str, const std::string& prefix);
         std::filesystem::path make_texture_path(const std::filesystem::path& directory, aiString const& texture_file);

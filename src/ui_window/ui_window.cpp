@@ -7,7 +7,7 @@
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
-    , model_dialog_state_{.model_file_path="", .shader_name="", .name=""}
+    , model_dialog_state_{.model_file_path="", .shader_name="", .name="", .flip_normals=false}
     , shader_dialog_state_{.vert_shader_file_path="", .frag_shader_file_path="", .geom_shader_file_path="", .name=""}
     , light_dialog_state_{.light_name="", .type=static_cast<int32_t>(scene::lights::LightType::DIRECTIONAL_LIGHT)}
     , model_inspector_state_{.selected_model_ptr=nullptr}
@@ -151,11 +151,17 @@ void UIWindow::render_model_dialog()
         ImGui::InputText("File", &model_dialog_state_.model_file_path);
         ImGui::InputText("Shader name", &model_dialog_state_.shader_name);
         ImGui::InputText("Object name", &model_dialog_state_.name);
+        ImGui::Separator();
+
+        ImGui::Checkbox("Flip normals", &model_dialog_state_.flip_normals);
         ImGui::Spacing();
 
         if (ImGui::Button("Load"))
         {
-            load_model(model_dialog_state_.shader_name, model_dialog_state_.name, model_dialog_state_.model_file_path);
+            uint32_t additional = 0;
+            if (model_dialog_state_.flip_normals) additional |= aiProcess_FlipUVs;
+
+            load_model(model_dialog_state_.shader_name, model_dialog_state_.name, model_dialog_state_.model_file_path, additional);
             model_dialog_state_ = {};
             ImGui::CloseCurrentPopup();
         }
@@ -559,7 +565,7 @@ void UIWindow::set_light_model_selected(const std::shared_ptr<scene::lights::Lig
     }
 }
 
-void UIWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path, const glm::vec3& scale_vec)
+void UIWindow::load_model(const std::string &shader_name, const std::string &name, const std::filesystem::path &file_path, uint32_t additional_post_processing_flags, const glm::vec3& scale_vec)
 {
     std::shared_ptr<Shader> model_shader = scene_->get_shader(shader_name);
     if (model_shader == nullptr) {
@@ -569,7 +575,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
 
     try {
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model(file_path, assimp_wrapper::POST_PROCESSING_FLAGS),
+            assimp_wrapper::Model(file_path, assimp_wrapper::POST_PROCESSING_FLAGS | additional_post_processing_flags),
             name
         );
 
