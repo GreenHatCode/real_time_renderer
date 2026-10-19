@@ -659,7 +659,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             
 
             spl->set_model_ptr(light_model);
-            light_model->scale(glm::vec3(0.15f)); // TODO: use normal model
+            light_model->scale(glm::vec3(0.15f));
             
             scene_->add_light(spl);
             scene_->add_object(light_model);

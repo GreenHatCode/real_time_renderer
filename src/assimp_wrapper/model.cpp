@@ -69,7 +69,10 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
         throw std::runtime_error("Assimp returned a mesh without normals");
     }
 
-    std::vector<vertex> vertices;
+    bool has_tangents = mesh->HasTangentsAndBitangents();
+    if (!has_tangents) spdlog::warn("Assimp returned a mesh without tangents or bitangents normals. Continuing loading the model");
+
+    std::vector<vertex> vertices(mesh->mNumVertices);
     std::vector<uint32_t> indices;
 
     // read and push all vertices
@@ -94,7 +97,23 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
             texture_coords.y = mesh->mTextureCoords[0][i].y;
         }
 
-        vertices.push_back(vertex{position, normal, texture_coords});
+        // read and push all tangents and bitangents
+        // in case tangent and bitangent are absent
+        // we consider that the model will not use normal mapping
+        // or textures at all (only base color is used)
+        glm::vec3 tangent(ABSENT_TANGENT_VALUE), bitangent(ABSENT_BITANGENT_VALUE);
+        if (has_tangents) {
+            tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+        }
+
+        vertices[i] = vertex{
+                .position = position,
+                .normal = normal,
+                .tex_coords = texture_coords,
+                .tangent = tangent,
+                .bitangent = bitangent
+            };
     }
 
     // read and push all indices
