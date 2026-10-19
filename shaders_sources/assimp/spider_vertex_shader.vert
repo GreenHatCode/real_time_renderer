@@ -14,7 +14,7 @@ out vec3 o_frag_pos;
 out vec2 o_tex_coords;
 
 void main() {
-    gl_Position = u_projection_mat * u_view_mat * u_model_mat * vec4(a_pos.x, a_pos.y, a_pos.z, 1.0);
+    gl_Position = u_projection_mat * u_view_mat * u_model_mat * vec4(a_pos, 1.0);
     o_tex_coords = a_tex_coords;
     o_normal = u_normal_mat * a_normal;
     o_frag_pos = vec3(u_model_mat * vec4(a_pos, 1.0));
