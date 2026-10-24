@@ -256,14 +256,13 @@ void App::load_sources_debug()
 
     imgui_window_->load_shader("simple", "shaders_sources/simple/vertex_shader.vert", "shaders_sources/simple/fragment_shader.frag");
     imgui_window_->load_shader("lighting", "shaders_sources/lighting/vertex_shader.vert", "shaders_sources/lighting/fragment_shader.frag");
-    imgui_window_->load_shader("assimp", "shaders_sources/assimp/assimp_with_lighting/vertex_shader.vert", "shaders_sources/assimp/assimp_with_lighting/fragment_shader.frag");
+    imgui_window_->load_shader("assimp", "shaders_sources/assimp/vertex_shader.vert", "shaders_sources/assimp/fragment_shader.frag");
     imgui_window_->load_shader("blending", "shaders_sources/blending/vertex_shader.vert", "shaders_sources/blending/fragment_shader.frag");
 
     // imgui_window_->load_model("assimp", "televisor", "resources/televisor/televisor.obj", aiProcess_FlipUVs); 
     // imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
     // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj");
-    imgui_window_->load_model("assimp", "bread", "resources/bread_normal_mapping/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(50.0f));
-    imgui_window_->load_model("assimp", "displaced_sphere", "resources/sphere_parallax_mapping/sphere_parallax.obj", 0);
+    imgui_window_->load_model("assimp", "bread", "resources/bread_normal_mapping/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(100.0f));
 
     // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
     // imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
