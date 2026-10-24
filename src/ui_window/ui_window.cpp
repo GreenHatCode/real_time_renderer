@@ -42,7 +42,9 @@ void UIWindow::render_window()
     ImGui::Checkbox("Render XZ grid", &render_xz_grid_);
     ImGui::Checkbox("Render XZ surface", &render_xz_surface_);
 
-    if (static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_) == renderer::PostProcessingTypes::GAMMA_CORRECTION) {
+    renderer::PostProcessingTypes type = static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_);
+    if (type == renderer::PostProcessingTypes::GAMMA_CORRECTION
+        || type == renderer::PostProcessingTypes::HDR_POST_PROCESSING) {
         ImGui::SliderFloat("Gamma", &gamma_, renderer::MIN_GAMMA, renderer::MAX_GAMMA);
     }
 

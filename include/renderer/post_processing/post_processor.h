@@ -15,6 +15,7 @@ namespace renderer {
         BLUR, 
         EDGE_DETECTION,
         GAMMA_CORRECTION, 
+        HDR_POST_PROCESSING,
         COUNT
     };
 
@@ -26,7 +27,8 @@ namespace renderer {
             "Grayscale",
             "Blur",
             "Edge detection",
-            "Gamma correction"
+            "Gamma correction",
+            "HDR post processing"
         };
         return names;
     }

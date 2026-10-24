@@ -7,7 +7,7 @@ renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	: width_(width), height_(height)
 {
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture_);
-	glTextureStorage2D(texture_, 1, GL_RGB8, width_, height_);
+	glTextureStorage2D(texture_, 1, GL_RGBA16F, width_, height_);
 	glTextureParameteri(texture_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(texture_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
@@ -84,7 +84,7 @@ void renderer::framebuffers::FrameBuffer::rescale(GLsizei width, GLsizei height)
 
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture_);
-	glTextureStorage2D(texture_, 1, GL_RGB8, width_, height_);
+	glTextureStorage2D(texture_, 1, GL_RGBA16F, width_, height_);
 	glTextureParameteri(texture_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(texture_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	

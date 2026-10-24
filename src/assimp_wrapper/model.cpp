@@ -156,7 +156,6 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
         std::shared_ptr<Texture2D> diffuse = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_DIFFUSE);
         std::shared_ptr<Texture2D> specular = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_SPECULAR);
         std::shared_ptr<Texture2D> height = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_HEIGHT);
-        std::shared_ptr<Texture2D> displacement = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_DISPLACEMENT);
         
         materials_.emplace_back(glm::vec4(color.r, color.g, color.b, color.a), opacity, ambient, diffuse, specular, height);
     }

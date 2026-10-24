@@ -13,7 +13,7 @@ scene::lights::LightBase::LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::v
 
 void scene::lights::LightBase::set_color(glm::vec3 rgb_color)
 {
-    color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COMPONENT_VALUE, MAX_LIGHTING_COMPONENT_VALUE);
+    color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COLOR_VALUE, MAX_LIGHTING_COLOR_VALUE);
 }
 
 glm::vec3 scene::lights::LightBase::get_color() const

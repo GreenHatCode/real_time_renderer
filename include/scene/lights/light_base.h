@@ -17,6 +17,8 @@ namespace scene::lights {
         inline constexpr float MAX_LIGHT_QUADRATIC = 1.0f;
         inline constexpr float MIN_SPOT_CUTOFF = 1.0f;
         inline constexpr float MAX_SPOT_CUTOFF = 89.0f;
+        inline constexpr float MIN_LIGHTING_COLOR_VALUE = 0.0f;
+        inline constexpr float MAX_LIGHTING_COLOR_VALUE = 1000.0f;
 
         // shadow mapping
         inline constexpr float SPOT_LIGHT_DEFAULT_NEAR_PLANE = 0.1f;
