@@ -20,6 +20,7 @@ namespace assimp_wrapper {
             case aiTextureType_SPECULAR: return "aiTextureType_SPECULAR";
             case aiTextureType_HEIGHT: return "aiTextureType_HEIGHT";
             case aiTextureType_AMBIENT: return "aiTextureType_AMBIENT";
+            case aiTextureType_DISPLACEMENT: return "aiTextureType_DISPLACEMENT";
             default:
                 spdlog::error("Failed to get texture type name. No such a type.");
                 assert(false);

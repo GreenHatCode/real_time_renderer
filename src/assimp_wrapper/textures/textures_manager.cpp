@@ -131,8 +131,8 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_file_texture(co
         int width, height, components_number;
         uint8_t *data = stbi_load(file.c_str(), &width, &height, &components_number, 0);
         if (!data) {
-            spdlog::error("Failed to load texture form file: texture_file_path={}", file.c_str());
-            throw std::runtime_error("Failed to load texture form file");
+            spdlog::error("stb_image failed to load texture form file: texture_file_path={}. Reason: {}", file.c_str(), stbi_failure_reason());
+            throw std::runtime_error("stb_image failed to load texture form file");
         }
 
         // allocate memory
