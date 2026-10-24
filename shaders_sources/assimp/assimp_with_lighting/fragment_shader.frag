@@ -127,13 +127,10 @@ float calculate_point_light_shadow(
 void main() {
     vec3 view_dir = normalize(u_camera_pos - vs_out.frag_pos);
     
-#if 1
-    vec3 unit_normal = normalize(vs_out.normal);   
-#else
     vec3 unit_normal = texture(texture_height, vs_out.tex_coords).rgb;
     unit_normal = unit_normal * 2.0 - 1.0;
     unit_normal = normalize(vs_out.tbn_mat * unit_normal);
-#endif
+
 
     vec3 direction_lights_color = process_directional_lights(unit_normal, view_dir);
     vec3 point_lights_color = process_point_lights(unit_normal, view_dir);

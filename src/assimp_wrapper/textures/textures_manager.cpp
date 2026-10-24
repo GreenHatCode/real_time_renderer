@@ -16,7 +16,8 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_material_textur
     material->GetTexture(type, 0, &file);
 
     if (file.Empty()) {
-        spdlog::debug("For material {} there is no texture with type={}. Use fallback texture.", material->GetName().C_Str(), static_cast<int>(type));
+        spdlog::debug("For material {} there is no texture with type={}. Using fallback texture.", 
+            material->GetName().C_Str(), helpers::texture_type_name(type).data());
         
         switch (type)
         {
@@ -34,9 +35,12 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_material_textur
             
         case aiTextureType::aiTextureType_HEIGHT:
             return Texture2D::create_solid_color(aiTextureType_HEIGHT, 128, 128, 128);   // mid-gray (neutral height)
+
+        case aiTextureType::aiTextureType_DISPLACEMENT:
+            return Texture2D::create_solid_color(aiTextureType_DISPLACEMENT, 0, 0, 0);
             
         default:
-            spdlog::error("Absent fallback texture for passed type={}", static_cast<int>(type));
+            spdlog::error("Absent fallback texture for passed type={}", helpers::texture_type_name(type).data());
             assert(false && "Unhandled texture type fallback");
             return nullptr; 
         }
@@ -60,7 +64,7 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_embedded_textur
 
     if (texture_it != textures_.end()) { // texture is already loaded, get ptr to it
         spdlog::info("Used previously loaded texture: id={}, type={}", 
-            texture_it->second->id(), static_cast<int>(texture_it->second->type()));
+            texture_it->second->id(), helpers::texture_type_name(texture_it->second->type()));
         return texture_it->second;
 
     } else { // new texture, load it to memory
@@ -119,7 +123,7 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_file_texture(co
     auto texture_it = textures_.find(file);
     if (texture_it != textures_.end()) { // texture is already loaded, get ptr to it
         spdlog::info("Used previously loaded file texture: id={}, type={}", 
-            texture_it->second->id(), static_cast<int>(texture_it->second->type()));
+            texture_it->second->id(), helpers::texture_type_name(texture_it->second->type()).data());
         return texture_it->second;
     
     } else { // new texture, load it to memory

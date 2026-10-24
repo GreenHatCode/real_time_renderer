@@ -28,6 +28,6 @@ void main() {
     vs_out.tbn_mat = mat3(
         normalize(vec3(u_model_mat * vec4(a_tangent, 0))),
         normalize(vec3(u_model_mat * vec4(a_bitangent, 0))),
-        vs_out.normal
+        normalize(vs_out.normal)
     );
 }

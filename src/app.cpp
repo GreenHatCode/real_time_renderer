@@ -259,11 +259,10 @@ void App::load_sources_debug()
     imgui_window_->load_shader("assimp", "shaders_sources/assimp/assimp_with_lighting/vertex_shader.vert", "shaders_sources/assimp/assimp_with_lighting/fragment_shader.frag");
     imgui_window_->load_shader("blending", "shaders_sources/blending/vertex_shader.vert", "shaders_sources/blending/fragment_shader.frag");
 
-    imgui_window_->load_model("assimp", "televisor", "resources/televisor/televisor.obj", aiProcess_FlipUVs); 
+    // imgui_window_->load_model("assimp", "televisor", "resources/televisor/televisor.obj", aiProcess_FlipUVs); 
     // imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
     // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj");
-    // imgui_window_->load_model("blending", "window2", "resources/transparent_window/tinker.obj");
-    // imgui_window_->load_model("blending", "window3", "resources/transparent_window/tinker.obj");
+    imgui_window_->load_model("assimp", "bread", "resources/bread_paralax/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(50.0f));
 
     // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
     // imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
@@ -273,12 +272,6 @@ void App::load_sources_debug()
     // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
     // imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
 
-#if 0
-    for (int i = 0; i < 10; i++) {
-            imgui_window_->add_light("dir" + std::to_string(i), scene::lights::LightType::DIRECTIONAL_LIGHT);
-    }
-
-#endif
 }
 
 int32_t App::run()
