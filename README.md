@@ -107,3 +107,6 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 
 #### Different lights combination shadows
 ![Failed to load file "./pics/three_lights_example.png"](./pics/three_lights_example.png)
+
+### HDR rendering
+![Failed to load file "./pics/hdr_example.png"](./pics/hdr_example.jpg)
