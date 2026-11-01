@@ -269,8 +269,34 @@ void App::load_sources_debug()
 
     // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
     // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
-    // imgui_window_->add_light("dir1", scene::lights::LightType::DIRECTIONAL_LIGHT);
-    // imgui_window_->add_light("dir2", scene::lights::LightType::DIRECTIONAL_LIGHT);
+    imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir2",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.8f, -1.0f,  0.6f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir3",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.3f, -1.0f,  0.9f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir4",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3(-0.3f, -1.0f,  0.9f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir5",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3(-0.8f, -1.0f,  0.6f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir6",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3(-1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir7",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3(-0.8f, -1.0f, -0.6f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir8",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3(-0.3f, -1.0f, -0.9f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir9",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.3f, -1.0f, -0.9f), glm::vec3(0.0f));
+    imgui_window_->add_light("dir10", scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.8f, -1.0f, -0.6f), glm::vec3(0.0f));
+
+    for (int i = 1; i <= 10; ++i) {
+        // Add Spot Light
+        imgui_window_->add_light(
+            "s" + std::to_string(i),
+            scene::lights::LightType::SPOT_LIGHT,
+            glm::vec3(0.0f, -1.0f, 0.0f),                  // Direction (pointing down)
+            glm::vec3(static_cast<float>(i) * 2.0f, 5.0f, 0.0f) // Spaced out position
+        );
+
+        // Add Point Light
+        imgui_window_->add_light(
+            "p" + std::to_string(i),
+            scene::lights::LightType::POINT_LIGHT,
+            glm::vec3(0.0f, 0.0f, 0.0f),                  // Direction (neutral for point lights)
+            glm::vec3(static_cast<float>(i) * 2.0f, 3.0f, 0.0f) // Spaced out position
+        );
+    }
 
 }
 

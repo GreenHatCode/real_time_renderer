@@ -115,5 +115,5 @@ public: // dev methods to add models and shader by hand from code
         const std::filesystem::path &fragment_shader_file, 
         const std::filesystem::path &geometry_shader_file = ""
     );
-    void add_light(const std::string &name, scene::lights::LightType type);
+    void add_light(const std::string &name, scene::lights::LightType type, glm::vec3 direction = glm::vec3(0.0f), glm::vec3 position = glm::vec3(0.0f));
 };

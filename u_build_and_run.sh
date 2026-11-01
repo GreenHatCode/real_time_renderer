@@ -3,7 +3,7 @@
 set -e
 
 CLEAN=0
-OFFLINE=0
+OFFLINE=1
 
 while [[ $# -gt 0 ]]; do
     case "$1" in

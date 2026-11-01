@@ -601,13 +601,14 @@ void UIWindow::load_shader(const std::string &name, const std::filesystem::path 
     
 }
 
-void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
+void UIWindow::add_light(const std::string &name, scene::lights::LightType type, glm::vec3 direction, glm::vec3 position)
 {
     switch (type)
     {
     case scene::lights::LightType::DIRECTIONAL_LIGHT:
         try {
             std::shared_ptr<scene::lights::DirectionalLight> dl = std::make_shared<scene::lights::DirectionalLight>(name);
+            dl->set_direction(direction); // todo: remove on release
             scene_->add_light(dl);
 
         } catch (const std::exception& e) {
@@ -634,6 +635,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
             );
             
             pl->set_model_ptr(light_model);
+            pl->set_position(position); // todo: remove on release
             scene_->add_light(pl);
             scene_->add_object(light_model);
         } catch (const std::exception& e) {
@@ -659,7 +661,9 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type)
                     model_shader
             );
             
-
+            spl->set_direction(direction); // todo: remove on release
+            spl->set_position(position); // todo: remove on release
+            
             spl->set_model_ptr(light_model);
             light_model->scale(glm::vec3(0.15f));
             
