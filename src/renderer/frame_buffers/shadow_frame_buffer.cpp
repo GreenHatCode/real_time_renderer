@@ -63,7 +63,7 @@ renderer::framebuffers::ShadowFrameBuffer::ShadowFrameBuffer(GLsizei width, GLsi
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 }
 
-renderer::framebuffers::ShadowFrameBuffer::ShadowFrameBuffer(ShadowFrameBuffer &&rhs)
+renderer::framebuffers::ShadowFrameBuffer::ShadowFrameBuffer(ShadowFrameBuffer &&rhs) noexcept
     : fbo_(rhs.fbo_)
 	, depth_map_(rhs.depth_map_)
 	, width_(rhs.width_)
@@ -74,7 +74,7 @@ renderer::framebuffers::ShadowFrameBuffer::ShadowFrameBuffer(ShadowFrameBuffer &
 	rhs.depth_map_ = 0;
 }
 
-renderer::framebuffers::ShadowFrameBuffer &renderer::framebuffers::ShadowFrameBuffer::operator=(ShadowFrameBuffer &&rhs)
+renderer::framebuffers::ShadowFrameBuffer &renderer::framebuffers::ShadowFrameBuffer::operator=(ShadowFrameBuffer &&rhs) noexcept
 {
     if (this == &rhs) return *this;
 

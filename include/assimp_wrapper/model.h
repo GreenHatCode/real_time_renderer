@@ -30,7 +30,6 @@ namespace assimp_wrapper
         bool is_transparent() const;
 
     private:
-        void load_model(uint32_t postprocess_flags);
         void process_node(aiNode *node, const aiScene *scene);
         Mesh process_mesh(aiMesh *mesh, const aiScene *scene);
         

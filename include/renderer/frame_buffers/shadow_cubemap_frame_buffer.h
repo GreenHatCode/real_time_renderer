@@ -20,9 +20,9 @@ namespace renderer
 
             ShadowCubemapFrameBuffer(GLsizei width, GLsizei height, size_t layers = DEFAULT_SHADOW_MAP_LAYERS_NUMBER);
             ShadowCubemapFrameBuffer(const ShadowCubemapFrameBuffer& rhs) = delete;
-            ShadowCubemapFrameBuffer(ShadowCubemapFrameBuffer&& rhs);
+            ShadowCubemapFrameBuffer(ShadowCubemapFrameBuffer&& rhs) noexcept;
             ShadowCubemapFrameBuffer& operator=(const ShadowCubemapFrameBuffer& rhs) = delete;
-            ShadowCubemapFrameBuffer& operator=(ShadowCubemapFrameBuffer&& rhs);
+            ShadowCubemapFrameBuffer& operator=(ShadowCubemapFrameBuffer&& rhs) noexcept;
 
            
            

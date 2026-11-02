@@ -62,7 +62,7 @@ renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(GLsiz
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 }
 
-renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(ShadowCubemapFrameBuffer &&rhs)
+renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(ShadowCubemapFrameBuffer &&rhs) noexcept
 	: fbo_(rhs.fbo_)
 	, cube_maps_array_(rhs.cube_maps_array_)
 	, width_(rhs.width_)
@@ -74,7 +74,7 @@ renderer::framebuffers::ShadowCubemapFrameBuffer::ShadowCubemapFrameBuffer(Shado
 	rhs.cube_maps_array_ = 0;
 }
 
-renderer::framebuffers::ShadowCubemapFrameBuffer &renderer::framebuffers::ShadowCubemapFrameBuffer::operator=(ShadowCubemapFrameBuffer &&rhs)
+renderer::framebuffers::ShadowCubemapFrameBuffer &renderer::framebuffers::ShadowCubemapFrameBuffer::operator=(ShadowCubemapFrameBuffer &&rhs) noexcept
 {
     if (this == &rhs) return *this;
 

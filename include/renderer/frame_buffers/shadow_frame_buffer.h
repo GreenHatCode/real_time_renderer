@@ -20,9 +20,9 @@ namespace renderer
             ShadowFrameBuffer(GLsizei width, GLsizei height, size_t layers = DEFAULT_SHADOW_MAP_LAYERS_NUMBER);
            
             ShadowFrameBuffer(const ShadowFrameBuffer& rhs) = delete;
-            ShadowFrameBuffer(ShadowFrameBuffer&& rhs);
+            ShadowFrameBuffer(ShadowFrameBuffer&& rhs) noexcept;
             ShadowFrameBuffer& operator=(const ShadowFrameBuffer& rhs) = delete;
-            ShadowFrameBuffer& operator=(ShadowFrameBuffer&& rhs);
+            ShadowFrameBuffer& operator=(ShadowFrameBuffer&& rhs) noexcept;
 
            
             GLsizei get_depth_map() override;
