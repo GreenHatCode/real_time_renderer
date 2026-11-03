@@ -1,9 +1,10 @@
 #include "ui_window/ui_window.h"
 #include "misc/cpp/imgui_stdlib.h"
-#include "scene/physical_objects/physical_light_object.h"
+#include "scene/physical_objects/light_model_object.h"
 #include "glm/gtx/quaternion.hpp"
 #include "assimp_wrapper/mesh.h"
 #include "renderer/renderer.h"
+#include "assimp_wrapper/model_loader.h"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -577,7 +578,7 @@ void UIWindow::load_model(const std::string &shader_name, const std::string &nam
 
     try {
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model(file_path, assimp_wrapper::POST_PROCESSING_FLAGS | additional_post_processing_flags),
+            assimp_wrapper::ModelLoader().load_model(file_path, assimp_wrapper::POST_PROCESSING_FLAGS | additional_post_processing_flags),
             name
         );
 
@@ -628,8 +629,8 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type,
             std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(name);
             std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
                 std::make_shared<scene::physical_objects::LightModelObject>(
+                    assimp_wrapper::ModelLoader().load_model(scene::physical_objects::physical_light_object_constants::LIGHT_SPHERE_MODEL_FILE, assimp_wrapper::LIGHT_MODEL_POSTPROCESSING_FLAGS),
                     name + std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_NAME_SUFFIX),
-                    scene::physical_objects::physical_light_object_constants::LIGHT_SPHERE_MODEL_FILE,
                     pl->get_color(),
                     model_shader
             );
@@ -655,8 +656,8 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type,
             std::shared_ptr<scene::lights::SpotLight> spl = std::make_shared<scene::lights::SpotLight>(name);
             std::shared_ptr<scene::physical_objects::LightModelObject> light_model =
                 std::make_shared<scene::physical_objects::LightModelObject>(
+                    assimp_wrapper::ModelLoader().load_model(scene::physical_objects::physical_light_object_constants::LIGHT_CONE_MODEL_FILE, assimp_wrapper::LIGHT_MODEL_POSTPROCESSING_FLAGS),
                     name + std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_NAME_SUFFIX),
-                    scene::physical_objects::physical_light_object_constants::LIGHT_CONE_MODEL_FILE,
                     spl->get_color(),
                     model_shader
             );

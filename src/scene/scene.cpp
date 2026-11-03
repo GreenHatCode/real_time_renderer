@@ -1,6 +1,7 @@
 #include "scene/scene.h"
 #include "spdlog/spdlog.h"
 #include "renderer/renderer.h"
+#include "assimp_wrapper/model_loader.h"
 
 using namespace scene;
 
@@ -20,7 +21,7 @@ scene::Scene::Scene()
         add_shader(shader);
 
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model("resources/axes_lines.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
+            assimp_wrapper::ModelLoader().load_model("resources/axes_lines.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
             "axes_lines_obj"
         );
 
@@ -40,7 +41,7 @@ scene::Scene::Scene()
         add_shader(shader);
 
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
+            assimp_wrapper::ModelLoader().load_model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
             "xz_face_grid_obj_top",
             shader
         );
@@ -60,7 +61,7 @@ scene::Scene::Scene()
 
         loaded_model.reset();
         loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
+            assimp_wrapper::ModelLoader().load_model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
             "xz_face_grid_obj_bottom",
             shader
         );
@@ -84,7 +85,7 @@ scene::Scene::Scene()
         add_shader(shader);
 
         std::shared_ptr<scene::physical_objects::ModelObject> loaded_model = std::make_shared<scene::physical_objects::ModelObject>(
-            assimp_wrapper::Model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
+            assimp_wrapper::ModelLoader().load_model("resources/xz_face_grid.obj", assimp_wrapper::POST_PROCESSING_FLAGS),
             "xz_solid_face_obj"
         );
 
@@ -121,6 +122,18 @@ scene::Scene::Scene()
 
     } catch (const std::exception& e) {
         spdlog::error("Failed to load internal shader: {}, what: {}", "shadow_map_point_light_shader", e.what());
+    }
+
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(
+            "g_buffer_shader", 
+            "shaders_sources/internal/deferred_rendering/vertex_shader.vert",
+            "shaders_sources/internal/deferred_rendering/fragment_shader.frag"
+        );
+        internal_shaders_.emplace(InternalShadersIDS::SHADOW_MAP_EMPTY_FRAG_SHADER, shader);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load internal shader: {}, what: {}", "g_buffer_shader", e.what());
     }
 }
 

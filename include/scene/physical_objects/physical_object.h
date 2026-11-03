@@ -2,8 +2,7 @@
 #include "glm/glm.hpp"
 #include "shader/shader.h"
 #include "scene/physical_objects/i_render.h"
-#include <memory>
-#include "glm/gtc/quaternion.hpp"
+#include "assimp_wrapper/model.h"
 
 namespace scene::physical_objects
 {   
@@ -30,7 +29,7 @@ namespace scene::physical_objects
         bool is_selected() const;
         void set_selected(bool selected);
         
-        virtual bool is_transparent() const = 0;
+        virtual assimp_wrapper::ModelType model_type() const = 0;
         virtual ~PhysicalObject() = default;
     };
 } // namespace scene::physical_objects

@@ -8,6 +8,7 @@
 namespace assimp_wrapper {
 
     inline static constexpr uint32_t POST_PROCESSING_FLAGS = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace;
+    inline static constexpr uint32_t LIGHT_MODEL_POSTPROCESSING_FLAGS = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ImproveCacheLocality | aiProcess_ValidateDataStructure | aiProcess_GenNormals;
     inline static constexpr GLenum DEFAULT_DRAW_MODE = GL_TRIANGLES;
     inline static constexpr glm::vec3 ABSENT_TANGENT_VALUE = glm::vec3(-1.0f);
     inline static constexpr glm::vec3 ABSENT_BITANGENT_VALUE = glm::vec3(-1.0f);

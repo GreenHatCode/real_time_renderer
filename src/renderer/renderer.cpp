@@ -3,6 +3,7 @@
 #include "scene/lights/spot_light.h"
 #include "renderer/frame_buffers/shadow_cubemap_frame_buffer.h"
 #include "renderer/frame_buffers/shadow_frame_buffer.h"
+#include "assimp_wrapper/model.h"
 
 using namespace renderer;
 
@@ -17,7 +18,10 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , post_processing_type_(PostProcessingTypes::NO_POST_PROCESSING)   
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
+    , g_buffer_(1, 1)
     , internal_objects_id_mask_(0)
+    , framebuffer_width_(0)
+    , framebuffer_height_(0)
 {
 
     shadow_frame_buffers_.emplace(
@@ -114,12 +118,29 @@ void renderer::Renderer::build_rendering_queues()
 
     for (const auto &obj : scene_->get_objects())
     {
-        if (obj->is_transparent()) {
+        switch (obj->model_type())
+        {
+        case assimp_wrapper::ModelType::OPAQUE:
+            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+            break;
+        case assimp_wrapper::ModelType::TRANSPARENT:
+        {
             float distance = glm::length2(camera_position_ - obj->get_move_vector());
             transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
         }
-        else {
+            break;
+        case assimp_wrapper::ModelType::OPAQUE_AND_TRANSPARENT:
+        {
+            float distance = glm::length2(camera_position_ - obj->get_move_vector());
+            transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
             opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+        }
+            break;
+        
+        default:
+            spdlog::error("Unknown model_type passed to renderer: {}", static_cast<int>(obj->model_type()));
+            assert(false);
+            break;
         }
     }
 
@@ -133,7 +154,7 @@ void renderer::Renderer::build_rendering_queues()
     );
 }
 
-void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float framebuffer_height)
+void renderer::Renderer::do_shadow_map_render()
 {
     std::shared_ptr<Shader> shader = nullptr;
     
@@ -178,8 +199,15 @@ void renderer::Renderer::do_shadow_map_render(float framebuffer_width, float fra
         fb->unbind();
     }
 
-    glViewport(0, 0, framebuffer_width, framebuffer_height);
+    glViewport(0, 0, framebuffer_width_, framebuffer_height_);
     if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
+}
+
+void renderer::Renderer::do_geometry_path_render()
+{
+    // render all opaque MESHES except lights
+
+
 }
 
 void renderer::Renderer::do_render()
@@ -376,7 +404,8 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     profiler_.begin_cpu_profiling_query();
     profiler_.begin_gpu_profiling_query();
 
-
+    framebuffer_width_ = framebuffer_width;
+    framebuffer_height_ = framebuffer_height;
 
     // render preparations
     scene_lights_buffer_ = scene_->get_lights();
@@ -402,19 +431,22 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
         }
     ));
 
-    build_rendering_queues();
-
-
+    build_rendering_queues(); // todo: remake
 
 
     // render
-    do_shadow_map_render(framebuffer_width, framebuffer_height);
+    do_shadow_map_render();
+
+    do_geometry_path_render();
+
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
-        post_processor_.enable_off_sceen_rendering(framebuffer_width, framebuffer_height);
+        post_processor_.enable_off_sceen_rendering(framebuffer_width_, framebuffer_height_);
     }
 
+    // do_color_path_render();
     do_render();
+    // do_forward_render(); // transparent objects and light physical objects
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.do_post_process(post_processing_type_);

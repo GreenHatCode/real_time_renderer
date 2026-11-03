@@ -1,47 +1,10 @@
-#include "assimp_wrapper/model.h"
+#include "assimp_wrapper/model_loader.h"
 #include "assimp/Importer.hpp"
 #include "spdlog/spdlog.h"
-#include "stb_image.h"
 
 using namespace assimp_wrapper;
 
-assimp_wrapper::Model::Model(const std::filesystem::path &path, uint32_t postprocess_flags)
-    : vertices_count_(0)
-    , faces_count_(0)
-    , transparent_(false)
-    , file_path_(path)
-{
-
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(
-        file_path_.string(),
-        postprocess_flags
-    );
-
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        spdlog::error("ASSIMP:{}", importer.GetErrorString());
-        throw std::runtime_error(importer.GetErrorString());
-    }
-    spdlog::info("model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", 
-        file_path_.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
-
-    materials_.reserve(scene->mNumMaterials);
-    size_t opaque_meshes_count = std::count_if(  // how many transparent and opaque materials 
-        materials_.cbegin(), 
-        materials_.cend(), 
-        [](const assimp_wrapper::Material& m) { 
-            return m.get_opacity() >= assimp_wrapper::Material::OPAQUE_MESH_MATERIAL_OPACITY;
-        }
-    );
-    opaque_meshes_.reserve(opaque_meshes_count);
-    transparent_meshes_.reserve(scene->mNumMeshes - opaque_meshes_count);
-
-    load_materials(scene); // load all meterials once
-    process_node(scene->mRootNode, scene);
-
-}
-
-void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
+void ModelLoader::process_node(aiNode *node, const aiScene *scene)
 {
     // processing all meshes in selected node
     for (size_t i = 0; i < node->mNumMeshes; ++i)
@@ -63,7 +26,7 @@ void assimp_wrapper::Model::process_node(aiNode *node, const aiScene *scene)
     }
 }
 
-Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
+Mesh ModelLoader::process_mesh(aiMesh *mesh, const aiScene *scene)
 {
     if (!mesh->HasNormals()) {
         throw std::runtime_error("Assimp returned a mesh without normals");
@@ -131,9 +94,9 @@ Mesh assimp_wrapper::Model::process_mesh(aiMesh *mesh, const aiScene *scene)
     return Mesh(vertices, indices, mesh->mMaterialIndex);
 }
 
-void assimp_wrapper::Model::load_materials(const aiScene *scene)
+void ModelLoader::load_materials(const std::filesystem::path &path, const aiScene *scene)
 {
-    TexturesManager manager(file_path_.parent_path(), scene);
+    TexturesManager manager(path.parent_path(), scene);
 
     for (size_t i = 0; i < scene->mNumMaterials; ++i) {
         aiMaterial *material_ptr = scene->mMaterials[i];
@@ -161,33 +124,61 @@ void assimp_wrapper::Model::load_materials(const aiScene *scene)
     }
 }
 
-void assimp_wrapper::Model::draw(GLenum draw_mode, bool draw_transparent, Shader &shader_program) const
+model_t ModelLoader::load_model(const std::filesystem::path &path, uint32_t postprocess_flags)
 {
-    if (draw_transparent) {
-        for (auto& mesh : transparent_meshes_) {
-            materials_[mesh.get_material_index()].bind(shader_program);
-            mesh.render(draw_mode);
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(
+        path.string(),
+        postprocess_flags
+    );
+
+    spdlog::info("Loading model:{} mRootNode->mNumChildren={} mNumMeshes[]={}, mNumMaterials[]={}", 
+        path.c_str(), scene->mRootNode->mNumChildren, scene->mNumMeshes, scene->mNumMaterials);
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        spdlog::error("ASSIMP:{}", importer.GetErrorString());
+        throw std::runtime_error(importer.GetErrorString());
+    }
+
+
+    load_materials(path, scene); // load all meterials once
+    int32_t opaque_materials_count = std::count_if(  // how many transparent and opaque materials 
+        materials_.cbegin(), 
+        materials_.cend(), 
+        [](const Material& m) { 
+            return m.get_opacity() >= Material::OPAQUE_MESH_MATERIAL_OPACITY;
+        }
+    );
+
+    ModelType loaded_model_type = ModelType::OPAQUE_AND_TRANSPARENT;
+    int32_t transparent_materials_count = scene->mNumMaterials - opaque_materials_count;
+    if (opaque_materials_count <= 0) { loaded_model_type = ModelType::TRANSPARENT; opaque_materials_count = 0; }
+    else if (transparent_materials_count <= 0) { loaded_model_type = ModelType::OPAQUE; transparent_materials_count = 0; }
+
+    size_t opaque_mesh_count = 0;
+    size_t transparent_mesh_count = 0;
+    for (size_t i = 0; i < scene->mNumMeshes; ++i) {
+        aiMesh* mesh = scene->mMeshes[i];
+        
+        if (materials_[mesh->mMaterialIndex].get_opacity() < Material::OPAQUE_MESH_MATERIAL_OPACITY) {
+            transparent_mesh_count++;
+        } else {
+            opaque_mesh_count++;
         }
     }
-    else {
-        for (auto& mesh : opaque_meshes_) {
-            materials_[mesh.get_material_index()].bind(shader_program);
-            mesh.render(draw_mode);
-        }
-    }
-}
 
-uint32_t assimp_wrapper::Model::get_vertices_count() const
-{
-    return vertices_count_;
-}
+    opaque_meshes_.reserve(opaque_mesh_count);
+    transparent_meshes_.reserve(transparent_mesh_count);
+    process_node(scene->mRootNode, scene);
 
-uint32_t assimp_wrapper::Model::get_faces_count() const
-{
-    return faces_count_;
-}
+    spdlog::info("Successfully loaded model:{}, model_type={}", path.c_str(), model_type_to_str(loaded_model_type));
 
-bool assimp_wrapper::Model::is_transparent() const
-{
-    return !transparent_meshes_.empty();
+    return {
+        .opaque_meshes=std::move(opaque_meshes_),
+        .transparent_meshes=std::move(transparent_meshes_),
+        .materials=std::move(materials_),
+        .vertices_count=vertices_count_,
+        .faces_count=faces_count_,
+        .type=loaded_model_type
+    };
 }

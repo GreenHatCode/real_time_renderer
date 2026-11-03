@@ -6,19 +6,19 @@
 namespace scene::physical_objects
 {
     class ModelObject final: public PhysicalObject {
-        assimp_wrapper::Model model_;
+        assimp_wrapper::model_t model_;
         std::shared_ptr<Shader> shader_;
         std::string name_;
         
     public:
-        ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader = nullptr);
+        ModelObject(assimp_wrapper::model_t&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader = nullptr);
         uint32_t get_vertices_count() const override;
         uint32_t get_faces_count() const override;
         void set_shader(const std::shared_ptr<Shader>& shader) override;
         std::shared_ptr<Shader> get_shader() const override;
         std::string get_name() const override;
         void render(GLenum draw_mode, bool render_transparent_meshes, const std::shared_ptr<Shader>& specific_shader = nullptr) const override;
-        bool is_transparent() const override;
+        assimp_wrapper::ModelType model_type() const override;
     };
 
 } // namespace scene::physical_objects

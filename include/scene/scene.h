@@ -1,14 +1,13 @@
 #pragma once
 #include <cstdint>
 #include "scene/physical_objects/physical_object.h"
-#include "scene/physical_objects/physical_light_object.h"
+#include "scene/physical_objects/light_model_object.h"
 #include "scene/physical_objects/model_object.h"
 #include "scene/lights/light_base.h"
 #include <memory>
 #include <map>
 #include <filesystem>
 #include "shader/shader.h"
-#include <utility>
 #include <vector>
 
 namespace scene

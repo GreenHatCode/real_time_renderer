@@ -11,6 +11,7 @@
 #include "renderer/post_processing/geometry_processor.h"
 #include "renderer/frame_buffers/i_shadow_frame_buffer.h"
 #include "scene/lights/light_base.h"
+#include "renderer/frame_buffers/g_framebuffer.h"
 
 namespace renderer {
     namespace defaults {
@@ -47,6 +48,8 @@ namespace renderer {
         GeometryProcessor geometry_processor_;
         GeometryProcessingTypes geometry_processing_type_;
 
+        framebuffers::GFrameBuffer g_buffer_;
+
         std::vector<RenderQueueObject> opaque_objects_;
         std::vector<RenderQueueObject> transparent_objects_;
 
@@ -60,6 +63,9 @@ namespace renderer {
         double profile_gpu_time_;
         double profile_cpu_time_;
 
+        GLsizei framebuffer_width_;
+        GLsizei framebuffer_height_;
+
         std::map<scene::lights::LightType, std::unique_ptr<framebuffers::IShadowFrameBuffer>> shadow_frame_buffers_;
 
         // uniforms and shaders
@@ -67,7 +73,8 @@ namespace renderer {
         void set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr);
 
         void build_rendering_queues();
-        void do_shadow_map_render(float framebuffer_width, float framebuffer_height);
+        void do_shadow_map_render();
+        void do_geometry_path_render();
         void do_render();
         void use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
         void use_shader(const std::shared_ptr<Shader> &shader_ptr);

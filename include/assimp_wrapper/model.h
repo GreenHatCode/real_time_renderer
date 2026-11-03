@@ -10,31 +10,36 @@
 
 namespace assimp_wrapper
 {
+    enum class ModelType { // defines which meshes model contains
+        OPAQUE,
+        TRANSPARENT,
+        OPAQUE_AND_TRANSPARENT // general
+    };
 
-    class Model final {
-        std::vector<Mesh> opaque_meshes_;
-        std::vector<Mesh> transparent_meshes_;
-        std::vector<Material> materials_;
-        uint32_t vertices_count_;
-        uint32_t faces_count_;
+    inline const char* model_type_to_str(ModelType type) 
+    {
+        switch (type)
+        {
+        case ModelType::OPAQUE:
+            return "OPAQUE";
+        case ModelType::TRANSPARENT:
+            return "TRANSPARENT";
+        case ModelType::OPAQUE_AND_TRANSPARENT:
+            return "OPAQUE_AND_TRANSPARENT";
+        default:
+            assert(false && "Unknown ModelType to get string name");
+            return "";
+            break;
+        }
+    }
 
-        bool transparent_;
-
-        const std::filesystem::path file_path_;
-        
-    public:
-        Model(const std::filesystem::path &path, uint32_t postprocess_flags);
-        void draw(GLenum draw_mode, bool draw_transparent, Shader &shader_program) const;
-        uint32_t get_vertices_count() const;
-        uint32_t get_faces_count() const;
-        bool is_transparent() const;
-
-    private:
-        void process_node(aiNode *node, const aiScene *scene);
-        Mesh process_mesh(aiMesh *mesh, const aiScene *scene);
-        
-        void load_materials(const aiScene *scene);
-
+    struct model_t {
+        std::vector<Mesh> opaque_meshes;
+        std::vector<Mesh> transparent_meshes;
+        std::vector<Material> materials;
+        uint32_t vertices_count;
+        uint32_t faces_count;
+        ModelType type;
     };
 
 } // namespace assimp_wrapper

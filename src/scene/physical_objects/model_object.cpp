@@ -1,6 +1,8 @@
 #include "scene/physical_objects/model_object.h"
 
-scene::physical_objects::ModelObject::ModelObject(assimp_wrapper::Model&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader)
+using namespace scene::physical_objects;
+
+ModelObject::ModelObject(assimp_wrapper::model_t&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader)
     : PhysicalObject()
     , model_(std::move(loaded_model))
     , name_(object_name)
@@ -8,45 +10,54 @@ scene::physical_objects::ModelObject::ModelObject(assimp_wrapper::Model&& loaded
 {
 }
 
-uint32_t scene::physical_objects::ModelObject::get_vertices_count() const
+uint32_t ModelObject::get_vertices_count() const
 {
-    return model_.get_vertices_count();
+    return model_.vertices_count;
 }
 
-uint32_t scene::physical_objects::ModelObject::get_faces_count() const
+uint32_t ModelObject::get_faces_count() const
 {
-    return model_.get_faces_count();
+    return model_.faces_count;
 }
 
-void scene::physical_objects::ModelObject::set_shader(const std::shared_ptr<Shader> &shader)
+void ModelObject::set_shader(const std::shared_ptr<Shader> &shader)
 {
     shader_ = shader;
 }
 
-std::shared_ptr<Shader> scene::physical_objects::ModelObject::get_shader() const
+std::shared_ptr<Shader> ModelObject::get_shader() const
 {
     return shader_;
 }
 
-std::string scene::physical_objects::ModelObject::get_name() const
+std::string ModelObject::get_name() const
 {
     return name_;
 }
 
-void scene::physical_objects::ModelObject::render(GLenum draw_mode, bool render_transparent_meshes, const std::shared_ptr<Shader> &specific_shader) const
+void ModelObject::render(GLenum draw_mode, bool render_transparent_meshes, const std::shared_ptr<Shader> &specific_shader) const
 {
-    if (specific_shader == nullptr) { // render using model's shader
-        shader_->set_uniform("u_model_mat", model_matrix());
-        shader_->set_uniform("u_normal_mat", normal_matrix());
-        model_.draw(draw_mode, render_transparent_meshes, *shader_);
-    } else {
-        specific_shader->set_uniform("u_model_mat", model_matrix());
-        specific_shader->set_uniform("u_normal_mat", normal_matrix());
-        model_.draw(draw_mode, render_transparent_meshes, *specific_shader);
-    } 
+    const std::shared_ptr<Shader>& sh = specific_shader == nullptr ? shader_ : specific_shader;
+
+    sh->set_uniform("u_model_mat", model_matrix());
+    sh->set_uniform("u_normal_mat", normal_matrix());
+
+    if (render_transparent_meshes) {
+        for (auto& mesh : model_.transparent_meshes) {
+            model_.materials[mesh.get_material_index()].bind(*sh);
+            mesh.render(draw_mode);
+        }
+    }
+    else {
+        for (auto& mesh : model_.opaque_meshes) {
+            model_.materials[mesh.get_material_index()].bind(*sh);
+            mesh.render(draw_mode);
+        }
+    }
+
 }
 
-bool scene::physical_objects::ModelObject::is_transparent() const
+assimp_wrapper::ModelType ModelObject::model_type() const
 {
-    return model_.is_transparent();
+    return model_.type;
 }
