@@ -11,23 +11,22 @@ in VSOut {
     mat3 tbn_mat;
 } vs_out;
 
+
 // textures
+uniform vec4 u_base_color;
 layout (binding = 5) uniform sampler2D texture_ambient;
 layout (binding = 6) uniform sampler2D texture_diffuse;
 layout (binding = 7) uniform sampler2D texture_specular;
 layout (binding = 8) uniform sampler2D texture_height;  
 
-void main() {
-    
+void main() {    
+
+    gNormal = vs_out.normal;
     gPosition = vs_out.frag_pos;
 
-    vec3 unit_normal = texture(texture_height, vs_out.tex_coords).rgb;
-    unit_normal = unit_normal * 2.0 - 1.0;
-    gNormal = normalize(vs_out.tbn_mat * unit_normal);
-
     vec3 diffuse = texture(texture_diffuse, vs_out.tex_coords).rgb;
-    float specular = texture(texture_specular, vs_out.tex_coords).r; // todo: possible replace on .rgb
+    float specular = texture(texture_specular, vs_out.tex_coords).r;
     
-    gAlbedoSpec.rgb = diffuse;
-    gAlbedoSpec.a = specular;
+    gAlbedoSpec.rgb = u_base_color.rgb * diffuse + u_base_color.rgb * specular;
+    gAlbedoSpec.a = u_base_color.a;
 }

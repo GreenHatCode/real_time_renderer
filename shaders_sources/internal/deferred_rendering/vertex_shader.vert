@@ -20,15 +20,12 @@ out VSOut {
 
 
 void main() {
-
     vec4 world_pos = u_model_mat * vec4(a_pos, 1.0);
-
     gl_Position = u_projection_mat * u_view_mat * world_pos;
     
-    vs_out.normal = u_normal_mat * a_normal;
-    vs_out.frag_pos = vec3(u_model_mat * world_pos);
+    vs_out.normal = normalize(u_normal_mat * a_normal);
+    vs_out.frag_pos = vec3(world_pos);
     vs_out.tex_coords = a_tex_coords;
-
     vs_out.tbn_mat = mat3(
         normalize(vec3(u_model_mat * vec4(a_tangent, 0))),
         normalize(vec3(u_model_mat * vec4(a_bitangent, 0))),
