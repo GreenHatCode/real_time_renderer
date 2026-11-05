@@ -3,22 +3,11 @@
 
 using namespace scene::lights::lighting_constants;
 
-scene::lights::LightBase::LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 rgb_color)
+scene::lights::LightBase::LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular)
 {
     set_ambient(ambient);
     set_diffuse(diffuse);
     set_specular(specular);
-    set_color(rgb_color);
-}
-
-void scene::lights::LightBase::set_color(glm::vec3 rgb_color)
-{
-    color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COLOR_VALUE, MAX_LIGHTING_COLOR_VALUE);
-}
-
-glm::vec3 scene::lights::LightBase::get_color() const
-{
-    return color_rgb_;
 }
 
 void scene::lights::LightBase::set_ambient(glm::vec3 value)

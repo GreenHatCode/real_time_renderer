@@ -45,7 +45,7 @@ void renderer::framebuffers::GFrameBuffer::create_buffers()
     glTextureParameteri(texture_albedospec_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glCreateRenderbuffers(1, &rbo_);
-    glNamedRenderbufferStorage(rbo_, GL_DEPTH32F_STENCIL8, width_, height_);
+    glNamedRenderbufferStorage(rbo_, GL_DEPTH24_STENCIL8, width_, height_);
 
 
     // attach buffer to framebuffer
@@ -108,7 +108,20 @@ void renderer::framebuffers::GFrameBuffer::check_fbo_status()
 	}
 }
 
-GLuint renderer::framebuffers::GFrameBuffer::get_color_buffer_texture()
+void renderer::framebuffers::GFrameBuffer::blit_depth_to_default_buffer(GLsizei width, GLsizei height)
+{
+    if (width_ != width || height_ != height) 
+        spdlog::warn("GFrameBuffer: incoming width or height for blitting depth are not equal to internal: width_={}, width={}, height_={}, height={}", width_, width, height_, height);
+
+    glBlitNamedFramebuffer(
+        fbo_, 0, 
+        0, 0, width_, height_, 
+        0, 0, width, height, 
+        GL_DEPTH_BUFFER_BIT, GL_NEAREST
+    );
+}
+
+GLuint renderer::framebuffers::GFrameBuffer::get_position_buffer_texture()
 {
     return texture_position_;
 }

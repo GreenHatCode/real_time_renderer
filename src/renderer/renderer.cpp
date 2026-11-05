@@ -4,6 +4,7 @@
 #include "renderer/frame_buffers/shadow_cubemap_frame_buffer.h"
 #include "renderer/frame_buffers/shadow_frame_buffer.h"
 #include "assimp_wrapper/model.h"
+#include "renderer/constants.h"
 
 using namespace renderer;
 
@@ -64,13 +65,22 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     shader_ptr->set_uniform("u_camera_pos", camera_position_);
 
 
-    // todo: reserve first 5 texture units
-    shader_ptr->set_uniform("u_directional_lights_shadow_map_array", 0);
-    glBindTextureUnit(0, shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->get_depth_map());
-    shader_ptr->set_uniform("u_spot_lights_shadow_map_array", 1);
-    glBindTextureUnit(1, shadow_frame_buffers_.at(scene::lights::LightType::SPOT_LIGHT)->get_depth_map());
-    shader_ptr->set_uniform("u_point_lights_shadow_map_array", 2);
-    glBindTextureUnit(2, shadow_frame_buffers_.at(scene::lights::LightType::POINT_LIGHT)->get_depth_map());
+    shader_ptr->set_uniform("u_directional_lights_shadow_map_array", bind_texture_units::DIRECTIONAL_LIGHTS_SHADOW_MAP_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::DIRECTIONAL_LIGHTS_SHADOW_MAP_TEXTURE_UNIT, shadow_frame_buffers_.at(scene::lights::LightType::DIRECTIONAL_LIGHT)->get_depth_map());
+    shader_ptr->set_uniform("u_spot_lights_shadow_map_array", bind_texture_units::SPOT_LIGHTS_SHADOW_MAP_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::SPOT_LIGHTS_SHADOW_MAP_TEXTURE_UNIT, shadow_frame_buffers_.at(scene::lights::LightType::SPOT_LIGHT)->get_depth_map());
+    shader_ptr->set_uniform("u_point_lights_shadow_map_array", bind_texture_units::POINT_LIGHTS_SHADOW_MAP_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::POINT_LIGHTS_SHADOW_MAP_TEXTURE_UNIT, shadow_frame_buffers_.at(scene::lights::LightType::POINT_LIGHT)->get_depth_map());
+
+
+    shader_ptr->set_uniform("frag_coords_texture", bind_texture_units::FRAG_COORDS_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::FRAG_COORDS_TEXTURE_UNIT, g_buffer_.get_position_buffer_texture());
+    shader_ptr->set_uniform("frag_normal_texture", bind_texture_units::FRAG_NORMAL_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::FRAG_NORMAL_TEXTURE_UNIT, g_buffer_.get_normal_buffer_texture());
+    shader_ptr->set_uniform("frag_color_texture", bind_texture_units::FRAG_COLOR_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::FRAG_COLOR_TEXTURE_UNIT, g_buffer_.get_albedospec_buffer_texture());
+  
+
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -209,33 +219,52 @@ void renderer::Renderer::do_geometry_path_render()
     g_buffer_.rescale(framebuffer_width_, framebuffer_height_);
     g_buffer_.bind();
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glDisable(GL_BLEND);
+    std::shared_ptr<Shader> sh = nullptr;
     for (const auto& obj: opaque_objects_) {
-        use_shader(obj.obj_ptr->get_geometry_path_shader());
+        sh = obj.obj_ptr->get_geometry_path_shader();
+        sh->use();
+
+        sh->set_uniform("u_view_mat", view_mat_);
+        sh->set_uniform("u_projection_mat", projection_mat_);
+        sh->set_uniform("u_camera_pos", camera_position_);
+
         obj.obj_ptr->render_geometry_path(obj.draw_mode); 
     }
     glEnable(GL_BLEND);
 
     g_buffer_.unbind();
+    if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
 }
 
 void renderer::Renderer::do_color_path_render()
 {
-    // glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
-    // use_shader(scene_->get_internal_shader(scene::InternalShadersIDS::GEOMETRY_PATH_SHADER));
+    use_shader(scene_->get_internal_shader(scene::InternalShadersIDS::COLOR_PATH_SHADER));
 
+    glDisable(GL_DEPTH_TEST);
+    post_processor_.render_quad();
+    glEnable(GL_DEPTH_TEST);
 }
 
 void renderer::Renderer::do_forward_path_render()
 {
-
-
-
+    // copy depth buffer from g-buffer
+    g_buffer_.blit_depth_to_default_buffer(framebuffer_width_, framebuffer_height_);
+   
+    // render lights
+    for (auto&& obj : scene_->get_light_objects()) {
+        use_shader(obj->get_shader());
+        obj->render(assimp_wrapper::DEFAULT_DRAW_MODE, false);
+        obj->render(assimp_wrapper::DEFAULT_DRAW_MODE, true);
+    }
+   
+    render_transparent_scene_objects();
 
 
 
@@ -243,11 +272,9 @@ void renderer::Renderer::do_forward_path_render()
 
 void renderer::Renderer::do_render()
 {
-    glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    render_opaque_scene_objects();
-    render_transparent_scene_objects();
+    // render_opaque_scene_objects();
+    // render_transparent_scene_objects();
 }
 
 void renderer::Renderer::use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
@@ -446,7 +473,7 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
 
 
     // render
-    // do_shadow_map_render();
+    do_shadow_map_render();
     do_geometry_path_render();
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
@@ -454,7 +481,6 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     }
 
     do_color_path_render();
-    do_render();
     do_forward_path_render(); // transparent objects and light physical objects
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {

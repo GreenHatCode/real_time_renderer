@@ -49,14 +49,11 @@ namespace scene::lights {
         glm::vec3 ambient_;
         glm::vec3 diffuse_;
         glm::vec3 specular_;
-        glm::vec3 color_rgb_;
     
     public:
-        LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, glm::vec3 rgb_color);
+        LightBase(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
         
         // general light usage
-        void set_color(glm::vec3 rgb_color);
-        glm::vec3 get_color() const;
         void set_ambient(glm::vec3 value);
         glm::vec3 get_ambient() const;
         void set_diffuse(glm::vec3 value);
@@ -65,6 +62,8 @@ namespace scene::lights {
         glm::vec3 get_specular() const;
 
         // shadow mapping
+        virtual void set_color(glm::vec3 rgb_color) = 0;
+        virtual glm::vec3 get_color() const = 0;
         virtual size_t get_view_count() const = 0;
         virtual glm::mat4 view_matrix(size_t face_idx = 0) const = 0;
         virtual glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const = 0;

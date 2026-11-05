@@ -30,20 +30,40 @@ float scene::lights::PointLight::calculate_far_plane(float threshold) const
 scene::lights::PointLight::PointLight(
     const std::string &name,
     const std::shared_ptr<scene::physical_objects::LightModelObject> &sphere_model,
+    glm::vec3 position,
+    glm::vec3 rgb_color,
     glm::vec3 ambient,
     glm::vec3 diffuse,
     glm::vec3 specular,
-    glm::vec3 rgb_color,
-    glm::vec3 position,
     float linear,
-    float quadratic)
-    : LightBase(ambient, diffuse, specular, rgb_color), position_(position), name_(name), type_(LightType::POINT_LIGHT), light_sphere_(sphere_model), linear_(linear), quadratic_(quadratic)
+    float quadratic
+)
+    : LightBase(ambient, diffuse, specular)
+    , name_(name)
+    , type_(LightType::POINT_LIGHT)
+    , light_sphere_(sphere_model)
+    , linear_(linear)
+    , quadratic_(quadratic)
 {
+    set_color(rgb_color);
+    set_position(position);
+}
+
+void scene::lights::PointLight::set_color(glm::vec3 rgb_color)
+{
+    color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COLOR_VALUE, MAX_LIGHTING_COLOR_VALUE);
+    light_sphere_->set_color(color_rgb_);
+}
+
+glm::vec3 scene::lights::PointLight::get_color() const
+{
+    return color_rgb_;
 }
 
 void scene::lights::PointLight::set_position(glm::vec3 position)
 {
     position_ = position;
+    light_sphere_->move(position);
 }
 
 glm::vec3 scene::lights::PointLight::get_position() const

@@ -108,6 +108,12 @@ void renderer::PostProcessor::do_post_process(PostProcessingTypes type)
     glEnable(GL_DEPTH_TEST);
 }
 
+void renderer::PostProcessor::render_quad()
+{
+    glBindVertexArray(vao_);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
 void renderer::PostProcessor::set_gamma(float value)
 {
     gamma_ = value;

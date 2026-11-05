@@ -1,5 +1,8 @@
 #include "scene/lights/directional_light.h"
 #include "renderer/renderer.h"
+#include "renderer/constants.h"
+
+using namespace scene::lights::lighting_constants;
 
 scene::lights::DirectionalLight::DirectionalLight(
     const std::string& name, 
@@ -9,10 +12,11 @@ scene::lights::DirectionalLight::DirectionalLight(
     glm::vec3 rgb_color, 
     glm::vec3 direction
 )
-    : LightBase(ambient, diffuse, specular, rgb_color)
+    : LightBase(ambient, diffuse, specular)
     , direction_(glm::normalize(direction))
     , name_(name)
     , type_(LightType::DIRECTIONAL_LIGHT)
+    , color_rgb_(glm::clamp(rgb_color, MIN_LIGHTING_COLOR_VALUE, MAX_LIGHTING_COLOR_VALUE))
 {
 
     ortho_mat_ = glm::ortho(
@@ -23,6 +27,16 @@ scene::lights::DirectionalLight::DirectionalLight(
         lighting_constants::CAMERA_DEFAULT_NEAR_PLANE, 
         lighting_constants::DIRECTIONAL_LIGHT_DEFAULT_FAR_PLANE
     );
+}
+
+void scene::lights::DirectionalLight::set_color(glm::vec3 rgb_color)
+{
+    color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COLOR_VALUE, MAX_LIGHTING_COLOR_VALUE);
+}
+
+glm::vec3 scene::lights::DirectionalLight::get_color() const
+{
+    return color_rgb_;
 }
 
 void scene::lights::DirectionalLight::set_direction(glm::vec3 direction)

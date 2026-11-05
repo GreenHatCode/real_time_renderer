@@ -8,7 +8,7 @@ namespace scene::lights
         glm::vec3 direction_;
         std::string name_;
         LightType type_;
-
+        glm::vec3 color_rgb_;
         glm::mat4 ortho_mat_;
 
         inline static constexpr glm::vec3 LOOK_POINT = glm::vec3(0.0f);
@@ -23,6 +23,9 @@ namespace scene::lights
             glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
             glm::vec3 direction = glm::vec3(1.0f, 0.0f, 0.0f)
         );
+
+        void set_color(glm::vec3 rgb_color) override;
+        glm::vec3 get_color() const override;
         void set_direction(glm::vec3 direction);
         glm::vec3 get_direction() const;
 

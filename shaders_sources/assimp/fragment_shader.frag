@@ -45,28 +45,25 @@ struct SpotLight {
 
 const uint MAX_LIGHTS = 10;
 const float BIAS = 0.005;
-const float DEFAULT_AMBIENT = 0.01;
+const float DEFAULT_AMBIENT = 0.1;
 
 in VSOut {
-    vec3 normal;
-    vec3 frag_pos;
     vec2 tex_coords;
-    mat3 tbn_mat;
 } vs_out;
 
 out vec4 FragColor;
 
-// textures
-uniform vec4 u_base_color; 
-layout (binding = 5) uniform sampler2D texture_ambient;
-layout (binding = 6) uniform sampler2D texture_diffuse;
-layout (binding = 7) uniform sampler2D texture_specular;
-layout (binding = 8) uniform sampler2D texture_height;
 
 // shadow mapping
-uniform sampler2DArray u_directional_lights_shadow_map_array;
-uniform sampler2DArray u_spot_lights_shadow_map_array;
-uniform samplerCubeArray u_point_lights_shadow_map_array;
+uniform sampler2DArray u_directional_lights_shadow_map_array; // layout (binding = 0)
+uniform sampler2DArray u_spot_lights_shadow_map_array; // layout (binding = 1)
+uniform samplerCubeArray u_point_lights_shadow_map_array; // layout (binding = 2)
+
+// textures
+layout (binding = 9) uniform sampler2D frag_coords_texture;
+layout (binding = 10) uniform sampler2D frag_normal_texture;
+layout (binding = 11) uniform sampler2D frag_color_texture;
+
 
 // lighting
 uniform vec3 u_camera_pos;
@@ -78,9 +75,9 @@ uniform uint u_directional_lights_count;
 uniform uint u_point_lights_count;
 uniform uint u_spot_lights_count;
 
-vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir);
-vec3 process_point_lights(vec3 unit_normal, vec3 view_dir);
-vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir);
+vec3 process_directional_lights(vec3, vec3, vec3, vec3);
+vec3 process_point_lights(vec3, vec3, vec3, vec3);
+vec3 process_spot_lights(vec3, vec3, vec3, vec3);
 
 float calculate_shadow(
     sampler2DArray depth_map, 
@@ -125,52 +122,50 @@ float calculate_point_light_shadow(
 }
 
 void main() {
-    vec3 view_dir = normalize(u_camera_pos - vs_out.frag_pos);
-    
-    vec3 unit_normal = texture(texture_height, vs_out.tex_coords).rgb;
-    unit_normal = unit_normal * 2.0 - 1.0;
-    unit_normal = normalize(vs_out.tbn_mat * unit_normal);
+
+    vec3 frag_pos = texture(frag_coords_texture, vs_out.tex_coords).rgb;
+    vec3 unit_normal = texture(frag_normal_texture, vs_out.tex_coords).rgb; // normalized in g-buffer shader
+    vec4 frag_color = texture(frag_color_texture, vs_out.tex_coords).rgba;
+    vec3 view_dir = normalize(u_camera_pos - frag_pos);
 
 
-    vec3 direction_lights_color = process_directional_lights(unit_normal, view_dir);
-    vec3 point_lights_color = process_point_lights(unit_normal, view_dir);
-    vec3 spot_lights_color = process_spot_lights(unit_normal, view_dir);
+    vec3 direction_lights_color = process_directional_lights(unit_normal, view_dir, frag_pos, frag_color.rgb);
+    vec3 point_lights_color = process_point_lights(unit_normal, view_dir, frag_pos, frag_color.rgb);
+    vec3 spot_lights_color = process_spot_lights(unit_normal, view_dir, frag_pos, frag_color.rgb);
+    vec3 ambient_color = vec3(frag_color) * DEFAULT_AMBIENT;
 
-    vec3 ambient_color = (texture(texture_ambient, vs_out.tex_coords).rgb + u_base_color.rgb) * DEFAULT_AMBIENT;
-
-    vec3 result = direction_lights_color + point_lights_color + spot_lights_color + ambient_color;
-
-    FragColor = vec4(result, u_base_color.a);
+    vec3 result = direction_lights_color + point_lights_color + spot_lights_color + ambient_color;  
+    FragColor = vec4(result, frag_color.a);
 
 }
 
-vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {
+vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir, vec3 frag_pos, vec3 diffuse_color) {
     vec3 diffuse = vec3(0.0);
 
     for (uint i = 0; i < u_directional_lights_count; ++i) {
-        vec4 frag_pos_light_space = directional_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
+        vec4 frag_pos_light_space = directional_lights[i].light_space_mat * vec4(frag_pos, 1.0);
         float shadow = calculate_shadow(
             u_directional_lights_shadow_map_array, frag_pos_light_space, i, -directional_lights[i].direction, unit_normal
         );
 
         float diff = max(dot(unit_normal, -directional_lights[i].direction), 0.0);
 
-        diffuse += diff * directional_lights[i].color * (1.0 - shadow) * texture(texture_diffuse, vs_out.tex_coords).rgb;
+        diffuse += diff * directional_lights[i].color * (1.0 - shadow) * diffuse_color;
     }
     
     return diffuse;
 }
 
-vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
+vec3 process_point_lights(vec3 unit_normal, vec3 view_dir, vec3 frag_pos, vec3 diffuse_color) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
     for (uint i = 0; i < u_point_lights_count; ++i) {
 
-        vec3 light_dir = normalize(point_lights[i].position - vs_out.frag_pos);
+        vec3 light_dir = normalize(point_lights[i].position - frag_pos);
 
         float shadow = calculate_point_light_shadow(
-            u_point_lights_shadow_map_array, vs_out.frag_pos, i, point_lights[i].position, point_lights[i].far_plane, unit_normal
+            u_point_lights_shadow_map_array, frag_pos, i, point_lights[i].position, point_lights[i].far_plane, unit_normal
         );
 
         
@@ -179,24 +174,24 @@ vec3 process_point_lights(vec3 unit_normal, vec3 view_dir) {
         vec3 reflect_dir = reflect(-light_dir, unit_normal);
         float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
 
-        float distance = length(point_lights[i].position - vs_out.frag_pos);
+        float distance = length(point_lights[i].position - frag_pos);
         float attenuation = 1.0 / (point_lights[i].constant  + point_lights[i].linear * distance + point_lights[i].quadratic * pow(distance, 2));
 
-        diffuse += point_lights[i].diffuse * point_lights[i].color * diff * attenuation * (1.0 - shadow) * texture(texture_diffuse, vs_out.tex_coords).rgb;
-        specular += point_lights[i].specular * point_lights[i].color * spec * attenuation * (1.0 - shadow) * texture(texture_specular, vs_out.tex_coords).rgb;
+        diffuse += point_lights[i].diffuse * point_lights[i].color * diff * attenuation * (1.0 - shadow) * diffuse_color;
+        specular += point_lights[i].specular * point_lights[i].color * spec * attenuation * (1.0 - shadow) * diffuse_color; // todo: maybe use specular map if possible
     }
 
     return diffuse + specular;
 }
 
-vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
+vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir, vec3 frag_pos, vec3 diffuse_color) {
     vec3 diffuse = vec3(0.0);
     vec3 specular = vec3(0.0);
 
     for (uint i = 0; i < u_spot_lights_count; ++i) {
-        vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(vs_out.frag_pos, 1.0);
+        vec4 frag_pos_light_space = spot_lights[i].light_space_mat * vec4(frag_pos, 1.0);
 
-        vec3 light_dir = normalize(spot_lights[i].position - vs_out.frag_pos); // direction of the light ray, not spot light itself
+        vec3 light_dir = normalize(spot_lights[i].position - frag_pos); // direction of the light ray, not spot light itself
         float shadow = calculate_shadow(
             u_spot_lights_shadow_map_array, frag_pos_light_space, i, light_dir, unit_normal
         );
@@ -212,11 +207,11 @@ vec3 process_spot_lights(vec3 unit_normal, vec3 view_dir) {
         diff *= intensity;
         spec *= intensity;
 
-        float distance = length(spot_lights[i].position - vs_out.frag_pos);
+        float distance = length(spot_lights[i].position - frag_pos);
         float attenuation = 1.0 / (spot_lights[i].constant  + spot_lights[i].linear * distance + spot_lights[i].quadratic * pow(distance, 2));
 
-        diffuse += spot_lights[i].diffuse * spot_lights[i].color * diff * attenuation * (1.0 - shadow) * texture(texture_diffuse, vs_out.tex_coords).rgb;
-        specular += spot_lights[i].specular *  spot_lights[i].color * spec * attenuation * (1.0 - shadow) * texture(texture_specular, vs_out.tex_coords).rgb;
+        diffuse += spot_lights[i].diffuse * spot_lights[i].color * diff * attenuation * (1.0 - shadow) * diffuse_color;
+        specular += spot_lights[i].specular *  spot_lights[i].color * spec * attenuation * (1.0 - shadow) * diffuse_color;
     }
 
     return diffuse + specular;

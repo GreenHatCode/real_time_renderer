@@ -1,6 +1,8 @@
 #include "assimp_wrapper/material.h"
+#include "renderer/constants.h"
 
 using namespace assimp_wrapper;
+using namespace renderer;
 
 assimp_wrapper::Material::Material(
     const glm::vec4 &color
@@ -29,17 +31,15 @@ void Material::bind(Shader& shader) const {
     shader.set_uniform("u_base_color", color_);
     shader.set_uniform("u_opacity", opacity_);
 
-    shader.set_uniform("texture_ambient", 5);
-    shader.set_uniform("texture_diffuse", 6);
-    shader.set_uniform("texture_specular", 7);
-    shader.set_uniform("texture_height", 8);
+    shader.set_uniform("texture_ambient", bind_texture_units::AMBIENT_TEXTURE_TEXTURE_UNIT);
+    shader.set_uniform("texture_diffuse", bind_texture_units::DIFFUSE_TEXTURE_TEXTURE_UNIT);
+    shader.set_uniform("texture_specular", bind_texture_units::SPECULAR_TEXTURE_TEXTURE_UNIT);
+    shader.set_uniform("texture_height", bind_texture_units::HEIGHT_TEXTURE_TEXTURE_UNIT);
 
-    if (ambient_texture_) glBindTextureUnit(5, ambient_texture_->id());
-    if (diffuse_texture_) glBindTextureUnit(6, diffuse_texture_->id());
-    if (specular_texture_) glBindTextureUnit(7, specular_texture_->id());
-
-    if (height_texture_) glBindTextureUnit(8, height_texture_->id());
-    if (height_texture_->is_fallback_used()) shader.set_uniform("u_texture_height_fallback_used", true);
+    if (ambient_texture_) glBindTextureUnit(bind_texture_units::AMBIENT_TEXTURE_TEXTURE_UNIT, ambient_texture_->id());
+    if (diffuse_texture_) glBindTextureUnit(bind_texture_units::DIFFUSE_TEXTURE_TEXTURE_UNIT, diffuse_texture_->id());
+    if (specular_texture_) glBindTextureUnit(bind_texture_units::SPECULAR_TEXTURE_TEXTURE_UNIT, specular_texture_->id());
+    if (height_texture_) glBindTextureUnit(bind_texture_units::HEIGHT_TEXTURE_TEXTURE_UNIT, height_texture_->id());
 
 }
 

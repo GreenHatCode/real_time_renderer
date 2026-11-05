@@ -1,25 +1,26 @@
 #include "scene/lights/spot_light.h"
 #include "renderer/renderer.h"
 #include <cassert>
+#include "renderer/constants.h"
+#include "glm/gtx/quaternion.hpp"
 
 using namespace scene::lights::lighting_constants;
+using namespace renderer;
 
 scene::lights::SpotLight::SpotLight(
     const std::string &name,
     const std::shared_ptr<scene::physical_objects::LightModelObject> &cone_model,
+    glm::vec3 position,
+    glm::vec3 direction,
+    glm::vec3 rgb_color,
     glm::vec3 ambient,
     glm::vec3 diffuse,
     glm::vec3 specular,
-    glm::vec3 rgb_color,
-    glm::vec3 position,
-    glm::vec3 direction_,
     float linear,
     float quadratic,
     float cut_off_rad,
     float outer_cut_off_rad)
-    : LightBase(ambient, diffuse, specular, rgb_color)
-    , position_(position)
-    , direction_(direction_)
+    : LightBase(ambient, diffuse, specular)
     , name_(name)
     , type_(LightType::SPOT_LIGHT)
     , light_cone_(cone_model)
@@ -29,6 +30,9 @@ scene::lights::SpotLight::SpotLight(
     , cosine_outer_cut_off_rad_(glm::cos(outer_cut_off_rad))
     , proj_mat_(1.0f)
 {
+    set_color(rgb_color);
+    set_position(position);
+    set_direction(direction);
 }
 
 float scene::lights::SpotLight::calculate_far_plane(float threshold) const
@@ -55,9 +59,21 @@ float scene::lights::SpotLight::calculate_far_plane(float threshold) const
     return std::max(distance, 1.0f);
 }
 
+void scene::lights::SpotLight::set_color(glm::vec3 rgb_color)
+{
+    color_rgb_ = glm::clamp(rgb_color, MIN_LIGHTING_COLOR_VALUE, MAX_LIGHTING_COLOR_VALUE);
+    light_cone_->set_color(color_rgb_);
+}
+
+glm::vec3 scene::lights::SpotLight::get_color() const
+{
+    return color_rgb_;
+}
+
 void scene::lights::SpotLight::set_position(glm::vec3 position)
 {
     position_ = position;
+    light_cone_->move(position);
 }
 
 glm::vec3 scene::lights::SpotLight::get_position() const
@@ -68,6 +84,7 @@ glm::vec3 scene::lights::SpotLight::get_position() const
 void scene::lights::SpotLight::set_direction(glm::vec3 direction)
 {
     direction_ = glm::normalize(direction);
+    light_cone_->set_rotation(glm::rotation(scene::physical_objects::physical_light_object_constants::SPOT_LIGHT_MODEL_DEFAULT_FORWARD, direction_));
 }
 
 glm::vec3 scene::lights::SpotLight::get_direction() const

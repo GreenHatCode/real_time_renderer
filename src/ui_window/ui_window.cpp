@@ -5,6 +5,7 @@
 #include "assimp_wrapper/mesh.h"
 #include "renderer/renderer.h"
 #include "assimp_wrapper/model_loader.h"
+#include "renderer/constants.h"
 
 UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     : scene_(scene)
@@ -436,22 +437,10 @@ void UIWindow::render_point_light_editor(scene::lights::PointLight &light)
     render_common_lights_editor(light);
 
     auto color = light.get_color();
-    if (ImGui::ColorEdit3("Color", glm::value_ptr(color))) {
-        light.set_color(color);
-        if (auto model_ptr = light.get_model_ptr())
-            model_ptr->set_color(color);
-        else 
-            spdlog::warn("Failed to edit point light model color, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
-    }
+    if (ImGui::ColorEdit3("Color", glm::value_ptr(color))) light.set_color(color);
         
     auto pos = light.get_position();
-    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f)) {
-        light.set_position(pos);
-        if (auto model_ptr = light.get_model_ptr())
-            model_ptr->move(pos);
-        else 
-            spdlog::warn("Failed to edit point light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
-    }
+    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f)) light.set_position(pos);
 
     auto linear = light.get_linear();
     if (ImGui::SliderFloat("Linear", &linear, scene::lights::lighting_constants::MIN_LIGHT_LINEAR, scene::lights::lighting_constants::MAX_LIGHT_LINEAR))
@@ -467,34 +456,13 @@ void UIWindow::render_spot_light_editor(scene::lights::SpotLight &light)
     render_common_lights_editor(light);
 
     auto color = light.get_color();
-    if (ImGui::ColorEdit3("Color", glm::value_ptr(color))) {
-        light.set_color(color);
-        if (auto model_ptr = light.get_model_ptr())
-            model_ptr->set_color(color);
-        else 
-            spdlog::warn("Failed to edit spot light model color, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
-    }
+    if (ImGui::ColorEdit3("Color", glm::value_ptr(color))) light.set_color(color);
         
     auto pos = light.get_position();
-    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f)) {
-        light.set_position(pos);
-        if (auto model_ptr = light.get_model_ptr())
-            model_ptr->move(pos);
-        else 
-            spdlog::warn("Failed to edit spot light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
-    }
+    if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.05f)) light.set_position(pos);
 
     auto dir = light.get_direction();
-    if (ImGui::DragFloat3("Direction", glm::value_ptr(dir), 0.05f)) {
-        light.set_direction(dir);
-
-        if (auto model_ptr = light.get_model_ptr()) {
-            dir = glm::normalize(dir);
-            model_ptr->set_rotation(glm::rotation(scene::physical_objects::physical_light_object_constants::SPOT_LIGHT_MODEL_DEFAULT_FORWARD, dir));
-        } else { 
-            spdlog::warn("Failed to edit spot light model position, there isn't such a model on the scene. Light name={}", light.get_name().c_str());
-        }
-    }
+    if (ImGui::DragFloat3("Direction", glm::value_ptr(dir), 0.05f)) light.set_direction(dir);
 
     auto linear = light.get_linear();
     if (ImGui::SliderFloat("Linear", &linear, scene::lights::lighting_constants::MIN_LIGHT_LINEAR, scene::lights::lighting_constants::MAX_LIGHT_LINEAR))
@@ -632,10 +600,6 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type,
                 return;
             }
 
-            std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(name);
-            
-            
-            
             assimp_wrapper::ModelLoader loader;
             assimp_wrapper::model_t model = loader.load_model(scene::physical_objects::physical_light_object_constants::LIGHT_SPHERE_MODEL_FILE, assimp_wrapper::LIGHT_MODEL_POSTPROCESSING_FLAGS);
             std::shared_ptr<Shader> g_shader = scene_->get_internal_shader(
@@ -645,12 +609,12 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type,
                 std::make_shared<scene::physical_objects::LightModelObject>(
                     std::move(model),
                     name + std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_NAME_SUFFIX),
-                    pl->get_color(),
+                    glm::vec3(1.0f),
                     g_shader,
                     model_shader);
+
+            std::shared_ptr<scene::lights::PointLight> pl = std::make_shared<scene::lights::PointLight>(name, light_model, position);
             
-            pl->set_model_ptr(light_model);
-            pl->set_position(position); // todo: remove on release
             scene_->add_light(pl);
             scene_->add_object(light_model);
         } catch (const std::exception& e) {
@@ -667,10 +631,7 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type,
                 return;
             }
 
-            std::shared_ptr<scene::lights::SpotLight> spl = std::make_shared<scene::lights::SpotLight>(name);
-            
-            
-            
+
             assimp_wrapper::ModelLoader loader;
             assimp_wrapper::model_t model = loader.load_model(scene::physical_objects::physical_light_object_constants::LIGHT_CONE_MODEL_FILE, assimp_wrapper::LIGHT_MODEL_POSTPROCESSING_FLAGS);
             std::shared_ptr<Shader> g_shader = scene_->get_internal_shader(
@@ -680,9 +641,15 @@ void UIWindow::add_light(const std::string &name, scene::lights::LightType type,
                 std::make_shared<scene::physical_objects::LightModelObject>(
                     std::move(model),
                     name + std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_NAME_SUFFIX),
-                    spl->get_color(),
+                    glm::vec3(1.0f),
                     g_shader,
                     model_shader);
+
+            std::shared_ptr<scene::lights::SpotLight> spl = std::make_shared<scene::lights::SpotLight>(name, light_model, position, direction);
+            
+            
+            
+
             
             spl->set_direction(direction); // todo: remove on release
             spl->set_position(position); // todo: remove on release

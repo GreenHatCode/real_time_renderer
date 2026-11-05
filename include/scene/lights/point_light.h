@@ -11,6 +11,8 @@ namespace scene::lights
         LightType type_;
         std::shared_ptr<scene::physical_objects::LightModelObject> light_sphere_;
 
+        glm::vec3 color_rgb_;
+
         // attenuation parameters
         float constant_;
         float linear_;
@@ -25,12 +27,12 @@ namespace scene::lights
     public:
         PointLight(
             const std::string& name, 
-            const std::shared_ptr<scene::physical_objects::LightModelObject>& sphere_model = {}, 
+            const std::shared_ptr<scene::physical_objects::LightModelObject>& sphere_model, 
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),  
+            glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3 ambient = glm::vec3(0.05f, 0.05f, 0.05f), 
             glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
-            glm::vec3 rgb_color = glm::vec3(1.0f, 1.0f, 1.0f), 
-            glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
             float linear = 0.09f, 
             float quadratic = 0.032f
         );
@@ -38,6 +40,8 @@ namespace scene::lights
         LightType get_type() const override;
         void upload_components(Shader &obj_shader, size_t light_idx) const override;
 
+        void set_color(glm::vec3 rgb_color) override;
+        glm::vec3 get_color() const override;
         void set_position(glm::vec3 position);
         glm::vec3 get_position() const;  
         void set_linear(float value);

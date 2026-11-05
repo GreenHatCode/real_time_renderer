@@ -5,6 +5,7 @@
 #include "camera/camera_implementation/orbit_camera.h"
 #include "camera/camera_implementation/free_camera.h"
 #include "scene/lights/point_light.h"
+#include "renderer/constants.h"
 
 void App::initialize_opengl()
 {
@@ -13,6 +14,8 @@ void App::initialize_opengl()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
     window_ = glfwCreateWindow(framebuffer_width_, framebuffer_height_, "Read-Time Renderer", NULL, NULL);
     if (window_ == NULL)
@@ -267,8 +270,8 @@ void App::load_sources_debug()
     imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj", 0);
     // imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
-    // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
-    // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
+    imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
+    imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 15.0f, 50.0f));
 
 #if 1
         imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));

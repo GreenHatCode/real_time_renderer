@@ -2,6 +2,7 @@
 #include "spdlog/spdlog.h"
 #include "renderer/renderer.h"
 #include "assimp_wrapper/model_loader.h"
+#include "renderer/constants.h"
 
 using namespace scene;
 
@@ -59,6 +60,22 @@ scene::Scene::Scene()
     } catch (const std::exception& e) {
         spdlog::error("Failed to load internal shader: {}, what: {}", "g_buffer_height_map_shader", e.what());
     }
+
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(
+            "color_path_shader", 
+            "shaders_sources/assimp/vertex_shader.vert",
+            "shaders_sources/assimp/fragment_shader.frag"
+        );
+        internal_shaders_.emplace(InternalShadersIDS::COLOR_PATH_SHADER, shader);
+
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load internal shader: {}, what: {}", "color_path_shader", e.what());
+    }
+
+
+
+
 
 
     assimp_wrapper::ModelLoader loader;

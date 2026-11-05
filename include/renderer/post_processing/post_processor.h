@@ -44,6 +44,7 @@ namespace renderer {
         ~PostProcessor();
         void enable_off_sceen_rendering(GLsizei scr_width, GLsizei scr_height);
         void do_post_process(PostProcessingTypes type); 
+        void render_quad();
         void set_gamma(float value);
     };
 } // namespace renderer
