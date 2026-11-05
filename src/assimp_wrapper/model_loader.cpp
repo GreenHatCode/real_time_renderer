@@ -120,12 +120,27 @@ void ModelLoader::load_materials(const std::filesystem::path &path, const aiScen
         std::shared_ptr<Texture2D> specular = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_SPECULAR);
         std::shared_ptr<Texture2D> height = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_HEIGHT);
         
+        height_map_flag_ |= !height->is_fallback_used();
+
         materials_.emplace_back(glm::vec4(color.r, color.g, color.b, color.a), opacity, ambient, diffuse, specular, height);
     }
 }
 
+void assimp_wrapper::ModelLoader::clear()
+{
+    opaque_meshes_.clear();
+    transparent_meshes_.clear();
+    materials_.clear();
+    vertices_count_ = 0;
+    faces_count_ = 0;
+
+    height_map_flag_ = false;
+}
+
 model_t ModelLoader::load_model(const std::filesystem::path &path, uint32_t postprocess_flags)
 {
+    clear();
+
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(
         path.string(),
@@ -181,4 +196,9 @@ model_t ModelLoader::load_model(const std::filesystem::path &path, uint32_t post
         .faces_count=faces_count_,
         .type=loaded_model_type
     };
+}
+
+bool assimp_wrapper::ModelLoader::has_height_map() const
+{
+    return height_map_flag_;
 }

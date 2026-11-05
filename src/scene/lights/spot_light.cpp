@@ -147,7 +147,7 @@ void scene::lights::SpotLight::set_model_ptr(const std::shared_ptr<scene::physic
     light_cone_ = value;
 }
 
-std::weak_ptr<scene::physical_objects::LightModelObject> scene::lights::SpotLight::get_model_ptr() const
+std::shared_ptr<scene::physical_objects::LightModelObject> scene::lights::SpotLight::get_model_ptr() const
 {
     return light_cone_;
 }

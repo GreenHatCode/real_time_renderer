@@ -3,8 +3,8 @@
 
 using namespace assimp_wrapper;
 
-Texture2D::Texture2D(aiTextureType type)
-    : type_(type)
+Texture2D::Texture2D(aiTextureType type, bool fallback_used)
+    : type_(type), fallback_used_(fallback_used)
 {
     glGenTextures(1, &id_);
 }
@@ -34,10 +34,11 @@ std::shared_ptr<Texture2D> Texture2D::create_solid_color(
     uint8_t r, 
     uint8_t g, 
     uint8_t b, 
-    uint8_t a
+    uint8_t a,
+    bool fallback_used
 )
 {
-    std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>(type);
+    std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>(type, fallback_used);
     texture->bind();
 
     // 1x1 pixel data array
@@ -68,6 +69,11 @@ void Texture2D::unbind() const
 uint32_t Texture2D::id() const
 {
     return id_;
+}
+
+bool assimp_wrapper::Texture2D::is_fallback_used() const
+{
+    return fallback_used_;
 }
 
 aiTextureType Texture2D::type() const

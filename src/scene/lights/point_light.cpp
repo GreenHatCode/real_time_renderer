@@ -29,7 +29,7 @@ float scene::lights::PointLight::calculate_far_plane(float threshold) const
 
 scene::lights::PointLight::PointLight(
     const std::string &name,
-    const std::weak_ptr<scene::physical_objects::LightModelObject> &sphere_model,
+    const std::shared_ptr<scene::physical_objects::LightModelObject> &sphere_model,
     glm::vec3 ambient,
     glm::vec3 diffuse,
     glm::vec3 specular,
@@ -110,12 +110,12 @@ glm::mat4 scene::lights::PointLight::projection_matrix(float framebuffer_width, 
     return proj_mat_;
 }
 
-void scene::lights::PointLight::set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject> &value)
+void scene::lights::PointLight::set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject> &value)
 {
     light_sphere_ = value;
 }
 
-std::weak_ptr<scene::physical_objects::LightModelObject> scene::lights::PointLight::get_model_ptr() const
+std::shared_ptr<scene::physical_objects::LightModelObject> scene::lights::PointLight::get_model_ptr() const
 {
     return light_sphere_;
 }

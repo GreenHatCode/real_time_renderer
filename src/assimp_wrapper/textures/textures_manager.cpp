@@ -22,22 +22,22 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_material_textur
         switch (type)
         {
         case aiTextureType::aiTextureType_DIFFUSE:
-            return Texture2D::create_solid_color(aiTextureType_DIFFUSE, 255, 255, 255); // white
+            return Texture2D::create_solid_color(aiTextureType_DIFFUSE, 255, 255, 255, 255, true); // white
             
         case aiTextureType::aiTextureType_SPECULAR:
-            return Texture2D::create_solid_color(aiTextureType_SPECULAR, 0, 0, 0); // black (no specular highlights)
+            return Texture2D::create_solid_color(aiTextureType_SPECULAR, 0, 0, 0, 255, true); // black (no specular highlights)
             
         case aiTextureType::aiTextureType_NORMALS:
-            return Texture2D::create_solid_color(aiTextureType_NORMALS, 128, 128, 255);  // flat normal (0,0,1)
+            return Texture2D::create_solid_color(aiTextureType_NORMALS, 128, 128, 255, 255, true);  // flat normal (0,0,1)
             
         case aiTextureType::aiTextureType_AMBIENT:
-            return Texture2D::create_solid_color(aiTextureType_AMBIENT, 255, 255, 255);  // white (full ambient light)
+            return Texture2D::create_solid_color(aiTextureType_AMBIENT, 255, 255, 255, 255, true);  // white (full ambient light)
             
         case aiTextureType::aiTextureType_HEIGHT:
-            return Texture2D::create_solid_color(aiTextureType_HEIGHT, 128, 128, 128);   // mid-gray (neutral height)
+            return Texture2D::create_solid_color(aiTextureType_HEIGHT, 128, 128, 255, 255, true);   // mid-gray (neutral height)
 
         case aiTextureType::aiTextureType_DISPLACEMENT:
-            return Texture2D::create_solid_color(aiTextureType_DISPLACEMENT, 0, 0, 0);
+            return Texture2D::create_solid_color(aiTextureType_DISPLACEMENT, 0, 0, 0, 255, true);
             
         default:
             spdlog::error("Absent fallback texture for passed type={}", helpers::texture_type_name(type).data());

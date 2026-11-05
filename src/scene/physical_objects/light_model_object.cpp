@@ -2,13 +2,21 @@
 #include "scene/lights/light_base.h"
 #include "assimp_wrapper/model_loader.h"
 
+using namespace scene;
 using namespace scene::physical_objects;
 using namespace physical_light_object_constants;
 
-LightModelObject::LightModelObject(assimp_wrapper::model_t&& loaded_model, const std::string& object_name, glm::vec3 color, const std::shared_ptr<Shader>& shader)
+LightModelObject::LightModelObject(
+    assimp_wrapper::model_t&& loaded_model, 
+    const std::string& object_name, 
+    glm::vec3 color, 
+    const std::shared_ptr<Shader>& g_path_shader,
+    const std::shared_ptr<Shader>& shader
+)
     : PhysicalObject()
     , model_(std::move(loaded_model))
     , name_(object_name)
+    , g_path_shader_(g_path_shader)
     , shader_(shader)
     , color_(1.0f, 1.0f, 1.0f)
 {
@@ -33,6 +41,11 @@ void LightModelObject::set_shader(const std::shared_ptr<Shader> &shader)
 std::shared_ptr<Shader> LightModelObject::get_shader() const
 {
     return shader_;
+}
+
+std::shared_ptr<Shader> scene::physical_objects::LightModelObject::get_geometry_path_shader() const
+{
+    return g_path_shader_;
 }
 
 std::string LightModelObject::get_name() const
@@ -60,6 +73,11 @@ void LightModelObject::render(GLenum draw_mode, bool render_transparent_meshes, 
             mesh.render(draw_mode);
         }
     }
+}
+
+void scene::physical_objects::LightModelObject::render_geometry_path(GLenum draw_mode) const
+{
+    render(draw_mode, false, g_path_shader_);
 }
 
 assimp_wrapper::ModelType LightModelObject::model_type() const

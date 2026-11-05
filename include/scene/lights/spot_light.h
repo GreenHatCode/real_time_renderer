@@ -64,7 +64,7 @@ namespace scene::lights
         glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override;
 
         void set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject>& value);
-        std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
+        std::shared_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };
 
 } // namespace scene::lights

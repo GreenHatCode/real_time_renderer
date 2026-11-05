@@ -116,7 +116,7 @@ void renderer::Renderer::build_rendering_queues()
         }
     }
 
-    for (const auto &obj : scene_->get_objects())
+    for (const auto &obj : scene_->get_model_objects())
     {
         switch (obj->model_type())
         {
@@ -206,6 +206,37 @@ void renderer::Renderer::do_shadow_map_render()
 void renderer::Renderer::do_geometry_path_render()
 {
     // render all opaque MESHES except lights
+    g_buffer_.rescale(framebuffer_width_, framebuffer_height_);
+    g_buffer_.bind();
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    glDisable(GL_BLEND);
+    for (const auto& obj: opaque_objects_) {
+        use_shader(obj.obj_ptr->get_geometry_path_shader());
+        obj.obj_ptr->render_geometry_path(obj.draw_mode); 
+    }
+    glEnable(GL_BLEND);
+
+    g_buffer_.unbind();
+}
+
+void renderer::Renderer::do_color_path_render()
+{
+    // glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    // use_shader(scene_->get_internal_shader(scene::InternalShadersIDS::GEOMETRY_PATH_SHADER));
+
+}
+
+void renderer::Renderer::do_forward_path_render()
+{
+
+
+
+
 
 
 }
@@ -279,29 +310,12 @@ void renderer::Renderer::render_transparent_scene_objects()
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
         for (const auto& obj: transparent_objects_) {
             use_shader(obj.obj_ptr);
-            if (obj.obj_ptr->is_selected()) {
-                render_scene_object_with_outline(obj); 
-            }
-            else {
-                obj.obj_ptr->render(obj.draw_mode, false); 
-            }      
-        }
-
-        for (const auto& obj: transparent_objects_) {
-            use_shader(obj.obj_ptr);
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(obj.draw_mode, true); 
             glDepthMask(GL_TRUE);
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
-        for (const auto& obj: transparent_objects_) {
-            use_shader(obj.obj_ptr);
-            obj.obj_ptr->render(obj.draw_mode, false); 
-            use_shader(processing_shader);
-            obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
-        }
-
         for (const auto& obj: transparent_objects_) {
             glDepthMask(GL_FALSE);
             use_shader(obj.obj_ptr);
@@ -315,10 +329,6 @@ void renderer::Renderer::render_transparent_scene_objects()
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         use_shader(processing_shader);
         for (const auto& obj: transparent_objects_) {
-            obj.obj_ptr->render(obj.draw_mode, false, processing_shader);     
-        }
-
-        for (const auto& obj: transparent_objects_) {
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(obj.draw_mode, true, processing_shader); 
             glDepthMask(GL_TRUE);
@@ -328,6 +338,7 @@ void renderer::Renderer::render_transparent_scene_objects()
 
 void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 {
+    // todo: fix outline
     use_shader(obj.obj_ptr);
 
     // render normal object with writing to stencil buffer
@@ -435,18 +446,16 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
 
 
     // render
-    do_shadow_map_render();
-
+    // do_shadow_map_render();
     do_geometry_path_render();
-
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.enable_off_sceen_rendering(framebuffer_width_, framebuffer_height_);
     }
 
-    // do_color_path_render();
+    do_color_path_render();
     do_render();
-    // do_forward_render(); // transparent objects and light physical objects
+    do_forward_path_render(); // transparent objects and light physical objects
 
     if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.do_post_process(post_processing_type_);

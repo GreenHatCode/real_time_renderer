@@ -2,11 +2,17 @@
 
 using namespace scene::physical_objects;
 
-ModelObject::ModelObject(assimp_wrapper::model_t&& loaded_model, const std::string& object_name, const std::shared_ptr<Shader>& shader)
+ModelObject::ModelObject(
+    assimp_wrapper::model_t&& loaded_model, 
+    const std::string& object_name, 
+    const std::shared_ptr<Shader>& g_path_shader,
+    const std::shared_ptr<Shader>& shader
+)
     : PhysicalObject()
     , model_(std::move(loaded_model))
-    , name_(object_name)
+    , g_path_shader_(g_path_shader)
     , shader_(shader)
+    , name_(object_name)
 {
 }
 
@@ -28,6 +34,11 @@ void ModelObject::set_shader(const std::shared_ptr<Shader> &shader)
 std::shared_ptr<Shader> ModelObject::get_shader() const
 {
     return shader_;
+}
+
+std::shared_ptr<Shader> scene::physical_objects::ModelObject::get_geometry_path_shader() const
+{
+    return g_path_shader_;
 }
 
 std::string ModelObject::get_name() const
@@ -55,6 +66,11 @@ void ModelObject::render(GLenum draw_mode, bool render_transparent_meshes, const
         }
     }
 
+}
+
+void scene::physical_objects::ModelObject::render_geometry_path(GLenum draw_mode) const
+{
+    render(draw_mode, false, g_path_shader_);
 }
 
 assimp_wrapper::ModelType ModelObject::model_type() const

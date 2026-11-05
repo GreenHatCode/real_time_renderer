@@ -9,7 +9,7 @@ namespace scene::lights
         glm::vec3 position_;
         std::string name_;
         LightType type_;
-        std::weak_ptr<scene::physical_objects::LightModelObject> light_sphere_;
+        std::shared_ptr<scene::physical_objects::LightModelObject> light_sphere_;
 
         // attenuation parameters
         float constant_;
@@ -25,7 +25,7 @@ namespace scene::lights
     public:
         PointLight(
             const std::string& name, 
-            const std::weak_ptr<scene::physical_objects::LightModelObject>& sphere_model = {}, 
+            const std::shared_ptr<scene::physical_objects::LightModelObject>& sphere_model = {}, 
             glm::vec3 ambient = glm::vec3(0.05f, 0.05f, 0.05f), 
             glm::vec3 diffuse = glm::vec3(0.8f, 0.8f, 0.8f), 
             glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f), 
@@ -51,8 +51,8 @@ namespace scene::lights
         glm::mat4 projection_matrix(float framebuffer_width, float framebuffer_height) const override;
 
 
-        void set_model_ptr(const std::weak_ptr<scene::physical_objects::LightModelObject>& value);
-        std::weak_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
+        void set_model_ptr(const std::shared_ptr<scene::physical_objects::LightModelObject>& value);
+        std::shared_ptr<scene::physical_objects::LightModelObject> get_model_ptr() const;
     };
 
 } // namespace scene::lights

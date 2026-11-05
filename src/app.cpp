@@ -264,11 +264,15 @@ void App::load_sources_debug()
     // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj", 0);
     imgui_window_->load_model("assimp", "bread", "resources/bread_normal_mapping/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(100.0f));
 
-    // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj");
+    imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj", 0);
     // imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
     // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
     // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT);
+
+#if 1
+        imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
+#else
     imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
     imgui_window_->add_light("dir2",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.8f, -1.0f,  0.6f), glm::vec3(0.0f));
     imgui_window_->add_light("dir3",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.3f, -1.0f,  0.9f), glm::vec3(0.0f));
@@ -297,7 +301,7 @@ void App::load_sources_debug()
             glm::vec3(static_cast<float>(i) * 2.0f, 3.0f, 0.0f) // Spaced out position
         );
     }
-
+#endif
 }
 
 int32_t App::run()

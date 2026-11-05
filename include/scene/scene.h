@@ -14,7 +14,9 @@ namespace scene
 {
     enum class InternalShadersIDS {
         SHADOW_MAP_EMPTY_FRAG_SHADER, 
-        SHADOW_MAP_POINT_LIGHT_SHADER
+        SHADOW_MAP_POINT_LIGHT_SHADER,
+        GEOMETRY_PATH_SHADER,
+        GEOMETRY_PATH_WITH_HEIGHT_MAP_SHADER
     };
 
     class Scene {
@@ -28,7 +30,8 @@ namespace scene
         
     private:
 
-        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> physical_objects_;
+        std::vector<std::shared_ptr<scene::physical_objects::ModelObject>> model_objects_;
+        std::vector<std::shared_ptr<scene::physical_objects::LightModelObject>> light_model_objects_;
         std::vector<internal_physical_object> internal_physical_objects_;
         std::vector<std::shared_ptr<scene::lights::LightBase>> lights_;
         std::vector<std::shared_ptr<Shader>> shaders_;
@@ -39,18 +42,21 @@ namespace scene
 
     public:
         Scene();
-        void add_object(const std::shared_ptr<scene::physical_objects::PhysicalObject>& ptr);
+        void add_object(const std::shared_ptr<scene::physical_objects::ModelObject>& ptr);
+        void add_object(const std::shared_ptr<scene::physical_objects::LightModelObject>& ptr);
         void add_light(const std::shared_ptr<scene::lights::LightBase>& ptr);
         void add_shader(const std::shared_ptr<Shader>& ptr);
         bool delete_scene_object(const std::string& name);
         bool delete_shader(const std::string &name);
 
-        std::vector<std::shared_ptr<scene::physical_objects::PhysicalObject>> get_objects() const; // returns scene physical objects that the user can edit
+        std::vector<std::shared_ptr<scene::physical_objects::ModelObject>> get_model_objects() const;
+        std::vector<std::shared_ptr<scene::physical_objects::LightModelObject>> get_light_objects() const;
+
         std::vector<internal_physical_object> get_internal_objects() const;
         std::vector<std::shared_ptr<scene::lights::LightBase>> get_lights() const;
         std::vector<std::shared_ptr<Shader>> get_shaders() const;
-        std::shared_ptr<scene::physical_objects::PhysicalObject> get_object(const std::string &name) const;
         std::shared_ptr<scene::lights::LightBase> get_light(const std::string &name) const;
+
         std::shared_ptr<Shader> get_shader(const std::string& name) const;
         std::shared_ptr<Shader> get_internal_shader(InternalShadersIDS id) const;
 

@@ -37,7 +37,9 @@ void Material::bind(Shader& shader) const {
     if (ambient_texture_) glBindTextureUnit(5, ambient_texture_->id());
     if (diffuse_texture_) glBindTextureUnit(6, diffuse_texture_->id());
     if (specular_texture_) glBindTextureUnit(7, specular_texture_->id());
+
     if (height_texture_) glBindTextureUnit(8, height_texture_->id());
+    if (height_texture_->is_fallback_used()) shader.set_uniform("u_texture_height_fallback_used", true);
 
 }
 
