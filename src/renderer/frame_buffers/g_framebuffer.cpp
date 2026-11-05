@@ -21,7 +21,7 @@ renderer::framebuffers::GFrameBuffer::~GFrameBuffer()
 
 void renderer::framebuffers::GFrameBuffer::delete_buffers()
 {
-    glDeleteTextures(1, &texture_color_);
+    glDeleteTextures(1, &texture_position_);
     glDeleteTextures(1, &texture_normal_);
     glDeleteTextures(1, &texture_albedospec_);
     glDeleteRenderbuffers(1, &rbo_);
@@ -29,13 +29,13 @@ void renderer::framebuffers::GFrameBuffer::delete_buffers()
 
 void renderer::framebuffers::GFrameBuffer::create_buffers()
 {
-    glCreateTextures(GL_TEXTURE_2D, 1, &texture_color_);
-    glTextureStorage2D(texture_color_, 1, GL_RGBA16F, width_, height_);
-    glTextureParameteri(texture_color_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTextureParameteri(texture_color_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glCreateTextures(GL_TEXTURE_2D, 1, &texture_position_);
+    glTextureStorage2D(texture_position_, 1, GL_RGBA32F, width_, height_);
+    glTextureParameteri(texture_position_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(texture_position_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &texture_normal_);
-    glTextureStorage2D(texture_normal_, 1, GL_RGBA16F, width_, height_);
+    glTextureStorage2D(texture_normal_, 1, GL_RGBA32F, width_, height_);
     glTextureParameteri(texture_normal_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(texture_normal_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -49,9 +49,17 @@ void renderer::framebuffers::GFrameBuffer::create_buffers()
 
 
     // attach buffer to framebuffer
-    glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_color_, 0);
+    glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_position_, 0);
     glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT1, texture_normal_, 0);
     glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT2, texture_albedospec_, 0);
+
+    constexpr GLenum draw_buffers[] = { 
+        GL_COLOR_ATTACHMENT0, 
+        GL_COLOR_ATTACHMENT1, 
+        GL_COLOR_ATTACHMENT2 
+    };
+    glNamedFramebufferDrawBuffers(fbo_, 3, draw_buffers);
+
     glNamedFramebufferRenderbuffer(fbo_, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
     check_fbo_status();
@@ -102,7 +110,7 @@ void renderer::framebuffers::GFrameBuffer::check_fbo_status()
 
 GLuint renderer::framebuffers::GFrameBuffer::get_color_buffer_texture()
 {
-    return texture_color_;
+    return texture_position_;
 }
 
 GLuint renderer::framebuffers::GFrameBuffer::get_normal_buffer_texture()

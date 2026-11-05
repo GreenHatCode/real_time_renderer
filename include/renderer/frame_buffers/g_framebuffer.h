@@ -29,7 +29,7 @@ namespace renderer
             void check_fbo_status();
 
             GLuint fbo_;
-            GLuint texture_color_;
+            GLuint texture_position_;
             GLuint texture_normal_;
             GLuint texture_albedospec_;
             GLuint rbo_;
