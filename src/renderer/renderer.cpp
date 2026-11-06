@@ -115,15 +115,25 @@ void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shade
 
 void renderer::Renderer::build_rendering_queues()
 {
-    opaque_objects_.clear();
-    transparent_objects_.clear();
+    opaque_objects_render_queue_.clear();
+    transparent_objects_render_queue_.clear();
+    forward_render_render_queue_.clear();
 
+    // special objects
     for (const auto &obj : scene_->get_internal_objects()) {
         if (internal_objects_id_mask_ & obj.id) {
             obj.ptr->move(glm::vec3(camera_position_.x, obj.ptr->get_move_vector().y, camera_position_.z));
             
-            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj.ptr, .distance_to_viewer=0.0f, .draw_mode=obj.draw_mode});
+            if (obj.id == renderer::defaults::XZ_FACE_SOLID_ID) // opaque plane where shadows can be rendered
+                opaque_objects_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj.ptr, .distance_to_viewer=0.0f, .draw_mode=obj.draw_mode});
+            else 
+                forward_render_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj.ptr, .distance_to_viewer=0.0f, .draw_mode=obj.draw_mode});
         }
+    }
+
+    // lights models
+    for (auto&& obj : scene_->get_light_objects()) {
+        forward_render_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
     }
 
     for (const auto &obj : scene_->get_model_objects())
@@ -131,19 +141,19 @@ void renderer::Renderer::build_rendering_queues()
         switch (obj->model_type())
         {
         case assimp_wrapper::ModelType::OPAQUE:
-            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+            opaque_objects_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
             break;
         case assimp_wrapper::ModelType::TRANSPARENT:
         {
             float distance = glm::length2(camera_position_ - obj->get_move_vector());
-            transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+            transparent_objects_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
         }
             break;
         case assimp_wrapper::ModelType::OPAQUE_AND_TRANSPARENT:
         {
             float distance = glm::length2(camera_position_ - obj->get_move_vector());
-            transparent_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
-            opaque_objects_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+            transparent_objects_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=distance, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+            opaque_objects_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
         }
             break;
         
@@ -155,8 +165,8 @@ void renderer::Renderer::build_rendering_queues()
     }
 
     std::sort(
-        transparent_objects_.begin(), 
-        transparent_objects_.end(), 
+        transparent_objects_render_queue_.begin(), 
+        transparent_objects_render_queue_.end(), 
         [](const RenderQueueObject& lhs, const RenderQueueObject& rhs) 
         { 
             return lhs.distance_to_viewer > rhs.distance_to_viewer; 
@@ -224,7 +234,7 @@ void renderer::Renderer::do_geometry_path_render()
 
     glDisable(GL_BLEND);
     std::shared_ptr<Shader> sh = nullptr;
-    for (const auto& obj: opaque_objects_) {
+    for (const auto& obj: opaque_objects_render_queue_) {
         sh = obj.obj_ptr->get_geometry_path_shader();
         sh->use();
 
@@ -258,23 +268,13 @@ void renderer::Renderer::do_forward_path_render()
     g_buffer_.blit_depth_to_default_buffer(framebuffer_width_, framebuffer_height_);
    
     // render lights
-    for (auto&& obj : scene_->get_light_objects()) {
-        use_shader(obj->get_shader());
-        obj->render(assimp_wrapper::DEFAULT_DRAW_MODE, false);
-        obj->render(assimp_wrapper::DEFAULT_DRAW_MODE, true);
+    for (auto&& obj : forward_render_render_queue_) {
+        use_shader(obj.obj_ptr->get_shader());
+        obj.obj_ptr->render(obj.draw_mode, false);
+        obj.obj_ptr->render(obj.draw_mode, true);
     }
-   
+
     render_transparent_scene_objects();
-
-
-
-}
-
-void renderer::Renderer::do_render()
-{
-
-    // render_opaque_scene_objects();
-    // render_transparent_scene_objects();
 }
 
 void renderer::Renderer::use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
@@ -303,7 +303,7 @@ void renderer::Renderer::use_shader(const std::shared_ptr<Shader> &shader_ptr)
 void Renderer::render_opaque_scene_objects()
 {
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
-        for (const auto& obj: opaque_objects_) {
+        for (const auto& obj: opaque_objects_render_queue_) {
             use_shader(obj.obj_ptr);
             if (obj.obj_ptr->is_selected()) {
                 render_scene_object_with_outline(obj); 
@@ -314,7 +314,7 @@ void Renderer::render_opaque_scene_objects()
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
-        for (const auto& obj: opaque_objects_) {
+        for (const auto& obj: opaque_objects_render_queue_) {
             use_shader(obj.obj_ptr);
             obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
             use_shader(processing_shader);
@@ -323,7 +323,7 @@ void Renderer::render_opaque_scene_objects()
     } else {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         use_shader(processing_shader);
-        for (const auto& obj: opaque_objects_) {
+        for (const auto& obj: opaque_objects_render_queue_) {
             obj.obj_ptr->render(obj.draw_mode, false, processing_shader);
         } 
     }
@@ -335,7 +335,7 @@ void renderer::Renderer::render_transparent_scene_objects()
     // the model can contain only transparent meshes,
     // but can contain a mix of opaque and transparent
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
-        for (const auto& obj: transparent_objects_) {
+        for (const auto& obj: transparent_objects_render_queue_) {
             use_shader(obj.obj_ptr);
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(obj.draw_mode, true); 
@@ -343,7 +343,7 @@ void renderer::Renderer::render_transparent_scene_objects()
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
-        for (const auto& obj: transparent_objects_) {
+        for (const auto& obj: transparent_objects_render_queue_) {
             glDepthMask(GL_FALSE);
             use_shader(obj.obj_ptr);
             obj.obj_ptr->render(obj.draw_mode, true); 
@@ -355,7 +355,7 @@ void renderer::Renderer::render_transparent_scene_objects()
     } else {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         use_shader(processing_shader);
-        for (const auto& obj: transparent_objects_) {
+        for (const auto& obj: transparent_objects_render_queue_) {
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(obj.draw_mode, true, processing_shader); 
             glDepthMask(GL_TRUE);
@@ -419,16 +419,16 @@ void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // render opaque objects (without anything)
-        for (const auto& obj: opaque_objects_) {
+        for (const auto& obj: opaque_objects_render_queue_) {
             obj.obj_ptr->render(obj.draw_mode, false, shader_ptr); 
         }
 
         // render transparent objects (in two steps)
-        for (const auto& obj: transparent_objects_) {
+        for (const auto& obj: transparent_objects_render_queue_) {
             obj.obj_ptr->render(obj.draw_mode, false, shader_ptr);       
         }
 
-        for (const auto& obj: transparent_objects_) {
+        for (const auto& obj: transparent_objects_render_queue_) {
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(obj.draw_mode, true, shader_ptr); 
             glDepthMask(GL_TRUE);

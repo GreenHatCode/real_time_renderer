@@ -36,8 +36,9 @@ namespace renderer {
 
         framebuffers::GFrameBuffer g_buffer_;
 
-        std::vector<RenderQueueObject> opaque_objects_;
-        std::vector<RenderQueueObject> transparent_objects_;
+        std::vector<RenderQueueObject> opaque_objects_render_queue_;
+        std::vector<RenderQueueObject> transparent_objects_render_queue_;
+        std::vector<RenderQueueObject> forward_render_render_queue_;
 
         uint8_t internal_objects_id_mask_;
 
