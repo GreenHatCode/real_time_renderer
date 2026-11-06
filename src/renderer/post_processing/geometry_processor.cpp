@@ -6,9 +6,9 @@ renderer::GeometryProcessor::GeometryProcessor()
         GeometryProcessingTypes::NORMALS_VISUALIZATIONS,
         std::make_shared<Shader>(
             "normals_visualization_gs",
-            "shaders_sources/geometry/normals_visualization/vertex_shader.vs",
-            "shaders_sources/geometry/normals_visualization/fragment_shader.fs",
-            "shaders_sources/geometry/normals_visualization/geometry_shader.gs"
+            "shaders_sources/internal/deferred_rendering/geometry_path.vert",
+            "shaders_sources/geometry/normals_visualization.fs",
+            "shaders_sources/geometry/normals_visualization.gs"
         )
     );
 
@@ -16,9 +16,9 @@ renderer::GeometryProcessor::GeometryProcessor()
         GeometryProcessingTypes::WIREFRAME_VISUALIZATION,
         std::make_shared<Shader>(
             "wireframe_visualization_gs",
-            "shaders_sources/geometry/wireframe_visualization/vertex_shader.vs",
-            "shaders_sources/geometry/wireframe_visualization/fragment_shader.fs",
-            "shaders_sources/geometry/wireframe_visualization/geometry_shader.gs"
+            "shaders_sources/internal/deferred_rendering/geometry_path.vert",
+            "shaders_sources/geometry/wireframe_visualization.fs",
+            "shaders_sources/geometry/wireframe_visualization.gs"
         )
     );
 

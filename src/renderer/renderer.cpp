@@ -235,14 +235,7 @@ void renderer::Renderer::do_geometry_path_render()
     glDisable(GL_BLEND);
     std::shared_ptr<Shader> sh = nullptr;
     for (const auto& obj: opaque_objects_render_queue_) {
-        sh = obj.obj_ptr->get_geometry_path_shader();
-        sh->use();
-
-        sh->set_uniform("u_view_mat", view_mat_);
-        sh->set_uniform("u_projection_mat", projection_mat_);
-        sh->set_uniform("u_camera_pos", camera_position_);
-
-        obj.obj_ptr->render_geometry_path(obj.draw_mode); 
+        render_opaque_scene_objects(); 
     }
     glEnable(GL_BLEND);
 
@@ -279,19 +272,10 @@ void renderer::Renderer::do_forward_path_render()
     render_transparent_scene_objects();
 }
 
-void renderer::Renderer::use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj)
-{
-    std::shared_ptr<Shader> shader_ptr = obj->get_shader();
-    if (shader_ptr == nullptr) {
-        spdlog::warn("Failed to use model's shader, {} hasn't shader", obj->get_name());
-        return;
-    }
-
-    use_shader(shader_ptr);
-}
-
 void renderer::Renderer::use_shader(const std::shared_ptr<Shader> &shader_ptr)
 {
+    if (shader_ptr == nullptr) throw std::runtime_error("Attempt to use shader by nullptr pointer");
+
     if (shader_ptr.get() != curr_shader_ptr_) 
     {
         curr_shader_ptr_ = shader_ptr.get();
@@ -306,19 +290,19 @@ void Renderer::render_opaque_scene_objects()
 {
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
         for (const auto& obj: opaque_objects_render_queue_) {
-            use_shader(obj.obj_ptr);
+            use_shader(obj.obj_ptr->get_geometry_path_shader());
             if (obj.obj_ptr->is_selected()) {
-                render_scene_object_with_outline(obj); 
+                render_scene_object_with_outline(obj); // todo:
             }
             else {
-                obj.obj_ptr->render(obj.draw_mode, false); 
+                obj.obj_ptr->render_geometry_path(obj.draw_mode); 
             }
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         for (const auto& obj: opaque_objects_render_queue_) {
-            use_shader(obj.obj_ptr);
-            obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
+            use_shader(obj.obj_ptr->get_geometry_path_shader());
+            obj.obj_ptr->render_geometry_path(obj.draw_mode); 
             use_shader(processing_shader);
             obj.obj_ptr->render(obj.draw_mode, false, processing_shader); 
         }
@@ -338,7 +322,7 @@ void renderer::Renderer::render_transparent_scene_objects()
     // but can contain a mix of opaque and transparent
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
         for (const auto& obj: transparent_objects_render_queue_) {
-            use_shader(obj.obj_ptr);
+            use_shader(obj.obj_ptr->get_shader());
             glDepthMask(GL_FALSE);
             obj.obj_ptr->render(obj.draw_mode, true); 
             glDepthMask(GL_TRUE);
@@ -347,7 +331,7 @@ void renderer::Renderer::render_transparent_scene_objects()
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
         for (const auto& obj: transparent_objects_render_queue_) {
             glDepthMask(GL_FALSE);
-            use_shader(obj.obj_ptr);
+            use_shader(obj.obj_ptr->get_shader());
             obj.obj_ptr->render(obj.draw_mode, true); 
             use_shader(processing_shader);
             obj.obj_ptr->render(obj.draw_mode, true, processing_shader); 
@@ -368,7 +352,7 @@ void renderer::Renderer::render_transparent_scene_objects()
 void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 {
     // todo: fix outline
-    use_shader(obj.obj_ptr);
+    use_shader(obj.obj_ptr->get_shader());
 
     // render normal object with writing to stencil buffer
     // to mark pixels that we have painted 

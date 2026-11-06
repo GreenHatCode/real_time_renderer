@@ -64,8 +64,6 @@ namespace renderer {
         void do_geometry_path_render();
         void do_color_path_render();
         void do_forward_path_render();
-        void do_render();
-        void use_shader(const std::shared_ptr<const scene::physical_objects::IRender>& obj);
         void use_shader(const std::shared_ptr<Shader> &shader_ptr);
         void render_opaque_scene_objects();
         void render_transparent_scene_objects();
