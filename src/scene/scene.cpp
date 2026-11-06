@@ -40,8 +40,8 @@ scene::Scene::Scene()
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(
             "g_buffer_shader", 
-            "shaders_sources/internal/deferred_rendering/vertex_shader.vert",
-            "shaders_sources/internal/deferred_rendering/fragment_shader.frag"
+            "shaders_sources/internal/deferred_rendering/geometry_path.vert",
+            "shaders_sources/internal/deferred_rendering/geometry_path.frag"
         );
         internal_shaders_.emplace(InternalShadersIDS::GEOMETRY_PATH_SHADER, shader);
 
@@ -52,8 +52,8 @@ scene::Scene::Scene()
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(
             "g_buffer_height_map_shader", 
-            "shaders_sources/internal/deferred_rendering/vertex_shader.vert",
-            "shaders_sources/internal/deferred_rendering/height_map_framgent_shader.frag"
+            "shaders_sources/internal/deferred_rendering/geometry_path.vert",
+            "shaders_sources/internal/deferred_rendering/height_map_geometry_path.frag"
         );
         internal_shaders_.emplace(InternalShadersIDS::GEOMETRY_PATH_WITH_HEIGHT_MAP_SHADER, shader);
 
@@ -64,8 +64,8 @@ scene::Scene::Scene()
     try {
         std::shared_ptr<Shader> shader = std::make_shared<Shader>(
             "color_path_shader", 
-            "shaders_sources/assimp/vertex_shader.vert",
-            "shaders_sources/assimp/fragment_shader.frag"
+            "shaders_sources/internal/deferred_rendering/color_path.vert",
+            "shaders_sources/internal/deferred_rendering/color_path.frag"
         );
         internal_shaders_.emplace(InternalShadersIDS::COLOR_PATH_SHADER, shader);
 
