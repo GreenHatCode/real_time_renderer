@@ -14,7 +14,7 @@ namespace renderer
             GFrameBuffer(GFrameBuffer&& rhs) = delete;
             GFrameBuffer& operator=(GFrameBuffer&& rhs) = delete;
 
-            void blit_depth_to_default_buffer(GLsizei width, GLsizei height);
+            void blit_depth_to_framebuffer(GLsizei width, GLsizei height, GLint framebuffer_id);
             GLuint get_position_buffer_texture();
             GLuint get_normal_buffer_texture();
             GLuint get_albedospec_buffer_texture();

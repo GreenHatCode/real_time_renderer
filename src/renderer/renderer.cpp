@@ -265,7 +265,9 @@ void renderer::Renderer::do_color_path_render()
 void renderer::Renderer::do_forward_path_render()
 {
     // copy depth buffer from g-buffer
-    g_buffer_.blit_depth_to_default_buffer(framebuffer_width_, framebuffer_height_);
+    GLint fbo_id;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fbo_id);
+    g_buffer_.blit_depth_to_framebuffer(framebuffer_width_, framebuffer_height_, fbo_id);
    
     // render lights
     for (auto&& obj : forward_render_render_queue_) {

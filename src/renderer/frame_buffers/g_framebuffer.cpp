@@ -108,13 +108,13 @@ void renderer::framebuffers::GFrameBuffer::check_fbo_status()
 	}
 }
 
-void renderer::framebuffers::GFrameBuffer::blit_depth_to_default_buffer(GLsizei width, GLsizei height)
+void renderer::framebuffers::GFrameBuffer::blit_depth_to_framebuffer(GLsizei width, GLsizei height, GLint framebuffer_id)
 {
     if (width_ != width || height_ != height) 
         spdlog::warn("GFrameBuffer: incoming width or height for blitting depth are not equal to internal: width_={}, width={}, height_={}, height={}", width_, width, height_, height);
 
     glBlitNamedFramebuffer(
-        fbo_, 0, 
+        fbo_, framebuffer_id, 
         0, 0, width_, height_, 
         0, 0, width, height, 
         GL_DEPTH_BUFFER_BIT, GL_NEAREST

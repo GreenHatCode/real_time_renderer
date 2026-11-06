@@ -15,7 +15,7 @@ renderer::framebuffers::FrameBuffer::FrameBuffer(GLsizei width, GLsizei height)
 	glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_, 0);
 
 	glCreateRenderbuffers(1, &rbo_);
-	glNamedRenderbufferStorage(rbo_, GL_DEPTH32F_STENCIL8, width_, height_);
+	glNamedRenderbufferStorage(rbo_, GL_DEPTH24_STENCIL8, width_, height_);
 	glNamedFramebufferRenderbuffer(fbo_, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
 	GLenum status = glCheckNamedFramebufferStatus(fbo_, GL_FRAMEBUFFER);
@@ -91,7 +91,7 @@ void renderer::framebuffers::FrameBuffer::rescale(GLsizei width, GLsizei height)
 	glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_, 0);
 
 	glCreateRenderbuffers(1, &rbo_);
-	glNamedRenderbufferStorage(rbo_, GL_DEPTH32F_STENCIL8, width_, height_);
+	glNamedRenderbufferStorage(rbo_, GL_DEPTH24_STENCIL8, width_, height_);
 	glNamedFramebufferRenderbuffer(fbo_, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
 }
