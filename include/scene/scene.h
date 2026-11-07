@@ -17,7 +17,8 @@ namespace scene
         SHADOW_MAP_POINT_LIGHT_SHADER,
         GEOMETRY_PATH_SHADER,
         GEOMETRY_PATH_WITH_HEIGHT_MAP_SHADER,
-        COLOR_PATH_SHADER
+        COLOR_PATH_SHADER,
+        OUTLINE_SHADER
     };
 
     class Scene {

@@ -44,7 +44,6 @@ in vec3 v_frag_pos;
 out vec4 FragColor;
 
 uniform vec4 u_base_color;
-uniform float u_opacity;
 uniform vec3 u_camera_pos;
 
 uniform DirectionalLight directional_lights[MAX_LIGHTS];
@@ -68,7 +67,7 @@ void main() {
     vec3 spot_lights_color = process_spot_lights(v_normal, view_dir);
 
     vec3 result = (direction_lights_color + point_lights_color + spot_lights_color) * vec3(u_base_color);
-    FragColor = vec4(result, u_opacity);
+    FragColor = vec4(result, u_base_color.a);
 }
 
 vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir) {

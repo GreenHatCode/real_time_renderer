@@ -73,7 +73,17 @@ scene::Scene::Scene()
         spdlog::error("Failed to load internal shader: {}, what: {}", "color_path_shader", e.what());
     }
 
+    try {
+        std::shared_ptr<Shader> shader = std::make_shared<Shader>(
+            "stencil_outline_shader", 
+            "shaders_sources/stencil_outline/stencil_outline.vs",
+            "shaders_sources/stencil_outline/stencil_outline.fs"
+        );
+        internal_shaders_.emplace(InternalShadersIDS::OUTLINE_SHADER, shader);
 
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load internal shader: {}, what: {}", "stencil_outline_shader", e.what());
+    }
 
 
 

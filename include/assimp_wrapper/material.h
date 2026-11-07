@@ -10,7 +10,6 @@ namespace assimp_wrapper {
 
     class Material final {
         glm::vec4 color_;
-        float opacity_;
         
         // textures
         std::shared_ptr<Texture2D> ambient_texture_;
@@ -23,7 +22,6 @@ namespace assimp_wrapper {
 
         Material(
             const glm::vec4& color, 
-            float opacity,
             std::shared_ptr<Texture2D> ambient_texture,
             std::shared_ptr<Texture2D> diffuse_texture,
             std::shared_ptr<Texture2D> specular_texture,

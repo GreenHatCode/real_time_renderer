@@ -46,7 +46,6 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
 
     // OpenGL configuration
     glEnable(GL_DEPTH_TEST);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -138,6 +137,11 @@ void renderer::Renderer::build_rendering_queues()
 
     for (const auto &obj : scene_->get_model_objects())
     {
+        if (obj->is_selected()) {
+            forward_render_render_queue_.emplace_back(RenderQueueObject{.obj_ptr=obj, .distance_to_viewer=0.0f, .draw_mode=assimp_wrapper::DEFAULT_DRAW_MODE});
+            continue;
+        }
+
         switch (obj->model_type())
         {
         case assimp_wrapper::ModelType::OPAQUE:
@@ -230,13 +234,10 @@ void renderer::Renderer::do_geometry_path_render()
     g_buffer_.bind();
 
     glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_BLEND);
-    std::shared_ptr<Shader> sh = nullptr;
-    for (const auto& obj: opaque_objects_render_queue_) {
-        render_opaque_scene_objects(); 
-    }
+    render_opaque_scene_objects();
     glEnable(GL_BLEND);
 
     g_buffer_.unbind();
@@ -264,6 +265,12 @@ void renderer::Renderer::do_forward_path_render()
    
     // render lights
     for (auto&& obj : forward_render_render_queue_) {
+        
+        if (obj.obj_ptr->is_selected()) {
+            render_scene_object_with_outline(obj); 
+            continue;
+        }
+
         use_shader(obj.obj_ptr->get_shader());
         obj.obj_ptr->render(obj.draw_mode, false);
         obj.obj_ptr->render(obj.draw_mode, true);
@@ -290,11 +297,11 @@ void Renderer::render_opaque_scene_objects()
 {
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
         for (const auto& obj: opaque_objects_render_queue_) {
-            use_shader(obj.obj_ptr->get_geometry_path_shader());
             if (obj.obj_ptr->is_selected()) {
-                render_scene_object_with_outline(obj); // todo:
+                // render_scene_object_with_outline(obj);
             }
             else {
+                use_shader(obj.obj_ptr->get_geometry_path_shader());
                 obj.obj_ptr->render_geometry_path(obj.draw_mode); 
             }
         }
@@ -351,41 +358,25 @@ void renderer::Renderer::render_transparent_scene_objects()
 
 void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 {
-    // todo: fix outline
-    use_shader(obj.obj_ptr->get_shader());
-
+    glClear(GL_STENCIL_BUFFER_BIT);
+    std::shared_ptr<Shader> shader_ptr = obj.obj_ptr->get_shader();
+    
     // render normal object with writing to stencil buffer
     // to mark pixels that we have painted 
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
     glStencilMask(0xFF); // allow writing to stencil buffer
+    use_shader(shader_ptr);
     obj.obj_ptr->render(obj.draw_mode, false);
-
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glDepthMask(GL_FALSE);
     obj.obj_ptr->render(obj.draw_mode, true);
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glDepthMask(GL_TRUE);
 
     // select outline shader
-    std::shared_ptr<Shader> shader_ptr = scene_->get_shader(std::string(defaults::OUTLINE_SHADER_NAME.data()));
-    if (shader_ptr == nullptr) {
-        spdlog::warn("Scene hasn't shader {} to draw outline, skipping rendering model {}", defaults::OUTLINE_SHADER_NAME.data(), obj.obj_ptr->get_name());
-        return;
-    }
-    curr_shader_ptr_ = shader_ptr.get();
-    shader_ptr->use();
-
-    set_general_shader_uniforms(shader_ptr);
-    set_lighting_shader_uniforms(shader_ptr);
-    shader_ptr->set_uniform("u_outline_width", defaults::OUTLINE_WIDTH);
-    shader_ptr->set_uniform("u_outline_color", defaults::OUTLINE_COLOR);
+    shader_ptr = scene_->get_internal_shader(scene::InternalShadersIDS::OUTLINE_SHADER);
+    if (shader_ptr == nullptr) return;
+    use_shader(shader_ptr);
 
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // discards all fragments whose stencil value is equeal to 1 (we have already drawn a normal model there)
     glStencilMask(0x00); // prevent writing to stencil buffer
 
-#ifdef MERGED_OUTLINES
-    glDepthMask(GL_FALSE);
-#endif
     // render object outline
     obj.obj_ptr->render(obj.draw_mode, false, shader_ptr);
     obj.obj_ptr->render(obj.draw_mode, true, shader_ptr);
@@ -393,10 +384,6 @@ void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
     // return stencil settings to default
     glStencilMask(0xFF); // allow writing to stencil buffer
     glStencilFunc(GL_ALWAYS, 1, 0xFF); // doesn't discard any fragment
-
-#ifdef MERGED_OUTLINES
-    glDepthMask(GL_TRUE);
-#endif
 }
 
 void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader> &shader_ptr)

@@ -113,7 +113,7 @@ void ModelLoader::load_materials(const std::filesystem::path &path, const aiScen
 
         aiString mat_name;
         material_ptr->Get(AI_MATKEY_NAME, mat_name);
-        spdlog::info("Loaded Material: {} | Opacity: {}", mat_name.C_Str(), opacity);
+        spdlog::info("Loaded Material: {} | Opacity: {}", mat_name.C_Str(), color.a);
         
         std::shared_ptr<Texture2D> ambient = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_AMBIENT);
         std::shared_ptr<Texture2D> diffuse = manager.load_material_texture(material_ptr, aiTextureType::aiTextureType_DIFFUSE);
@@ -122,7 +122,7 @@ void ModelLoader::load_materials(const std::filesystem::path &path, const aiScen
         
         height_map_flag_ |= !height->is_fallback_used();
 
-        materials_.emplace_back(glm::vec4(color.r, color.g, color.b, color.a), opacity, ambient, diffuse, specular, height);
+        materials_.emplace_back(glm::vec4(color.r, color.g, color.b, color.a), ambient, diffuse, specular, height);
     }
 }
 

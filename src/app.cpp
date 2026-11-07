@@ -81,13 +81,6 @@ void App::load_default_content()
         std::string(scene::physical_objects::physical_light_object_constants::LIGHT_MODEL_OBJECT_FRAGMENT_SHADER)
     );
 
-    imgui_window_->load_shader(
-        std::string(renderer::defaults::OUTLINE_SHADER_NAME), 
-        std::string(renderer::defaults::OUTLINE_VERTEX_SHADER), 
-        std::string(renderer::defaults::OUTLINE_FRAGMENT_SHADER)
-    );
-
-
     spdlog::info("Loaded default content, please do not delete it");
 }
 
@@ -269,11 +262,12 @@ void App::load_sources_debug()
     imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj", 0);
     // imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
-    imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
-    imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 15.0f, 50.0f));
 
 #if 1
-        imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
+    // imgui_window_->add_light("s1", scene::lights::LightType::SPOT_LIGHT);
+    // imgui_window_->add_light("p1", scene::lights::LightType::POINT_LIGHT, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 15.0f, 50.0f));
+
+    imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
 #else
     imgui_window_->add_light("dir1",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 1.0f, -1.0f,  0.0f), glm::vec3(0.0f));
     imgui_window_->add_light("dir2",  scene::lights::LightType::DIRECTIONAL_LIGHT, glm::vec3( 0.8f, -1.0f,  0.6f), glm::vec3(0.0f));

@@ -6,14 +6,12 @@ using namespace renderer;
 
 assimp_wrapper::Material::Material(
     const glm::vec4 &color
-    , float opacity
     , std::shared_ptr<Texture2D> ambient_texture
     , std::shared_ptr<Texture2D> diffuse_texture
     , std::shared_ptr<Texture2D> specular_texture
     , std::shared_ptr<Texture2D> height_texture
 )
     : color_(color)
-    , opacity_(opacity)
     , ambient_texture_(ambient_texture)
     , diffuse_texture_(diffuse_texture)
     , specular_texture_(specular_texture)
@@ -23,13 +21,12 @@ assimp_wrapper::Material::Material(
 
 float assimp_wrapper::Material::get_opacity() const
 {
-    return opacity_;
+    return color_.a;
 }
 
 void Material::bind(Shader& shader) const {
 
     shader.set_uniform("u_base_color", color_);
-    shader.set_uniform("u_opacity", opacity_);
 
     shader.set_uniform("texture_ambient", bind_texture_units::AMBIENT_TEXTURE_TEXTURE_UNIT);
     shader.set_uniform("texture_diffuse", bind_texture_units::DIFFUSE_TEXTURE_TEXTURE_UNIT);
