@@ -78,8 +78,8 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     glBindTextureUnit(bind_texture_units::FRAG_NORMAL_TEXTURE_UNIT, g_buffer_.get_normal_buffer_texture());
     shader_ptr->set_uniform("frag_color_texture", bind_texture_units::FRAG_COLOR_TEXTURE_UNIT);
     glBindTextureUnit(bind_texture_units::FRAG_COLOR_TEXTURE_UNIT, g_buffer_.get_albedospec_buffer_texture());
-  
-
+    shader_ptr->set_uniform("depth_buffer_texture", bind_texture_units::DEPTH_BUFFER_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::DEPTH_BUFFER_TEXTURE_UNIT, g_buffer_.get_depth_map_texture());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -247,7 +247,7 @@ void renderer::Renderer::do_geometry_path_render()
 void renderer::Renderer::do_color_path_render()
 {
     glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     use_shader(scene_->get_internal_shader(scene::InternalShadersIDS::COLOR_PATH_SHADER));
 
@@ -297,13 +297,8 @@ void Renderer::render_opaque_scene_objects()
 {
     if (geometry_processing_type_ == GeometryProcessingTypes::NO_GEOMETRY_PROCESSING) {
         for (const auto& obj: opaque_objects_render_queue_) {
-            if (obj.obj_ptr->is_selected()) {
-                // render_scene_object_with_outline(obj);
-            }
-            else {
-                use_shader(obj.obj_ptr->get_geometry_path_shader());
-                obj.obj_ptr->render_geometry_path(obj.draw_mode); 
-            }
+            use_shader(obj.obj_ptr->get_geometry_path_shader());
+            obj.obj_ptr->render_geometry_path(obj.draw_mode); 
         }
     } else if (geometry_processing_type_ == GeometryProcessingTypes::NORMALS_VISUALIZATIONS) {
         auto processing_shader = geometry_processor_.get_geometry_shader(geometry_processing_type_);
@@ -388,26 +383,26 @@ void Renderer::render_scene_object_with_outline(const RenderQueueObject& obj)
 
 void renderer::Renderer::render_shadow_depth_buffer(const std::shared_ptr<Shader> &shader_ptr)
 {
-        glCullFace(GL_FRONT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
-        // render opaque objects (without anything)
-        for (const auto& obj: opaque_objects_render_queue_) {
-            obj.obj_ptr->render(obj.draw_mode, false, shader_ptr); 
-        }
+    // render opaque objects (without anything)
+    for (const auto& obj: opaque_objects_render_queue_) {
+        obj.obj_ptr->render(obj.draw_mode, false, shader_ptr); 
+    }
 
-        // render transparent objects (in two steps)
-        for (const auto& obj: transparent_objects_render_queue_) {
-            obj.obj_ptr->render(obj.draw_mode, false, shader_ptr);       
-        }
+    // render transparent objects (in two steps)
+    for (const auto& obj: transparent_objects_render_queue_) {
+        obj.obj_ptr->render(obj.draw_mode, false, shader_ptr);       
+    }
 
-        for (const auto& obj: transparent_objects_render_queue_) {
-            glDepthMask(GL_FALSE);
-            obj.obj_ptr->render(obj.draw_mode, true, shader_ptr); 
-            glDepthMask(GL_TRUE);
-        }
+    for (const auto& obj: transparent_objects_render_queue_) {
+        glDepthMask(GL_FALSE);
+        obj.obj_ptr->render(obj.draw_mode, true, shader_ptr); 
+        glDepthMask(GL_TRUE);
+    }
 
-        glCullFace(GL_BACK);
+    glCullFace(GL_BACK);
 }
 
 void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_height)

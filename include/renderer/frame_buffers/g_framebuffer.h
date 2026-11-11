@@ -18,6 +18,7 @@ namespace renderer
             GLuint get_position_buffer_texture();
             GLuint get_normal_buffer_texture();
             GLuint get_albedospec_buffer_texture();
+            GLuint get_depth_map_texture();
             void rescale(GLsizei width, GLsizei height);
             void bind() const;
             void unbind() const;
@@ -33,7 +34,7 @@ namespace renderer
             GLuint texture_position_;
             GLuint texture_normal_;
             GLuint texture_albedospec_;
-            GLuint rbo_;
+            GLuint depth_buffer_;
 
             GLsizei width_;
             GLsizei height_;

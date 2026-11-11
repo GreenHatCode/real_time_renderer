@@ -63,6 +63,7 @@ uniform samplerCubeArray u_point_lights_shadow_map_array; // layout (binding = 2
 layout (binding = 9) uniform sampler2D frag_coords_texture;
 layout (binding = 10) uniform sampler2D frag_normal_texture;
 layout (binding = 11) uniform sampler2D frag_color_texture;
+layout (binding = 12) uniform sampler2D depth_buffer_texture;
 
 
 // lighting
@@ -123,6 +124,8 @@ float calculate_point_light_shadow(
 
 void main() {
 
+    if (texture(depth_buffer_texture, vs_out.tex_coords).r >= 1.0) discard;
+
     vec3 frag_pos = texture(frag_coords_texture, vs_out.tex_coords).rgb;
     vec3 unit_normal = texture(frag_normal_texture, vs_out.tex_coords).rgb; // normalized in g-buffer shader
     vec4 frag_color = texture(frag_color_texture, vs_out.tex_coords).rgba;
@@ -136,7 +139,6 @@ void main() {
 
     vec3 result = direction_lights_color + point_lights_color + spot_lights_color + ambient_color;  
     FragColor = vec4(result, frag_color.a);
-
 }
 
 vec3 process_directional_lights(vec3 unit_normal, vec3 view_dir, vec3 frag_pos, vec3 diffuse_color) {

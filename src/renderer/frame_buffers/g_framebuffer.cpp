@@ -24,7 +24,7 @@ void renderer::framebuffers::GFrameBuffer::delete_buffers()
     glDeleteTextures(1, &texture_position_);
     glDeleteTextures(1, &texture_normal_);
     glDeleteTextures(1, &texture_albedospec_);
-    glDeleteRenderbuffers(1, &rbo_);
+    glDeleteTextures(1, &depth_buffer_);
 }
 
 void renderer::framebuffers::GFrameBuffer::create_buffers()
@@ -44,11 +44,13 @@ void renderer::framebuffers::GFrameBuffer::create_buffers()
     glTextureParameteri(texture_albedospec_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTextureParameteri(texture_albedospec_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glCreateRenderbuffers(1, &rbo_);
-    glNamedRenderbufferStorage(rbo_, GL_DEPTH24_STENCIL8, width_, height_);
+    glCreateTextures(GL_TEXTURE_2D, 1, &depth_buffer_);
+    glTextureStorage2D(depth_buffer_, 1, GL_DEPTH_COMPONENT24, width_, height_);
+    glTextureParameteri(depth_buffer_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTextureParameteri(depth_buffer_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-
-    // attach buffer to framebuffer
+    // attach buffers to framebuffer
+    glNamedFramebufferTexture(fbo_, GL_DEPTH_ATTACHMENT, depth_buffer_, 0);
     glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT0, texture_position_, 0);
     glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT1, texture_normal_, 0);
     glNamedFramebufferTexture(fbo_, GL_COLOR_ATTACHMENT2, texture_albedospec_, 0);
@@ -59,8 +61,6 @@ void renderer::framebuffers::GFrameBuffer::create_buffers()
         GL_COLOR_ATTACHMENT2 
     };
     glNamedFramebufferDrawBuffers(fbo_, 3, draw_buffers);
-
-    glNamedFramebufferRenderbuffer(fbo_, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_);
 
     check_fbo_status();
 }
@@ -134,6 +134,11 @@ GLuint renderer::framebuffers::GFrameBuffer::get_normal_buffer_texture()
 GLuint renderer::framebuffers::GFrameBuffer::get_albedospec_buffer_texture()
 {
     return texture_albedospec_;
+}
+
+GLuint renderer::framebuffers::GFrameBuffer::get_depth_map_texture()
+{
+    return depth_buffer_;
 }
 
 void renderer::framebuffers::GFrameBuffer::rescale(GLsizei width, GLsizei height)
