@@ -48,7 +48,7 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 
 1. Clone the repository:
     ```bash
-    git@github.com:GreenHatCode/real_time_renderer.git
+    git clone --recursive git@github.com:GreenHatCode/real_time_renderer.git
     cd real_time_renderer
     ```
 2.  Change git remote url to avoid accidental pushes to base project
@@ -113,3 +113,11 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 
 ### Deferred renderer
 ![Failed to load file "./pics/deferred_render_multiple_lights.png"](./pics/deferred_render_multiple_lights.png)
+
+## License
+This project is licensed under the GNU General Public License v3.0 (GPLv3) - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments and Assets
+This project utilizes several open-source libraries (Dear ImGui, Assimp, GLM, spdlog) and third-party 3D models for testing and rendering demonstrations. 
+
+For a full list of third-party assets, author attributions, and their respective licenses, please see the [CREDITS.md](CREDITS.md) file.
