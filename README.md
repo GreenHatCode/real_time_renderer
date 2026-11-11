@@ -109,4 +109,7 @@ Fully wrapped and controlled using Dear ImGui, featuring a detailed render stati
 ![Failed to load file "./pics/three_lights_example.png"](./pics/three_lights_example.png)
 
 ### HDR rendering
-![Failed to load file "./pics/hdr_example.png"](./pics/hdr_example.jpg)
+![Failed to load file "./pics/hdr_example.jpg"](./pics/hdr_example.jpg)
+
+### Deferred renderer
+![Failed to load file "./pics/deferred_render_multiple_lights.png"](./pics/deferred_render_multiple_lights.png)
