@@ -260,7 +260,6 @@ void App::load_sources_debug()
     imgui_window_->load_model("simple", "bread", "resources/bread_normal_mapping/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(100.0f));
 
     imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj", 0);
-    // imgui_window_->load_model("lighting", "sphere", "resources/light_sphere.obj");
 
 
 #if 1
