@@ -16,7 +16,6 @@ namespace scene::lights
         glm::vec3 color_rgb_;
 
         // attenuation parameters
-        float constant_;
         float linear_;
         float quadratic_;
         float cosine_cut_off_rad_;

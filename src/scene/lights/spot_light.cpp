@@ -40,7 +40,7 @@ float scene::lights::SpotLight::calculate_far_plane(float threshold) const
     // solving quadratic equation
     float a = quadratic_;
     float b = linear_;
-    float c = constant_ - (1.0f / threshold);
+    float c = LIGHT_CONSTANT - (1.0f / threshold);
 
     if (std::abs(a) < 1e-6f) {
         if (std::abs(b) < 1e-6f) {
@@ -56,7 +56,7 @@ float scene::lights::SpotLight::calculate_far_plane(float threshold) const
 
     float distance = (-b + std::sqrt(discriminant)) / (2.0f * a);
     
-    return std::max(distance, 1.0f);
+    return glm::clamp(distance, 1.0f, 300.0f);
 }
 
 void scene::lights::SpotLight::set_color(glm::vec3 rgb_color)
@@ -154,7 +154,6 @@ glm::mat4 scene::lights::SpotLight::projection_matrix(float framebuffer_width, f
 
     // bad idea, but in case we do not store last calculated mat
     // we need to pass framebuffer width and height during uploading light's components
-
     proj_mat_ = glm::perspective(2 * glm::acos(cosine_outer_cut_off_rad_), framebuffer_width / framebuffer_height, lighting_constants::SPOT_LIGHT_DEFAULT_NEAR_PLANE, calculate_far_plane());
     return proj_mat_;
 }

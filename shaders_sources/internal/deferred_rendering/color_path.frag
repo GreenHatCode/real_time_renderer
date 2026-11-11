@@ -44,7 +44,6 @@ struct SpotLight {
 };
 
 const uint MAX_LIGHTS = 10;
-const float BIAS = 0.005;
 const float DEFAULT_AMBIENT = 0.1;
 
 in VSOut {
@@ -99,7 +98,8 @@ float calculate_shadow(
     float curr_depth = ndc_coords.z;
 
     float bias = max(0.005 * (1.0 - dot(frag_normal, -light_dir)), 0.0005);
-
+    bias *= max((1.0 - curr_depth) * 5.0, 0.001);
+    
     return curr_depth - bias > closest_depth ? 1.0 : 0.0;
 }
 

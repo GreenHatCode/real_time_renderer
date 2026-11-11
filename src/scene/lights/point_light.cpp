@@ -8,7 +8,7 @@ float scene::lights::PointLight::calculate_far_plane(float threshold) const
     // solving quadratic equation
     float a = quadratic_;
     float b = linear_;
-    float c = constant_ - (1.0f / threshold);
+    float c = LIGHT_CONSTANT - (1.0f / threshold);
 
     if (std::abs(a) < 1e-6f) {
         if (std::abs(b) < 1e-6f) {
