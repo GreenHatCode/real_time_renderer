@@ -3,7 +3,6 @@
 #include <stb_image.h>
 
 using namespace assimp_wrapper;
-using textures_vector = std::vector<std::shared_ptr<Texture2D>>;
 
 assimp_wrapper::TexturesManager::TexturesManager(const std::filesystem::path &model_base_dir, const aiScene *scene)
     : model_base_dir_(model_base_dir), scene_(scene)
@@ -22,22 +21,22 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_material_textur
         switch (type)
         {
         case aiTextureType::aiTextureType_DIFFUSE:
-            return Texture2D::create_solid_color(aiTextureType_DIFFUSE, 255, 255, 255, 255, true); // white
+            return std::make_shared<Texture2D>(Texture2D::create_solid_color(aiTextureType_DIFFUSE, 255, 255, 255, 255, true)); // white
             
         case aiTextureType::aiTextureType_SPECULAR:
-            return Texture2D::create_solid_color(aiTextureType_SPECULAR, 0, 0, 0, 255, true); // black (no specular highlights)
+            return std::make_shared<Texture2D>(Texture2D::create_solid_color(aiTextureType_SPECULAR, 0, 0, 0, 255, true)); // black (no specular highlights)
             
         case aiTextureType::aiTextureType_NORMALS:
-            return Texture2D::create_solid_color(aiTextureType_NORMALS, 128, 128, 255, 255, true);  // flat normal (0,0,1)
+            return std::make_shared<Texture2D>(Texture2D::create_solid_color(aiTextureType_NORMALS, 128, 128, 255, 255, true));  // flat normal (0,0,1)
             
         case aiTextureType::aiTextureType_AMBIENT:
-            return Texture2D::create_solid_color(aiTextureType_AMBIENT, 255, 255, 255, 255, true);  // white (full ambient light)
+            return std::make_shared<Texture2D>(Texture2D::create_solid_color(aiTextureType_AMBIENT, 255, 255, 255, 255, true));  // white (full ambient light)
             
         case aiTextureType::aiTextureType_HEIGHT:
-            return Texture2D::create_solid_color(aiTextureType_HEIGHT, 128, 128, 255, 255, true);   // mid-gray (neutral height)
+            return std::make_shared<Texture2D>(Texture2D::create_solid_color(aiTextureType_HEIGHT, 128, 128, 255, 255, true));   // mid-gray (neutral height)
 
         case aiTextureType::aiTextureType_DISPLACEMENT:
-            return Texture2D::create_solid_color(aiTextureType_DISPLACEMENT, 0, 0, 0, 255, true);
+            return std::make_shared<Texture2D>(Texture2D::create_solid_color(aiTextureType_DISPLACEMENT, 0, 0, 0, 255, true));
             
         default:
             spdlog::error("Absent fallback texture for passed type={}", helpers::texture_type_name(type).data());
@@ -69,7 +68,7 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_embedded_textur
 
     } else { // new texture, load it to memory
         auto loaded_texture_ptr = std::make_shared<Texture2D>(type);
-        loaded_texture_ptr->bind();
+        GLsizei texture_id = loaded_texture_ptr->id();
 
         if (texture_ptr->mHeight == 0) {
             // load with stbimage and decode texture format
@@ -78,42 +77,46 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_embedded_textur
             int width, height, components_number;
             uint8_t* data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(texture_ptr->pcData), texture_ptr->mWidth, &width, &height, &components_number, 0);
 
-            GLenum format;
+            GLenum format, internal_format;
             switch (components_number)
             {
             case 1:
                 format = GL_RED;
+                internal_format = GL_R8;
                 break;
             case 3:
                 format = GL_RGB;
+                internal_format = GL_RGB8;
             break;
             case 4:
                 format = GL_RGBA;
+                internal_format = GL_RGBA8;
             break;
             default:
-                spdlog::error("Failed to select texture format, read components_number={}", components_number);
+                spdlog::error("Failed to select texture formats, read components_number={}", components_number);
                 assert(false);
                 break;
             }
 
-            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-            spdlog::info("Loaded uncompressed textures: format={}", static_cast<int>(format));
+            glTextureStorage2D(texture_id, 1, internal_format, width, height);
+            glTextureSubImage2D(texture_id, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+            spdlog::debug("Loaded uncompressed texture: format={}", static_cast<int>(format));
 
         } else {
             // raw pixel data
-            spdlog::info("Received compressed texture");
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texture_ptr->mWidth, texture_ptr->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_ptr->pcData);
+            glTextureStorage2D(texture_id, 1, GL_RGBA8, texture_ptr->mWidth, texture_ptr->mHeight);
+            glTextureSubImage2D(texture_id, 0, 0, 0, texture_ptr->mWidth, texture_ptr->mHeight, GL_RGBA, GL_UNSIGNED_BYTE, texture_ptr->pcData);
+            spdlog::debug("Loaded uncompressed texture: format={}", static_cast<int>(GL_RGBA));
         }
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (texture_ptr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (texture_ptr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
+        glTextureParameteri(texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        glTextureParameteri(texture_id, GL_TEXTURE_WRAP_S, (texture_ptr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
+        glTextureParameteri(texture_id, GL_TEXTURE_WRAP_T, (texture_ptr->achFormatHint[0] & 0x01) ? GL_REPEAT : GL_CLAMP);
     
         textures_.emplace(texture_ptr->mFilename.C_Str(), loaded_texture_ptr);
         spdlog::info("Loaded embedded texture: texture_file_path={}",  texture_ptr->mFilename.C_Str());
-        loaded_texture_ptr->unbind();
         return loaded_texture_ptr;
     }
 }
@@ -136,34 +139,37 @@ std::shared_ptr<Texture2D> assimp_wrapper::TexturesManager::load_file_texture(co
         }
 
         // allocate memory
-        GLenum format;
+        GLenum format, internal_format;
         switch (components_number)
         {
         case 1:
             format = GL_RED;
+            internal_format = GL_R8;
             break;
         case 3:
             format = GL_RGB;
+            internal_format = GL_RGB8;
         break;
         case 4:
             format = GL_RGBA;
+            internal_format = GL_RGBA8;
         break;
         default:
-            spdlog::error("Failed to select file texture format, read components_number={}", components_number);
+            spdlog::error("Failed to select texture formats, read components_number={}", components_number);
             assert(false);
             break;
         }
 
         auto loaded_texture_ptr = std::make_shared<Texture2D>(type);
-        loaded_texture_ptr->bind();
+        GLsizei texture_id = loaded_texture_ptr->id();
 
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glTextureStorage2D(texture_id, 1, internal_format, width, height);
+        glTextureSubImage2D(texture_id, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTextureParameteri(texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
 

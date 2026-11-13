@@ -1,4 +1,5 @@
 #pragma once
+#include "opengl.h"
 #include <cstdint>
 #include "assimp/material.h"
 #include <memory>
@@ -10,18 +11,26 @@ namespace assimp_wrapper{
         bool fallback_used_;
 
     public:
-        Texture2D(aiTextureType type, bool fallback_used = false);
+        Texture2D(aiTextureType type = aiTextureType::aiTextureType_AMBIENT, bool fallback_used = false);
         Texture2D(const Texture2D& rhs) = delete;
         Texture2D(Texture2D&& rhs) noexcept;
         Texture2D& operator=(const Texture2D& rhs) = delete;
         Texture2D& operator=(Texture2D&& rhs) noexcept;
 
-        static std::shared_ptr<Texture2D> create_solid_color(
+        static Texture2D create_solid_color(
             aiTextureType type, 
             uint8_t r, 
             uint8_t g, 
             uint8_t b, 
             uint8_t a = 255,
+            bool fallback_used = false
+        );
+
+        static Texture2D create_noise_texture(
+            aiTextureType type, 
+            GLsizei width,
+            GLsizei height,
+            void *data,
             bool fallback_used = false
         );
 
