@@ -11,43 +11,43 @@ PostProcessor::PostProcessor()
     post_processing_shaders_.try_emplace(
         PostProcessingTypes::INVERSION, 
         "inversion_shader", 
-        "shaders_sources/post_processing/inversion/vertex_shader.vert", 
-        "shaders_sources/post_processing/inversion/fragment_shader.frag"
+        "shaders_sources/post_processing/vertex_shader.vert", 
+        "shaders_sources/post_processing/inversion.frag"
     );
 
     post_processing_shaders_.try_emplace(
         PostProcessingTypes::GRAYSCALE, 
         "grayscale_shader", 
-        "shaders_sources/post_processing/grayscale/vertex_shader.vert", 
-        "shaders_sources/post_processing/grayscale/fragment_shader.frag"
+        "shaders_sources/post_processing/vertex_shader.vert", 
+        "shaders_sources/post_processing/grayscale.frag"
     );
 
     post_processing_shaders_.try_emplace(
         PostProcessingTypes::BLUR, 
         "blur_shader", 
-        "shaders_sources/post_processing/blur/vertex_shader.vert", 
-        "shaders_sources/post_processing/blur/fragment_shader.frag"
+        "shaders_sources/post_processing/vertex_shader.vert", 
+        "shaders_sources/post_processing/blur.frag"
     );
 
     post_processing_shaders_.try_emplace(
         PostProcessingTypes::EDGE_DETECTION, 
         "edge_detection_shader", 
-        "shaders_sources/post_processing/edge_detection/vertex_shader.vert", 
-        "shaders_sources/post_processing/edge_detection/fragment_shader.frag"
+        "shaders_sources/post_processing/vertex_shader.vert", 
+        "shaders_sources/post_processing/edge_detection.frag"
     );
 
     post_processing_shaders_.try_emplace(
         PostProcessingTypes::GAMMA_CORRECTION, 
         "gamma_correction_shader", 
-        "shaders_sources/post_processing/gamma_correction/vertex_shader.vert", 
-        "shaders_sources/post_processing/gamma_correction/fragment_shader.frag"
+        "shaders_sources/post_processing/vertex_shader.vert", 
+        "shaders_sources/post_processing/gamma_correction.frag"
     );
 
     post_processing_shaders_.try_emplace(
         PostProcessingTypes::HDR_POST_PROCESSING, 
         "hdr_shader", 
-        "shaders_sources/post_processing/hdr/vertex_shader.vert", 
-        "shaders_sources/post_processing/hdr/fragment_shader.frag"
+        "shaders_sources/post_processing/vertex_shader.vert", 
+        "shaders_sources/post_processing/hdr_post_process.frag"
     );
 }
 
