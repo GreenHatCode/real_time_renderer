@@ -75,7 +75,7 @@ public:
     UIWindow(const std::shared_ptr<scene::Scene>& scene);
     void render_window();
     glm::vec4 get_clear_color() const;
-    renderer::PostProcessingTypes get_post_processing_type() const;
+    renderer::post_processing::PostProcessingTypes get_post_processing_type() const;
     renderer::GeometryProcessingTypes get_geometry_processing_type() const;
     float get_delta_time() const;
     uint8_t get_selected_internal_objects_id_mask() const;

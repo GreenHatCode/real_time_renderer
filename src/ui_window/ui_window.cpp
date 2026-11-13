@@ -18,7 +18,7 @@ UIWindow::UIWindow(const std::shared_ptr<scene::Scene> &scene)
     , cpu_time_to_display_(0.0)
     , clear_color_(0.2f, 0.1f, 0.1f, 1.0f)
     , delta_time_(0.0)
-    , selected_post_processing_type_(static_cast<int32_t>(renderer::PostProcessingTypes::NO_POST_PROCESSING))
+    , selected_post_processing_type_(static_cast<int32_t>(renderer::post_processing::PostProcessingTypes::NO_POST_PROCESSING))
     , selected_geometry_processing_type_(static_cast<int32_t>(renderer::GeometryProcessingTypes::NO_GEOMETRY_PROCESSING))
     , render_axes_(false)
     , render_xz_grid_(false)
@@ -35,7 +35,7 @@ void UIWindow::render_window()
     // rendering options
     ImGui::Text("Read-Timer Renderer");
     ImGui::ColorEdit4("Clear color", glm::value_ptr(clear_color_));
-    ImGui::Combo("Post processing", &selected_post_processing_type_, renderer::post_processing_types_names(), static_cast<int>(renderer::PostProcessingTypes::COUNT));    
+    ImGui::Combo("Post processing", &selected_post_processing_type_, renderer::post_processing::post_processing_types_names(), static_cast<int>(renderer::post_processing::PostProcessingTypes::COUNT));    
     ImGui::Combo("Geometry processing", &selected_geometry_processing_type_, renderer::geometry_processing_types_names(), static_cast<int>(renderer::GeometryProcessingTypes::COUNT));    
     ImGui::Separator();
 
@@ -44,10 +44,10 @@ void UIWindow::render_window()
     ImGui::Checkbox("Render XZ grid", &render_xz_grid_);
     ImGui::Checkbox("Render XZ surface", &render_xz_surface_);
 
-    renderer::PostProcessingTypes type = static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_);
-    if (type == renderer::PostProcessingTypes::GAMMA_CORRECTION
-        || type == renderer::PostProcessingTypes::HDR_POST_PROCESSING) {
-        ImGui::SliderFloat("Gamma", &gamma_, renderer::MIN_GAMMA, renderer::MAX_GAMMA);
+    renderer::post_processing::PostProcessingTypes type = static_cast<renderer::post_processing::PostProcessingTypes>(selected_post_processing_type_);
+    if (type == renderer::post_processing::PostProcessingTypes::GAMMA_CORRECTION
+        || type == renderer::post_processing::PostProcessingTypes::HDR_POST_PROCESSING) {
+        ImGui::SliderFloat("Gamma", &gamma_, renderer::post_processing::MIN_GAMMA, renderer::post_processing::MAX_GAMMA);
     }
 
 
@@ -90,9 +90,9 @@ glm::vec4 UIWindow::get_clear_color() const
     return clear_color_;
 }
 
-renderer::PostProcessingTypes UIWindow::get_post_processing_type() const
+renderer::post_processing::PostProcessingTypes UIWindow::get_post_processing_type() const
 {
-    return static_cast<renderer::PostProcessingTypes>(selected_post_processing_type_);
+    return static_cast<renderer::post_processing::PostProcessingTypes>(selected_post_processing_type_);
 }
 
 renderer::GeometryProcessingTypes UIWindow::get_geometry_processing_type() const

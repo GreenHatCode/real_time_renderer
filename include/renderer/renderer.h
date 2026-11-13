@@ -29,8 +29,8 @@ namespace renderer {
         Shader* curr_shader_ptr_; // can be a dangling pointer
         std::vector<std::shared_ptr<scene::lights::LightBase>> scene_lights_buffer_;
 
-        PostProcessor post_processor_;
-        PostProcessingTypes post_processing_type_;
+        post_processing::PostProcessor post_processor_;
+        post_processing::PostProcessingTypes post_processing_type_;
         GeometryProcessor geometry_processor_;
         GeometryProcessingTypes geometry_processing_type_;
 
@@ -84,7 +84,7 @@ namespace renderer {
         void set_camera_position(const glm::vec3& camera_position);
         void set_internal_objects_id_mask(uint8_t internal_objects_id_mask);
 
-        void set_post_processing(PostProcessingTypes type = PostProcessingTypes::NO_POST_PROCESSING);
+        void set_post_processing(post_processing::PostProcessingTypes type = post_processing::PostProcessingTypes::NO_POST_PROCESSING);
         void set_geometry_post_processing(GeometryProcessingTypes type = GeometryProcessingTypes::NO_GEOMETRY_PROCESSING);
         
         void set_gamma(float value);

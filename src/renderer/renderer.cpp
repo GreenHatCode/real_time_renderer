@@ -15,8 +15,8 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , view_mat_(1.0)
     , projection_mat_(1.0)
     , camera_position_(1.0) 
-    , post_processor_(1, 1)
-    , post_processing_type_(PostProcessingTypes::NO_POST_PROCESSING)   
+    , post_processor_()
+    , post_processing_type_(post_processing::PostProcessingTypes::NO_POST_PROCESSING)   
     , geometry_processor_()
     , geometry_processing_type_(GeometryProcessingTypes::NO_GEOMETRY_PROCESSING)
     , g_buffer_(1, 1)
@@ -252,7 +252,7 @@ void renderer::Renderer::do_color_path_render()
     use_shader(scene_->get_internal_shader(scene::InternalShadersIDS::COLOR_PATH_SHADER));
 
     glDisable(GL_DEPTH_TEST);
-    post_processor_.render_quad();
+    post_processing::render_zero_buffer_quad();
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -444,14 +444,16 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
     do_shadow_map_render();
     do_geometry_path_render();
 
-    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
+    if (post_processing_type_ != post_processing::PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.enable_off_sceen_rendering(framebuffer_width_, framebuffer_height_);
     }
+
+    // do ssao render
 
     do_color_path_render();
     do_forward_path_render(); // transparent objects and light physical objects
 
-    if (post_processing_type_ != PostProcessingTypes::NO_POST_PROCESSING) {
+    if (post_processing_type_ != post_processing::PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.do_post_process(post_processing_type_);
         curr_shader_ptr_->use(); // restore renderer's shader
     }
@@ -495,7 +497,7 @@ void renderer::Renderer::set_internal_objects_id_mask(uint8_t internal_objects_i
     internal_objects_id_mask_ = internal_objects_id_mask;
 }
 
-void renderer::Renderer::set_post_processing(PostProcessingTypes type)
+void renderer::Renderer::set_post_processing(post_processing::PostProcessingTypes type)
 {
     post_processing_type_ = type;
 }
