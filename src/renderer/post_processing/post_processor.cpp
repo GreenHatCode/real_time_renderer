@@ -2,8 +2,8 @@
 
 using namespace renderer::framebuffers;
 
-renderer::PostProcessor::PostProcessor(GLsizei width, GLsizei height)
-    : framebuffer_(width, height)
+renderer::PostProcessor::PostProcessor()
+    : framebuffer_(FrameBuffer::create_post_processing())
 {
     // fill map with shaders
     post_processing_shaders_.try_emplace(

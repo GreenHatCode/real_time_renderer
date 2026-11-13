@@ -40,7 +40,7 @@ namespace renderer {
         float gamma_;
 
     public:
-        PostProcessor(GLsizei width, GLsizei height);
+        PostProcessor();
         ~PostProcessor();
         void enable_off_sceen_rendering(GLsizei scr_width, GLsizei scr_height);
         void do_post_process(PostProcessingTypes type); 
