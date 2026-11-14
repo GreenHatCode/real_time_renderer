@@ -15,13 +15,16 @@ namespace renderer
             GFrameBuffer& operator=(GFrameBuffer&& rhs) = delete;
 
             void blit_depth_to_framebuffer(GLsizei width, GLsizei height, GLint framebuffer_id);
-            GLuint get_position_buffer_texture();
-            GLuint get_normal_buffer_texture();
-            GLuint get_albedospec_buffer_texture();
-            GLuint get_depth_map_texture();
+            GLuint get_position_buffer_texture() const;
+            GLuint get_normal_buffer_texture() const;
+            GLuint get_albedospec_buffer_texture() const;
+            GLuint get_depth_map_texture() const;
             void rescale(GLsizei width, GLsizei height);
             void bind() const;
             void unbind() const;
+
+            GLsizei get_width() const;
+            GLsizei get_height() const;
             
             ~GFrameBuffer();
 

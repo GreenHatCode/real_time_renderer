@@ -121,22 +121,22 @@ void renderer::framebuffers::GFrameBuffer::blit_depth_to_framebuffer(GLsizei wid
     );
 }
 
-GLuint renderer::framebuffers::GFrameBuffer::get_position_buffer_texture()
+GLuint renderer::framebuffers::GFrameBuffer::get_position_buffer_texture() const
 {
     return texture_position_;
 }
 
-GLuint renderer::framebuffers::GFrameBuffer::get_normal_buffer_texture()
+GLuint renderer::framebuffers::GFrameBuffer::get_normal_buffer_texture() const
 {
     return texture_normal_;
 }
 
-GLuint renderer::framebuffers::GFrameBuffer::get_albedospec_buffer_texture()
+GLuint renderer::framebuffers::GFrameBuffer::get_albedospec_buffer_texture() const
 {
     return texture_albedospec_;
 }
 
-GLuint renderer::framebuffers::GFrameBuffer::get_depth_map_texture()
+GLuint renderer::framebuffers::GFrameBuffer::get_depth_map_texture() const
 {
     return depth_buffer_;
 }
@@ -159,4 +159,14 @@ void renderer::framebuffers::GFrameBuffer::bind() const
 void renderer::framebuffers::GFrameBuffer::unbind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+GLsizei renderer::framebuffers::GFrameBuffer::get_width() const
+{
+    return width_;
+}
+
+GLsizei renderer::framebuffers::GFrameBuffer::get_height() const
+{
+    return height_;
 }

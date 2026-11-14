@@ -58,6 +58,14 @@ namespace detail
     };
 
     template <> 
+    struct UniformUploader<glm::vec2>
+    {
+        static void upload(int32_t uniform_location, const glm::vec2& value) {
+            glUniform2fv(uniform_location, 1, glm::value_ptr(value));
+        }
+    };
+
+    template <> 
     struct UniformUploader<glm::vec3>
     {
         static void upload(int32_t uniform_location, const glm::vec3& value) {

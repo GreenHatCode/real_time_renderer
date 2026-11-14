@@ -14,6 +14,11 @@ namespace renderer {
     } // namespace defaults
 
     namespace bind_texture_units {
+
+        // if texture units have the same values,
+        // it means that they should not be used
+        // in the same shader
+
         inline constexpr int32_t DIRECTIONAL_LIGHTS_SHADOW_MAP_TEXTURE_UNIT = 0;
         inline constexpr int32_t SPOT_LIGHTS_SHADOW_MAP_TEXTURE_UNIT = 1;
         inline constexpr int32_t POINT_LIGHTS_SHADOW_MAP_TEXTURE_UNIT = 2;
@@ -25,10 +30,12 @@ namespace renderer {
         inline constexpr int32_t SPECULAR_TEXTURE_TEXTURE_UNIT = 7;
         inline constexpr int32_t HEIGHT_TEXTURE_TEXTURE_UNIT = 8;
 
-        inline constexpr int32_t FRAG_COORDS_TEXTURE_UNIT = 9;
-        inline constexpr int32_t FRAG_NORMAL_TEXTURE_UNIT = 10;
-        inline constexpr int32_t FRAG_COLOR_TEXTURE_UNIT = 11;
-        inline constexpr int32_t DEPTH_BUFFER_TEXTURE_UNIT = 12;
+        // deferred render with ssao
+        inline constexpr int32_t NOISE_TEXTURE_TEXTURE_UNIT = 5;
+        inline constexpr int32_t FRAG_COORDS_TEXTURE_UNIT = 6;
+        inline constexpr int32_t FRAG_NORMAL_TEXTURE_UNIT = 7;
+        inline constexpr int32_t FRAG_COLOR_TEXTURE_UNIT = 8;
+        inline constexpr int32_t DEPTH_BUFFER_TEXTURE_UNIT = 9;
 
 
     } // namespace bind_texture_units

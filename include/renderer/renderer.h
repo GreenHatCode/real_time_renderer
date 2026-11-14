@@ -12,6 +12,7 @@
 #include "renderer/frame_buffers/i_shadow_frame_buffer.h"
 #include "scene/lights/light_base.h"
 #include "renderer/frame_buffers/g_framebuffer.h"
+#include "renderer/post_processing/ssao_processor.h"
 
 namespace renderer {
 
@@ -29,6 +30,7 @@ namespace renderer {
         Shader* curr_shader_ptr_; // can be a dangling pointer
         std::vector<std::shared_ptr<scene::lights::LightBase>> scene_lights_buffer_;
 
+        SSAOProcessor ssao_processor_;
         post_processing::PostProcessor post_processor_;
         post_processing::PostProcessingTypes post_processing_type_;
         GeometryProcessor geometry_processor_;
@@ -62,6 +64,7 @@ namespace renderer {
         void build_rendering_queues();
         void do_shadow_map_render();
         void do_geometry_path_render();
+        void do_ssao_path_render();
         void do_color_path_render();
         void do_forward_path_render();
         void use_shader(const std::shared_ptr<Shader> &shader_ptr);

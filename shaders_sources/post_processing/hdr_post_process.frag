@@ -2,7 +2,7 @@
 
 const float OFFSET = 1.0 / 300.0;
 
-in vec2 o_tex_coords;
+in vec2 v_tex_coords;
 
 out vec4 FragColor;
 
@@ -20,7 +20,7 @@ vec3 ACESFilm(vec3 x) {
 
 void main() {
 
-    vec3 hdr_color = texture(u_screen_texture, o_tex_coords).rgb;
+    vec3 hdr_color = texture(u_screen_texture, v_tex_coords).rgb;
     vec3 mapped = ACESFilm(hdr_color);
     mapped = pow(mapped, vec3(1.0 / u_gamma));
 

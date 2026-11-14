@@ -59,10 +59,10 @@ uniform sampler2DArray u_spot_lights_shadow_map_array; // layout (binding = 1)
 uniform samplerCubeArray u_point_lights_shadow_map_array; // layout (binding = 2)
 
 // textures
-layout (binding = 9) uniform sampler2D frag_coords_texture;
-layout (binding = 10) uniform sampler2D frag_normal_texture;
-layout (binding = 11) uniform sampler2D frag_color_texture;
-layout (binding = 12) uniform sampler2D depth_buffer_texture;
+layout (binding = 6) uniform sampler2D frag_coords_texture;
+layout (binding = 7) uniform sampler2D frag_normal_texture;
+layout (binding = 8) uniform sampler2D frag_color_texture;
+layout (binding = 9) uniform sampler2D depth_buffer_texture;
 
 
 // lighting

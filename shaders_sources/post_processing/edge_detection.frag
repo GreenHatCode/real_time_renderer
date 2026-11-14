@@ -2,7 +2,7 @@
 
 const float OFFSET = 1.0 / 300.0;
 
-in vec2 o_tex_coords;
+in vec2 v_tex_coords;
 
 out vec4 FragColor;
 
@@ -30,7 +30,7 @@ void main() {
 
     vec3 sampled_tex[9];
     for (int i = 0; i < 9; i++) {
-        sampled_tex[i] = texture(u_screen_texture, o_tex_coords + offsets[i]).rgb;
+        sampled_tex[i] = texture(u_screen_texture, v_tex_coords + offsets[i]).rgb;
     }
 
     vec3 color = vec3(0.0);

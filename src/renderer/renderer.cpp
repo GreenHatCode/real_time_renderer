@@ -15,6 +15,7 @@ Renderer::Renderer(std::shared_ptr<const scene::Scene> scene)
     , view_mat_(1.0)
     , projection_mat_(1.0)
     , camera_position_(1.0) 
+    , ssao_processor_()
     , post_processor_()
     , post_processing_type_(post_processing::PostProcessingTypes::NO_POST_PROCESSING)   
     , geometry_processor_()
@@ -244,6 +245,12 @@ void renderer::Renderer::do_geometry_path_render()
     if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
 }
 
+void renderer::Renderer::do_ssao_path_render()
+{
+    ssao_processor_.do_ssao_render(g_buffer_, projection_mat_);
+    if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
+}
+
 void renderer::Renderer::do_color_path_render()
 {
     glClearColor(clear_color_rgba_.r, clear_color_rgba_.g, clear_color_rgba_.b, clear_color_rgba_.a);
@@ -437,18 +444,18 @@ void Renderer::render_scene(GLsizei framebuffer_width, GLsizei framebuffer_heigh
         }
     ));
 
-    build_rendering_queues(); // todo: remake
+    build_rendering_queues();
 
 
     // render
     do_shadow_map_render();
     do_geometry_path_render();
+    do_ssao_path_render();
+
 
     if (post_processing_type_ != post_processing::PostProcessingTypes::NO_POST_PROCESSING) {
         post_processor_.enable_off_sceen_rendering(framebuffer_width_, framebuffer_height_);
     }
-
-    // do ssao render
 
     do_color_path_render();
     do_forward_path_render(); // transparent objects and light physical objects
