@@ -257,9 +257,9 @@ void App::load_sources_debug()
     // imgui_window_->load_model("assimp", "televisor", "resources/televisor/televisor.obj", aiProcess_FlipUVs); 
     // imgui_window_->load_model("assimp", "spider", "resources/assimp-mdb/model-db/Obj/Spider/spider.obj");
     // imgui_window_->load_model("blending", "window", "resources/transparent_window/tinker.obj", 0);
-    imgui_window_->load_model("simple", "bread", "resources/bread_normal_mapping/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(100.0f));
-
-    imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj", 0);
+    // imgui_window_->load_model("simple", "bread", "resources/bread_normal_mapping/3DBread010_SQ-1K-JPG.obj", 0, glm::vec3(100.0f));
+    imgui_window_->load_model("simple", "bunny", "resources/stanford-bunny.obj", 0, glm::vec3(100.0f));
+    // imgui_window_->load_model("lighting", "multi_cube", "resources/multi_cube/tinker.obj", 0);
 
 
 #if 1

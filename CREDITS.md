@@ -27,3 +27,9 @@ The following 3D models are used for testing and demonstration purposes within t
 *   **Custom Test Models**
     *   **Source:** Created specifically for this project using Tinkercad.
     *   **License:** Released under the primary project license (GPLv3).
+
+*   **"Stanford Bunny"**
+    *   **Source:** [Stanford 3D Scanning Repository](https://graphics.stanford.edu/data/3Dscanrep/) (`.obj` conversion via [common-3d-test-models](https://github.com/alecjacobson/common-3d-test-models))
+    *   **License:** Free for non-commercial and research use (Stanford University Computer Graphics Laboratory)
+    *   **Note:** Classic 3D test scan (`stanford-bunny.obj`) originally created by Greg Turk and Marc Levoy (1994).
+
