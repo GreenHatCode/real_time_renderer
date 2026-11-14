@@ -12,6 +12,7 @@ layout (binding = 9) uniform sampler2D depth_buffer_texture;
 uniform vec3 samples[64]; // size = SAMPLES_COUNT
 uniform vec2 noise_scale;
 uniform mat4 u_projection_mat;
+uniform mat4 u_view_mat;
 uniform int kernel_size = 64;
 
 float radius = 0.5;
@@ -25,6 +26,10 @@ void main() {
     vec3 frag_pos = texture(frag_coords_texture, v_tex_coords).rgb;
     vec3 unit_normal = texture(frag_normal_texture, v_tex_coords).rgb; // normalized in g-buffer shader
     vec3 random_vec = texture(noise_texture, v_tex_coords * noise_scale).xyz; // normalized on CPU side
+
+    // transform to view space
+    frag_pos = (u_view_mat * vec4(frag_pos, 1.0)).xyz;
+    unit_normal = normalize(mat3(u_view_mat) * unit_normal);
 
     // TBN mat creation
     vec3 tangent = normalize(random_vec - unit_normal * dot(random_vec, unit_normal));
@@ -43,8 +48,11 @@ void main() {
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5; // transform to range [0.0; 1.0]
         
-        // get sample depth 
-        float sample_depth = texture(frag_coords_texture, offset.xy).z; // get depth value of kernel sample
+
+        if (texture(depth_buffer_texture, offset.xy).r >= 1.0) continue; // skip texels that are background
+
+        // get sample depth in view space
+        float sample_depth = (u_view_mat * vec4(texture(frag_coords_texture, offset.xy).rgb, 1.0)).z; // get depth value of kernel sample
         
         // range check & accumulate
         float range_check = smoothstep(0.0, 1.0, radius / abs(frag_pos.z - sample_depth));

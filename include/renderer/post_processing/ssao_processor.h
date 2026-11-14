@@ -26,7 +26,7 @@ namespace renderer {
         static inline int32_t SSAO_BLUR_SIZE = 4;
         
         SSAOProcessor();
-        void do_ssao_render(const framebuffers::GFrameBuffer& g_buffer, const glm::mat4& camera_projection_mat);
+        void do_ssao_render(const framebuffers::GFrameBuffer &g_buffer, const glm::mat4& camera_view_mat, const glm::mat4& camera_projection_mat);
         GLuint get_ssao_oclusion_texture();
 
     };

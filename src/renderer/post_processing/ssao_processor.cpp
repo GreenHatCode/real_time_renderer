@@ -70,7 +70,7 @@ SSAOProcessor::SSAOProcessor()
 
 }
 
-void renderer::SSAOProcessor::do_ssao_render(const framebuffers::GFrameBuffer &g_buffer, const glm::mat4& camera_projection_mat)
+void renderer::SSAOProcessor::do_ssao_render(const framebuffers::GFrameBuffer &g_buffer, const glm::mat4& camera_view_mat, const glm::mat4& camera_projection_mat)
 {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -101,6 +101,7 @@ void renderer::SSAOProcessor::do_ssao_render(const framebuffers::GFrameBuffer &g
     glm::vec2 noise_scale = glm::vec2(g_buffer.get_width() / 4.0, g_buffer.get_height() / 4.0); // screen size divided by noise size 
     ssao_shader_->set_uniform("noise_scale", noise_scale);
 
+    ssao_shader_->set_uniform("u_view_mat", camera_view_mat);
     ssao_shader_->set_uniform("u_projection_mat", camera_projection_mat);
     ssao_shader_->set_uniform("kernel_size", SAMPLES_COUNT);
 

@@ -37,6 +37,7 @@ namespace renderer {
         inline constexpr int32_t FRAG_NORMAL_TEXTURE_UNIT = 7;
         inline constexpr int32_t FRAG_COLOR_TEXTURE_UNIT = 8;
         inline constexpr int32_t DEPTH_BUFFER_TEXTURE_UNIT = 9;
+        inline constexpr int32_t AMBIENT_OCCLUSION_TEXTURE_UNIT = 10;
 
 
     } // namespace bind_texture_units

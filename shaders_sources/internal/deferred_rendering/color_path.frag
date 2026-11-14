@@ -63,6 +63,7 @@ layout (binding = 6) uniform sampler2D frag_coords_texture;
 layout (binding = 7) uniform sampler2D frag_normal_texture;
 layout (binding = 8) uniform sampler2D frag_color_texture;
 layout (binding = 9) uniform sampler2D depth_buffer_texture;
+layout (binding = 10) uniform sampler2D ambient_occlusion_texture;
 
 
 // lighting
@@ -130,12 +131,12 @@ void main() {
     vec3 unit_normal = texture(frag_normal_texture, vs_out.tex_coords).rgb; // normalized in g-buffer shader
     vec4 frag_color = texture(frag_color_texture, vs_out.tex_coords).rgba;
     vec3 view_dir = normalize(u_camera_pos - frag_pos);
-
+    float ambient_occlusion = texture(ambient_occlusion_texture, vs_out.tex_coords).r;
 
     vec3 direction_lights_color = process_directional_lights(unit_normal, view_dir, frag_pos, frag_color.rgb);
     vec3 point_lights_color = process_point_lights(unit_normal, view_dir, frag_pos, frag_color.rgb);
     vec3 spot_lights_color = process_spot_lights(unit_normal, view_dir, frag_pos, frag_color.rgb);
-    vec3 ambient_color = vec3(frag_color) * DEFAULT_AMBIENT;
+    vec3 ambient_color = vec3(frag_color) * DEFAULT_AMBIENT * ambient_occlusion;
 
     vec3 result = direction_lights_color + point_lights_color + spot_lights_color + ambient_color;  
     FragColor = vec4(result, frag_color.a);

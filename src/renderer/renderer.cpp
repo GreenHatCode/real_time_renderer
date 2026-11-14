@@ -79,8 +79,8 @@ void Renderer::set_general_shader_uniforms(const std::shared_ptr<Shader> &shader
     glBindTextureUnit(bind_texture_units::FRAG_NORMAL_TEXTURE_UNIT, g_buffer_.get_normal_buffer_texture());
     shader_ptr->set_uniform("frag_color_texture", bind_texture_units::FRAG_COLOR_TEXTURE_UNIT);
     glBindTextureUnit(bind_texture_units::FRAG_COLOR_TEXTURE_UNIT, g_buffer_.get_albedospec_buffer_texture());
-    shader_ptr->set_uniform("depth_buffer_texture", bind_texture_units::DEPTH_BUFFER_TEXTURE_UNIT);
-    glBindTextureUnit(bind_texture_units::DEPTH_BUFFER_TEXTURE_UNIT, g_buffer_.get_depth_map_texture());
+    shader_ptr->set_uniform("ambient_occlusion_texture", bind_texture_units::AMBIENT_OCCLUSION_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::AMBIENT_OCCLUSION_TEXTURE_UNIT, ssao_processor_.get_ssao_oclusion_texture());
 }
 
 void Renderer::set_lighting_shader_uniforms(const std::shared_ptr<Shader> &shader_ptr)
@@ -247,7 +247,7 @@ void renderer::Renderer::do_geometry_path_render()
 
 void renderer::Renderer::do_ssao_path_render()
 {
-    ssao_processor_.do_ssao_render(g_buffer_, projection_mat_);
+    ssao_processor_.do_ssao_render(g_buffer_, view_mat_, projection_mat_);
     if (curr_shader_ptr_ != nullptr) curr_shader_ptr_->use(); // restore last used shader
 }
 
