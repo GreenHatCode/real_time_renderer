@@ -12,9 +12,8 @@ layout (binding = 9) uniform sampler2D depth_buffer_texture;
 uniform vec3 samples[64]; // size = SAMPLES_COUNT
 uniform vec2 noise_scale;
 uniform mat4 u_projection_mat;
+uniform int kernel_size = 64;
 
-// TODO: possibly make uniforms and configure on cpu side
-int kernel_size = 64;
 float radius = 0.5;
 float bias = 0.025;
 

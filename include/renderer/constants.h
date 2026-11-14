@@ -32,6 +32,7 @@ namespace renderer {
 
         // deferred render with ssao
         inline constexpr int32_t NOISE_TEXTURE_TEXTURE_UNIT = 5;
+        inline constexpr int32_t BLUR_TEXTURE_TEXTURE_UNIT = 5;
         inline constexpr int32_t FRAG_COORDS_TEXTURE_UNIT = 6;
         inline constexpr int32_t FRAG_NORMAL_TEXTURE_UNIT = 7;
         inline constexpr int32_t FRAG_COLOR_TEXTURE_UNIT = 8;

@@ -34,7 +34,8 @@ SSAOProcessor::SSAOProcessor()
 
     // generating noise texture 4x4 size
     std::vector<glm::vec3> noise_data;
-    for (size_t i = 0; i < 16; ++i) {
+    size_t texels_count = SSAO_BLUR_SIZE * SSAO_BLUR_SIZE;
+    for (size_t i = 0; i < texels_count; ++i) {
         // rotation around z-axis in tangent space
         glm::vec3 noise (rand_floats(generator) * 2.0f - 1.0f, rand_floats(generator) * 2.0f - 1.0f, 0.0f); 
         noise_data.push_back(glm::normalize(noise)); // originally normalized in ssao_shader
@@ -55,19 +56,29 @@ SSAOProcessor::SSAOProcessor()
         throw;
     }
     
-
+    try {
+        ssao_blur_shader_ = std::make_unique<Shader>(
+            "ssao_blur_shader", 
+            "shaders_sources/post_processing/vertex_shader.vert",
+            "shaders_sources/post_processing/ssao_blur.frag"
+        );
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load ssao shader: {}, what: {}", "ssao_blur_shader", e.what());
+        throw;
+    }
 
 
 }
 
 void renderer::SSAOProcessor::do_ssao_render(const framebuffers::GFrameBuffer &g_buffer, const glm::mat4& camera_projection_mat)
 {
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
     // do ssao path
     ssao_framebuffer_.rescale(g_buffer.get_width(), g_buffer.get_height());
     ssao_framebuffer_.bind();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
 
 
     ssao_shader_->use();
@@ -91,12 +102,31 @@ void renderer::SSAOProcessor::do_ssao_render(const framebuffers::GFrameBuffer &g
     ssao_shader_->set_uniform("noise_scale", noise_scale);
 
     ssao_shader_->set_uniform("u_projection_mat", camera_projection_mat);
+    ssao_shader_->set_uniform("kernel_size", SAMPLES_COUNT);
 
     post_processing::render_zero_buffer_quad();
     ssao_framebuffer_.unbind();
 
-    // do ssao blur
 
+
+
+    // do ssao blur
+    ssao_blur_framebuffer_.rescale(g_buffer.get_width(), g_buffer.get_height());
+    ssao_blur_framebuffer_.bind();
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    ssao_blur_shader_->use();
+    ssao_blur_shader_->set_uniform("u_blur_size", SSAO_BLUR_SIZE);
+    ssao_blur_shader_->set_uniform("ssao_unblured_texture", bind_texture_units::BLUR_TEXTURE_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::BLUR_TEXTURE_TEXTURE_UNIT, ssao_framebuffer_.get_frame_texture());
+    ssao_blur_shader_->set_uniform("depth_buffer_texture", bind_texture_units::DEPTH_BUFFER_TEXTURE_UNIT);
+    glBindTextureUnit(bind_texture_units::DEPTH_BUFFER_TEXTURE_UNIT, g_buffer.get_depth_map_texture());
+    
+    post_processing::render_zero_buffer_quad();
+    ssao_blur_framebuffer_.unbind();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND); 
 }
 
 GLuint renderer::SSAOProcessor::get_ssao_oclusion_texture()

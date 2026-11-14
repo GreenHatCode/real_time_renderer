@@ -22,7 +22,8 @@ namespace renderer {
         static float lerp(float a, float b, float f);
 
     public:
-        static inline size_t SAMPLES_COUNT = 64;
+        static inline int32_t SAMPLES_COUNT = 64;
+        static inline int32_t SSAO_BLUR_SIZE = 4;
         
         SSAOProcessor();
         void do_ssao_render(const framebuffers::GFrameBuffer& g_buffer, const glm::mat4& camera_projection_mat);
